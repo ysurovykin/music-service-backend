@@ -1,0 +1,11 @@
+# dependencies
+/node_modules
+
+# build
+/dist
+
+# misc
+.env
+todo.txt
+
+package-lock.json
