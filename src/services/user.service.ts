@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import randomstring from 'randomstring';
 import { ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../firebase.config';
-import UserModel, { User } from '../models/user.model';
+import UserModel, { CreateUserRequestDataType } from '../models/user.model';
 import UserDto from '../dtos/user.dto';
 import { NotFoundError, UnauthorizedError, ValidationError } from '../errors/api-errors';
 import tokenService from './token.service';
@@ -15,7 +15,7 @@ type AuthorizedUserData = {
 
 class UserService {
 
-    async registration(userData: User, file: Express.Multer.File): Promise<AuthorizedUserData> {
+    async registration(userData: CreateUserRequestDataType): Promise<AuthorizedUserData> {
         const pretender = await UserModel.findOne({ email: userData.email }).lean();
         if (pretender) {
             throw new NotFoundError(`User with email ${userData.email} already exists`);
@@ -36,12 +36,12 @@ class UserService {
                 month: birthDate.getMonth() + 1,
                 year: birthDate.getFullYear()
             },
-            profileImageLink: `user-avatars/${userId}`,
-            role: 'user'
+            // profileImageLink: `user-avatars/${userId}`,
+            profileType: userData.profileType
         });
 
-        const storageRef = ref(storage, `user-avatars/${userId}`);
-        await uploadBytes(storageRef, file.buffer, {contentType: 'image/jpeg'});
+        // const storageRef = ref(storage, `user-avatars/${userId}`);
+        // await uploadBytes(storageRef, file.buffer, {contentType: 'image/jpeg'});
     
         const userDto = new UserDto(newUser);
         const tokens = tokenService.generateTokens({ ...userDto });

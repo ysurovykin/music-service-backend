@@ -1,28 +1,49 @@
-import {Schema, model} from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-export interface AlbumArtist {
-    name: string,
-    link: string
-};
-
-export type Album = {
+export type CreateAlbumRequestDataType = {
   name: string;
-  artist: AlbumArtist;
+  artistId: String;
   languages: string;
   genres: Array<string>;
 };
 
+export type AlbumSongDataType = {
+  name: string,
+  plays: number,
+  coArtistIds: Array<string>,
+  downloadUrl: string
+}
+
+export type AlbumArtistDataType = {
+  name: string,
+  link: string
+}
+
+export type AlbumInfoResponseDataType = {
+  albumId: string,
+  name: string,
+  date: Date,
+  downloadUrl: string,
+  artist: AlbumArtistDataType
+}
+
+export type AlbumFullResponseDataType = {
+  name: string,
+  date: Date,
+  songs: Array<AlbumSongDataType>,
+  downloadUrl: string,
+  artist: AlbumArtistDataType
+}
+
 const AlbumSchema = model('Album', new Schema({
-    name: { type: String, required: true },
-    /**
-     * @type {AlbumArtist} array of artist datas
-     */
-    artist: { type: Object, required: true },
-    coverImageLink: { type: String, required: true },
-    likes: { type: Number, default: 0, required: true },
-    languages: { type: Array<String>, required: true },
-    genres: { type: Array<String>, required: true },
-    date: { type: Date, required: true },
+  _id: { type: String },
+  name: { type: String, required: true },
+  artistId: { type: String, required: true },
+  coverImageLink: { type: String, required: true },
+  likes: { type: Number, default: 0, required: true },
+  languages: { type: [String], required: true },
+  genres: { type: [String], required: true },
+  date: { type: Date, required: true },
 }));
 
 export default AlbumSchema;

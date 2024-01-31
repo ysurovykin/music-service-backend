@@ -34,8 +34,8 @@ class TokenService {
 
     validateAccessToken(token: string): UserDto | null {
         try {
-            const userData: UserDto = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-            return userData;
+            const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+            return userData as UserDto;
         } catch (error) {
             return null;
         }
@@ -43,8 +43,8 @@ class TokenService {
     
     validateRefreshToken(token: string): UserDto | null {
         try {
-            const userData: UserDto = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-            return userData;
+            const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+            return userData as UserDto;
         } catch (error) {
             return null;
         }

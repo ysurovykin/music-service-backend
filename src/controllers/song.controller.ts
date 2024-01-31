@@ -12,6 +12,16 @@ class SongController {
             next(error);
         }
     }
+
+    async loadSong(req, res, next) {
+        try {
+            const {artistId, albumId, songId} = req.params;
+            const song = await songService.loadSong(artistId, albumId, songId);
+            return res.json(song);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 const songController = new SongController();

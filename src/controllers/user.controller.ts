@@ -24,9 +24,9 @@ class UserController {
     
     async login(req, res, next) {
         try {
-            const {email, password} = req.body;
+            const {email, password, remember} = req.body;
             const userData = await userService.login(email, password);
-            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true})
+            res.cookie('refreshToken', userData.refreshToken, {maxAge: remember ? 30*24*60*60*1000 : 0, httpOnly: true})
             return res.json(userData);
         } catch (error) {
             next(error);
@@ -47,8 +47,7 @@ class UserController {
     async registration(req, res, next) {
         try {
             const userData = req.body;
-            const profileImage: Express.Multer.File = req.file;
-            const user = await userService.registration(userData, profileImage);
+            const user = await userService.registration(userData);
             res.cookie('refreshToken', user.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true})
             return res.json(user);
         } catch (error) {

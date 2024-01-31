@@ -1,9 +1,7 @@
-import { SongAlbum, SongArtist } from "../models/song.model";
-
 export default class SongDto{
     name: string;
-    artists: Array<SongArtist>;
-    album: SongAlbum;
+    artistIds: Array<String>;
+    albumId: String;
     coverImageLink: string;
     plays: number;
     language: string;
@@ -12,8 +10,8 @@ export default class SongDto{
 
     constructor(model: any){
         this.name = model.name;
-        this.artists = model.artists;
-        this.album = model.album;
+        this.artistIds = model.artistIds;
+        this.albumId = model.albumId;
         this.coverImageLink = model.coverImageLink;
         this.plays = model.plays;
         this.language = model.language;

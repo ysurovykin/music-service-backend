@@ -1,8 +1,6 @@
-import { AlbumArtist } from "../models/album.model";
-
 export default class AlbumDto{
     name: string;
-    artist: AlbumArtist;
+    artistId: String;
     coverImageLink: string;
     likes: number;
     languages: Array<string>;
@@ -11,7 +9,7 @@ export default class AlbumDto{
 
     constructor(model: any){
         this.name = model.name;
-        this.artist = model.artist;
+        this.artistId = model.artistId;
         this.coverImageLink = model.coverImageLink;
         this.likes = model.likes;
         this.languages = model.languages;

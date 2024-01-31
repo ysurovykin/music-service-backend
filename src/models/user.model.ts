@@ -1,4 +1,4 @@
-import {Schema, model} from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 export interface BirthDate {
     day: Number,
@@ -6,56 +6,36 @@ export interface BirthDate {
     year: Number
 };
 
-export type User = {
+export type CreateUserRequestDataType = {
     email: string;
     password: string;
     name: string;
     gender: string;
     country: string;
     birthDate: Date;
-    role: 'user' | 'artist' | 'admin';
+    profileType: 'listener' | 'artist' | 'admin';
     profileImageLink: string;
 };
 
-export interface ArtistSocialLinks {
-  name: string,
-  link: string
-}
-
-export type Artist = {
-  name: string;
-  country: string;
-  description?: string;
-  socialLinks?: Array<ArtistSocialLinks>;
-  genres: Array<string>;
-};
-
-type ArtistData = {
-    description: string,
-    socialLinks: Array<ArtistSocialLinks>,
-    genres: Array<string>,
-    followers: number
-}
+const BirthDateSchema = new Schema({
+    day: { type: Number, required: true },
+    month: { type: Number, required: true },
+    year: { type: Number, required: true },
+});
 
 const UserSchema = model('User', new Schema({
+    _id: { type: String },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
     name: { type: String, required: true },
     gender: { type: String, required: true },
     country: { type: String, required: true },
+    birthDate: [BirthDateSchema],
     /**
-     * @type {BirthDate} birth date
+     * @type {('listener' | 'artist' | 'admin')} user profile type
      */
-    birthDate: { type: Object, required: true },
-    /**
-     * @type {('user' | 'artist' | 'admin')} user role
-     */
-    role: { type: String, required: true },
-    profileImageLink: {type: String, required: false},
-    /**
-     * @type {ArtistData} artist data
-     */
-    artistData: { type: Object, required: false }
+    profileType: { type: String, required: true },
+    profileImageLink: { type: String, required: false },
 }));
 
 export default UserSchema;
