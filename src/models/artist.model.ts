@@ -5,7 +5,7 @@ export interface ArtistSocialLinks {
   link: string
 }
 
-export type CreateAlbumRequestDataType = {
+export type CreateArtistRequestDataType = {
   name: string;
   country: string;
   description?: string;
@@ -13,6 +13,32 @@ export type CreateAlbumRequestDataType = {
   followers: number;
   genres: Array<string>;
 };
+
+export type ArtistAlbumDataType = {
+  albumId: string,
+  name: string,
+  likes: number,
+  date: Date,
+  downloadUrl: string
+}
+
+export type ArtistShortDataType = {
+  name: string;
+  id: string;
+}
+
+export type ArtistInfoResponseDataType = {
+  artistId: string;
+  name: string;
+  country: string;
+  description: string;
+  socialLinks: Array<ArtistSocialLinks>;
+  followers: number;
+}
+
+export type ArtistFullResponseDataType = ArtistInfoResponseDataType & {
+  albums: Array<ArtistAlbumDataType>
+}
 
 const SocialLinksSchema = new Schema({
   name: { type: String, required: true },

@@ -1,6 +1,8 @@
 import { Schema, model } from 'mongoose';
+import { AlbumShortDataType } from './album.model';
+import { ArtistShortDataType } from './artist.model';
 
-export type Song = {
+export type CreateSongRequestDataType = {
     name: string;
     artistId: string;
     coArtistIds?: Array<string>;
@@ -8,6 +10,16 @@ export type Song = {
     language: string;
     genres: Array<string>;
 };
+
+export type SongInfoResponseDataType = {
+    name: string;
+    artists: Array<ArtistShortDataType>;
+    album: AlbumShortDataType;
+    plays: number;
+    date: Date;
+    coverImageurl: string;
+    songUrl: string;
+}
 
 const SongSchema = model('Song', new Schema({
     _id: { type: String },

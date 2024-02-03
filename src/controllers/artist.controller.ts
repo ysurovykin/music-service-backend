@@ -12,7 +12,7 @@ class ArtistController {
 
     async getArtistById(req, res, next) {
         try {
-            const {artistId} = req.body;
+            const {artistId} = req.params;
             const artist = await artistService.getArtistById(artistId);
             return res.json(artist);
         } catch (error) {

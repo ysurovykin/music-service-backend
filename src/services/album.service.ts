@@ -1,7 +1,7 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { AlbumArtistDataType, AlbumFullResponseDataType, AlbumInfoResponseDataType, AlbumSongDataType, CreateAlbumRequestDataType } from '../models/album.model';
-import ArtistModel from '../models/artist.model';
+import { AlbumFullResponseDataType, AlbumInfoResponseDataType, AlbumSongDataType, CreateAlbumRequestDataType } from '../models/album.model';
+import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import AlbumModel from '../models/album.model';
 import SongModel from '../models/song.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
@@ -39,9 +39,9 @@ class AlbumService {
         if (!artist) {
             throw new NotFoundError(`Artist with id ${artistId} not found`);
         }
-        const artistData: AlbumArtistDataType = {
+        const artistData: ArtistShortDataType = {
             name: artist.name,
-            link: artist._id
+            id: artist._id
         };
 
         const albums = await AlbumModel.find({ artistId }).lean();
@@ -74,6 +74,7 @@ class AlbumService {
             const storageSongRef = ref(storage, `${albumSong.link}`);
             const url = await getDownloadURL(storageSongRef);
             albumSongUrls.push({
+                songId: albumSong._id,
                 name: albumSong.name,
                 plays: albumSong.plays,
                 coArtistIds: albumSong.coArtistIds,
@@ -85,11 +86,13 @@ class AlbumService {
         if (!artist) {
             throw new NotFoundError(`Artist with id ${album.artistId} not found`);
         }
-        const artistData: AlbumArtistDataType = {
+        const artistData: ArtistShortDataType = {
             name: artist.name,
-            link: artist._id
+            id: artist._id
         };
         return {
+            albumId,
+            likes: album.likes,
             name: album.name,
             date: album.date,
             songs: albumSongUrls,
