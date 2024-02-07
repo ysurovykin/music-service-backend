@@ -7,6 +7,6 @@ const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/upload', upload.single('song'), songController.upload);
-router.get('/:songId', songController.loadSong);
+router.get('/:songId', songController.getSongById);
 
 export default router;

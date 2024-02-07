@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { ArtistShortDataType } from './artist.model';
+import { SongInfoResponseDataType } from './song.model';
 
 export type CreateAlbumRequestDataType = {
   name: string;
@@ -7,14 +8,6 @@ export type CreateAlbumRequestDataType = {
   languages: string;
   genres: Array<string>;
 };
-
-export type AlbumSongDataType = {
-  songId: string,
-  name: string,
-  plays: number,
-  coArtistIds: Array<string>,
-  downloadUrl: string
-}
 
 export type AlbumShortDataType = {
   name: string;
@@ -31,7 +24,7 @@ export type AlbumInfoResponseDataType = {
 
 export type AlbumFullResponseDataType = AlbumInfoResponseDataType & {
   likes: number,
-  songs: Array<AlbumSongDataType>
+  songs: Array<SongInfoResponseDataType>
 }
 
 const AlbumSchema = model('Album', new Schema({

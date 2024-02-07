@@ -1,11 +1,12 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { AlbumFullResponseDataType, AlbumInfoResponseDataType, AlbumSongDataType, CreateAlbumRequestDataType } from '../models/album.model';
+import { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import AlbumModel from '../models/album.model';
-import SongModel from '../models/song.model';
+import SongModel, { SongInfoResponseDataType } from '../models/song.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
+import songService from '../services/song.service'
 
 class AlbumService {
 
@@ -68,20 +69,6 @@ class AlbumService {
         const storageCoverImageRef = ref(storage, `${album.coverImageLink}`);
         const coverImageUrl = await getDownloadURL(storageCoverImageRef);
 
-        const albumSongs = await SongModel.find({ albumId: albumId }).lean();
-        const albumSongUrls: Array<AlbumSongDataType> = [];
-        for (const albumSong of albumSongs) {
-            const storageSongRef = ref(storage, `${albumSong.link}`);
-            const url = await getDownloadURL(storageSongRef);
-            albumSongUrls.push({
-                songId: albumSong._id,
-                name: albumSong.name,
-                plays: albumSong.plays,
-                coArtistIds: albumSong.coArtistIds,
-                downloadUrl: url
-            });
-        }
-
         const artist = await ArtistModel.findOne({ _id: album.artistId }).lean();
         if (!artist) {
             throw new NotFoundError(`Artist with id ${album.artistId} not found`);
@@ -90,6 +77,14 @@ class AlbumService {
             name: artist.name,
             id: artist._id
         };
+
+        const albumSongs = await SongModel.find({ albumId: albumId }).lean();
+        const albumSongUrls: Array<SongInfoResponseDataType> = [];
+        for (const albumSong of albumSongs) {
+            const formatedSong = await songService._formatSongData(albumSong);
+            albumSongUrls.push(formatedSong);
+        }
+
         return {
             albumId,
             likes: album.likes,

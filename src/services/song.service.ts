@@ -1,6 +1,7 @@
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import mm from 'music-metadata';
 import { storage } from '../../firebase.config';
-import SongModel, { CreateSongRequestDataType, SongInfoResponseDataType } from '../models/song.model';
+import SongModel, { CreateSongRequestDataType, SongInfoResponseDataType, SongRecordType } from '../models/song.model';
 import AlbumModel from '../models/album.model';
 import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
@@ -15,7 +16,8 @@ class SongService {
         if (!album) {
             throw new NotFoundError(`Album with id ${songData.albumId} not found`);
         }
-
+        const songMetadata = await mm.parseBuffer(file.buffer, 'audio/mpeg');
+        const duration = songMetadata.format.duration;
         const songId = randomstring.generate(16);
         const songLink = `songs/${songData.artistId}/${album._id}/${songId}`;
         const storageRef = ref(storage, songLink);
@@ -29,17 +31,44 @@ class SongService {
             coArtistIds: songData.coArtistIds,
             albumId: album._id,
             link: songLink,
+            duration,
             date: new Date()
         });
     }
 
-    async loadSong(songId: string): Promise<SongInfoResponseDataType> {
+    async getSongById(songId: string): Promise<SongInfoResponseDataType> {
         const song = await SongModel.findOne({_id: songId}).lean();
         if (!song) {
             throw new NotFoundError(`Song with id ${songId} not found`);
         }
+        const songInfo = await this._formatSongData(song);
+        return songInfo;
+    }
+
+    async _formatSongData(song: SongRecordType): Promise<SongInfoResponseDataType> {
         const album = await AlbumModel.findOne({_id: song.albumId}).lean();
-        const artist = await ArtistModel.findOne({_id: song.albumId}).lean();
+        const artists = await this._getSongArtists(song);
+        
+        const storageCoverImageRef = ref(storage, song.coverImageLink);
+        const coverImageUrl = await getDownloadURL(storageCoverImageRef);
+
+        const storageSongRef = ref(storage, song.link);
+        const songUrl = await getDownloadURL(storageSongRef);
+        const songDto = new SongDto(song);
+        return {
+            ...songDto,
+            album: {
+                id: song.albumId,
+                name: album.name
+            },
+            artists,
+            coverImageUrl, 
+            songUrl
+        };
+    }
+
+    async _getSongArtists(song: SongRecordType): Promise<Array<ArtistShortDataType>> {
+        const artist = await ArtistModel.findOne({_id: song.artistId}).lean();
         const artists: Array<ArtistShortDataType> = [{
             id: song.artistId,
             name: artist.name
@@ -51,21 +80,7 @@ class SongService {
                 name: coArtist.name
             })
         }
-        const storageCoverImageRef = ref(storage, song.coverImageLink);
-        const coverImageurl = await getDownloadURL(storageCoverImageRef);
-        const storageSongRef = ref(storage, song.link);
-        const songUrl = await getDownloadURL(storageSongRef);
-        const songDto = new SongDto(song);
-        return {
-            ...songDto,
-            album: {
-                id: song.albumId,
-                name: album.name
-            },
-            artists,
-            coverImageurl, 
-            songUrl
-        };
+        return artists;
     }
 
 }
