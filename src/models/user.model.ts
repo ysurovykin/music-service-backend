@@ -1,9 +1,9 @@
 import { Schema, model } from 'mongoose';
 
-export interface BirthDate {
-    day: Number,
-    month: Number,
-    year: Number
+export type BirthDate = {
+    day: Number;
+    month: Number;
+    year: Number;
 };
 
 export enum ProfileTypeEnum {

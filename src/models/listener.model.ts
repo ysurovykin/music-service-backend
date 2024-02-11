@@ -12,17 +12,17 @@ export enum RepeatSongStateEnum {
 }
 
 export type ListenerInfoResponseDataType = {
-  volume: number,
-  shuffleEnabled: boolean,
-  repeatSongState: RepeatSongStateEnum,
-  songId: string,
-  songsQueue: Array<SongInfoResponseDataType>,
+  volume: number;
+  shuffleEnabled: boolean;
+  repeatSongState: RepeatSongStateEnum;
+  songId: string;
+  songsQueue: Array<SongInfoResponseDataType>;
   name: string;
 }
 
 export type ListenerSongDataToUpdateType = {
-  songId: string,
-  songsQueue: Array<SongInfoResponseDataType>
+  songId: string;
+  songsQueue: Array<SongInfoResponseDataType>;
 }
 
 const ListenerSchema = model('Listener', new Schema({

@@ -36,18 +36,18 @@ export const SongInfoResponseDataSchema = new Schema<SongInfoResponseDataType>({
 });
 
 export type SongRecordType = {
-    _id: string,
-    name: string,
-    artistId: string,
-    coArtistIds: Array<string>,
-    albumId: string,
-    coverImageLink: string,
-    plays: number,
-    language: string,
-    genres: Array<string>,
-    link: string,
-    duration: number,
-    date: Date,
+    _id: string;
+    name: string;
+    artistId: string;
+    coArtistIds: Array<string>;
+    albumId: string;
+    coverImageLink: string;
+    plays: number;
+    language: string;
+    genres: Array<string>;
+    link: string;
+    duration: number;
+    date: Date;
 }
 
 const SongSchema = model('Song', new Schema({

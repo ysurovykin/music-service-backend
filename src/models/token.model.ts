@@ -1,8 +1,8 @@
 import {Schema, model} from 'mongoose';
 
 export type TokenType = {
-    userId: string, 
-    refreshToken: string
+    userId: string;
+    refreshToken: string;
 };
 
 const TokenSchema = model('Token', new Schema({

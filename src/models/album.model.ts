@@ -20,16 +20,16 @@ export const AlbumShortDataSchema = new Schema<AlbumShortDataType>({
 });
 
 export type AlbumInfoResponseDataType = {
-  albumId: string,
-  name: string,
-  date: Date,
-  downloadUrl: string,
-  artist: ArtistShortDataType
+  albumId: string;
+  name: string;
+  date: Date;
+  downloadUrl: string;
+  artist: ArtistShortDataType;
 }
 
 export type AlbumFullResponseDataType = AlbumInfoResponseDataType & {
-  likes: number,
-  songs: Array<SongInfoResponseDataType>
+  likes: number;
+  songs: Array<SongInfoResponseDataType>;
 }
 
 const AlbumSchema = model('Album', new Schema({
