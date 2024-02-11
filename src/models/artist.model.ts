@@ -27,6 +27,11 @@ export type ArtistShortDataType = {
   id: string;
 }
 
+export const ArtistShortDataSchema = new Schema<ArtistShortDataType>({
+  name: { type: String, required: true },
+  id: { type: String, required: true },
+});
+
 export type ArtistInfoResponseDataType = {
   artistId: string;
   name: string;

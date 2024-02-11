@@ -1,10 +1,12 @@
+import { ProfileTypeEnum } from "../models/user.model";
+
 export default class UserDto{
     userId: string;
     email: string;
     name: string;
     gender: string;
     country: string;
-    profileType: string;
+    profileType: ProfileTypeEnum;
     birthDate: Object;
  
     constructor(model: any){

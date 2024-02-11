@@ -6,6 +6,12 @@ export interface BirthDate {
     year: Number
 };
 
+export enum ProfileTypeEnum {
+  'listener' = 'listener',
+  'artist' = 'artist',
+  'admin' = 'admin'
+}
+
 export type CreateUserRequestDataType = {
     email: string;
     password: string;
@@ -13,7 +19,7 @@ export type CreateUserRequestDataType = {
     gender: string;
     country: string;
     birthDate: Date;
-    profileType: 'listener' | 'artist' | 'admin';
+    profileType: ProfileTypeEnum;
     profileImageLink: string;
 };
 
@@ -32,7 +38,7 @@ const UserSchema = model('User', new Schema({
     country: { type: String, required: true },
     birthDate: [BirthDateSchema],
     /**
-     * @type {('listener' | 'artist' | 'admin')} user profile type
+     * @type {ProfileTypeEnum} profile type
      */
     profileType: { type: String, required: true },
     profileImageLink: { type: String, required: false },

@@ -14,6 +14,11 @@ export type AlbumShortDataType = {
   id: string;
 }
 
+export const AlbumShortDataSchema = new Schema<AlbumShortDataType>({
+  name: { type: String, required: true },
+  id: { type: String, required: true },
+});
+
 export type AlbumInfoResponseDataType = {
   albumId: string,
   name: string,

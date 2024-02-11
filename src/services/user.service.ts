@@ -50,7 +50,7 @@ class UserService {
         return { ...tokens, user: userDto }
     }
 
-    async login(email: string, password: string) {
+    async login(email: string, password: string): Promise<AuthorizedUserData> {
         const user = await UserModel.findOne({ email }).lean();
         if (!user) {
             throw new NotFoundError(`User with email ${email} not found`);
@@ -66,12 +66,11 @@ class UserService {
         return { ...tokens, user: userDto }
     }
 
-    async logout(refreshToken: string) {
-        const token = await tokenService.removeToken(refreshToken);
-        return token;
+    async logout(refreshToken: string): Promise<void> {
+        await tokenService.removeToken(refreshToken);
     }
 
-    async refresh(refreshToken: string) {
+    async refresh(refreshToken: string): Promise<AuthorizedUserData> {
         if (!refreshToken) {
             throw new UnauthorizedError()
         }

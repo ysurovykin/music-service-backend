@@ -7,6 +7,7 @@ import userRouter from './src/router/user.router.ts';
 import songRouter from './src/router/song.router.ts';
 import albumRouter from './src/router/album.router.ts';
 import artistRouter from './src/router/artist.router.ts';
+import listenerRouter from './src/router/listener.router.ts';
 
 config();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,7 @@ app.use('/user', userRouter);
 app.use('/song', songRouter);
 app.use('/album', albumRouter);
 app.use('/artist', artistRouter);
+app.use('/listener', listenerRouter);
 
 const start = async () => {
     try {
