@@ -13,6 +13,7 @@ export enum RepeatSongStateEnum {
 
 export type ListenerInfoResponseDataType = {
   volume: number;
+  muted: boolean;
   shuffleEnabled: boolean;
   repeatSongState: RepeatSongStateEnum;
   songId: string;
@@ -29,6 +30,7 @@ const ListenerSchema = model('Listener', new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   volume: { type: Number, required: true, default: 30 },
+  muted: { type: Boolean, required: true, default: false }, 
   shuffleEnabled: { type: Boolean, require: true, default: false },
   /**
    * @type {RepeatSongStateEnum} repeat song state

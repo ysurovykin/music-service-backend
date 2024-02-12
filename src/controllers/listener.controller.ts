@@ -42,6 +42,16 @@ class ListenerController {
         }
     }
     
+    async changeMuting(req, res, next) {
+        try {
+            const {listenerId, muted} = req.body;
+            const listener = await listenerService.changeMuting(listenerId, muted);
+            return res.json(listener);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async changeShuffleState(req, res, next) {
         try {
             const {listenerId, shuffleEnabled} = req.body;

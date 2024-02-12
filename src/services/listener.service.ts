@@ -25,7 +25,12 @@ class ListenerService {
     }
 
     async changeVolume(listenerId: string, volume: number): Promise<void> {
+        console.log('changevalume')
         await ListenerModel.updateOne({_id: listenerId, volume});
+    }
+
+    async changeMuting(listenerId: string, muted: boolean): Promise<void> {
+        await ListenerModel.updateOne({_id: listenerId, muted});
     }
 
     async changeShuffleState(listenerId: string, shuffleEnabled: boolean): Promise<void> {

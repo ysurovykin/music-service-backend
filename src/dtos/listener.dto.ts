@@ -3,6 +3,7 @@ import { SongInfoResponseDataType } from "../models/song.model";
 
 export default class ListenerDto{
     volume: number;
+    muted: boolean;
     shuffleEnabled: boolean;
     repeatSongState: RepeatSongStateEnum;
     songId: string;
@@ -14,6 +15,7 @@ export default class ListenerDto{
     constructor(model: any){
         this.name = model.name;
         this.volume = model.volume;
+        this.muted = model.muted
         this.shuffleEnabled = model.shuffleEnabled;
         this.repeatSongState = model.repeatSongState;
         this.songId = model.songId;
