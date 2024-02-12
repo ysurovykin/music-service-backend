@@ -25,7 +25,6 @@ class ListenerService {
     }
 
     async changeVolume(listenerId: string, volume: number): Promise<void> {
-        console.log('changevalume')
         await ListenerModel.updateOne({_id: listenerId, volume});
     }
 
