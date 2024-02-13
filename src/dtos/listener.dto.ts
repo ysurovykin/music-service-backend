@@ -1,7 +1,7 @@
-export default class ListenerDto{
+export default class ListenerDto {
     name: string;
 
-    constructor(model: any){
+    constructor(model: any) {
         this.name = model.name;
     }
 }

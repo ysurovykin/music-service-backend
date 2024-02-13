@@ -1,7 +1,7 @@
 export class NotFoundError extends Error {
     status: number;
 
-    constructor(message: string){
+    constructor(message: string) {
         super(message);
         this.status = 404;
     }
@@ -10,7 +10,7 @@ export class NotFoundError extends Error {
 export class ForbiddenError extends Error {
     status: number;
 
-    constructor(message: string){
+    constructor(message: string) {
         super(message);
         this.status = 403;
     }
@@ -19,7 +19,7 @@ export class ForbiddenError extends Error {
 export class UnauthorizedError extends Error {
     status: number;
 
-    constructor(){
+    constructor() {
         super('User is not authorized');
         this.status = 401;
     }
@@ -28,7 +28,7 @@ export class UnauthorizedError extends Error {
 export class ValidationError extends Error {
     status: number;
 
-    constructor(message: string){
+    constructor(message: string) {
         super(message);
         this.status = 400;
     }

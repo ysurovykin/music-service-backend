@@ -10,26 +10,26 @@ type TokensType = {
 class TokenService {
 
     generateTokens(payload: UserDto): TokensType {
-        const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '30s'})
-        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: '30d'})
+        const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '30s' })
+        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' })
 
         return {
-            accessToken, 
+            accessToken,
             refreshToken
         };
     }
 
     async saveToken(userId: string, refreshToken: string): Promise<void> {
-        await TokenModel.updateOne({userId}, {$set: {refreshToken}}, {upsert: true});
+        await TokenModel.updateOne({ userId }, { $set: { refreshToken } }, { upsert: true });
     }
 
     async removeToken(refreshToken: string): Promise<void> {
-        await TokenModel.deleteOne({refreshToken});
+        await TokenModel.deleteOne({ refreshToken });
     }
 
     async findToken(refreshToken: string): Promise<TokenType | null> {
-        const token = await TokenModel.findOne({refreshToken}).lean();
-        return token ? {userId: token.userId, refreshToken: token.refreshToken} : null;
+        const token = await TokenModel.findOne({ refreshToken }).lean();
+        return token ? { userId: token.userId, refreshToken: token.refreshToken } : null;
     }
 
     validateAccessToken(token: string): UserDto | null {
@@ -40,7 +40,7 @@ class TokenService {
             return null;
         }
     }
-    
+
     validateRefreshToken(token: string): UserDto | null {
         try {
             const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET);

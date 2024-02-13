@@ -4,7 +4,7 @@ class ListenerController {
 
     async getListenerById(req, res, next) {
         try {
-            const {listenerId} = req.params;
+            const { listenerId } = req.params;
             const listener = await listenerService.getListenerById(listenerId);
             return res.json(listener);
         } catch (error) {

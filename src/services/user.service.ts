@@ -24,12 +24,12 @@ class UserService {
 
         const birthDate = new Date(userData.birthDate);
         const userId = randomstring.generate(16);
-        const newUser = await UserModel.create({ 
+        const newUser = await UserModel.create({
             _id: userId,
             country: userData.country,
             email: userData.email,
             gender: userData.gender,
-            name: userData.name, 
+            name: userData.name,
             password: hashedPassword,
             birthDate: {
                 day: birthDate.getDate(),
@@ -42,7 +42,7 @@ class UserService {
 
         // const storageRef = ref(storage, `user-avatars/${userId}`);
         // await uploadBytes(storageRef, file.buffer, {contentType: 'image/jpeg'});
-    
+
         const userDto = new UserDto(newUser);
         const tokens = tokenService.generateTokens({ ...userDto });
         await tokenService.saveToken(userDto.userId, tokens.refreshToken);

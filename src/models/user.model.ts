@@ -7,9 +7,9 @@ export type BirthDate = {
 };
 
 export enum ProfileTypeEnum {
-  'listener' = 'listener',
-  'artist' = 'artist',
-  'admin' = 'admin'
+    'listener' = 'listener',
+    'artist' = 'artist',
+    'admin' = 'admin'
 }
 
 export type CreateUserRequestDataType = {

@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import multer from 'multer';
 import authMiddleware from '../middlewares/auth.middleware';
 import songController from '../controllers/song.controller';

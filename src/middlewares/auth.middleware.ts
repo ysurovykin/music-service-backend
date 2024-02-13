@@ -2,20 +2,20 @@
 import { UnauthorizedError } from '../errors/api-errors';
 import tokenService from '../services/token.service';
 
-export default function (req, res, next){
+export default function (req, res, next) {
     try {
         const authorizationHeader = req.headers.authorization;
-        if (!authorizationHeader){
+        if (!authorizationHeader) {
             return next(new UnauthorizedError());
         }
-        
+
         const accessToken = authorizationHeader.split(' ')[1];
-        if (!accessToken){
+        if (!accessToken) {
             return next(new UnauthorizedError());
         }
 
         const userData = tokenService.validateAccessToken(accessToken);
-        if (!userData){
+        if (!userData) {
             return next(new UnauthorizedError());
         }
 

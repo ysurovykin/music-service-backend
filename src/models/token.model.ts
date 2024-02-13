@@ -1,4 +1,4 @@
-import {Schema, model} from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 export type TokenType = {
     userId: string;
@@ -6,8 +6,8 @@ export type TokenType = {
 };
 
 const TokenSchema = model('Token', new Schema({
-    userId: {type: String, required: true},
-    refreshToken: {type: String, required: true}
+    userId: { type: String, required: true },
+    refreshToken: { type: String, required: true }
 }));
 
 export default TokenSchema;

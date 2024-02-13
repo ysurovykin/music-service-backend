@@ -21,7 +21,7 @@ class SongService {
         const songId = randomstring.generate(16);
         const songLink = `songs/${songData.artistId}/${album._id}/${songId}`;
         const storageRef = ref(storage, songLink);
-        await uploadBytes(storageRef, file.buffer, {contentType: 'audio/mpeg'});
+        await uploadBytes(storageRef, file.buffer, { contentType: 'audio/mpeg' });
 
         await SongModel.create({
             ...songData,
@@ -37,7 +37,7 @@ class SongService {
     }
 
     async getSongById(songId: string): Promise<SongInfoResponseDataType> {
-        const song = await SongModel.findOne({_id: songId}).lean();
+        const song = await SongModel.findOne({ _id: songId }).lean();
         if (!song) {
             throw new NotFoundError(`Song with id ${songId} not found`);
         }
@@ -46,9 +46,9 @@ class SongService {
     }
 
     async _formatSongData(song: SongRecordType): Promise<SongInfoResponseDataType> {
-        const album = await AlbumModel.findOne({_id: song.albumId}).lean();
+        const album = await AlbumModel.findOne({ _id: song.albumId }).lean();
         const artists = await this._getSongArtists(song);
-        
+
         const storageCoverImageRef = ref(storage, song.coverImageLink);
         const coverImageUrl = await getDownloadURL(storageCoverImageRef);
 
@@ -62,19 +62,19 @@ class SongService {
                 name: album.name
             },
             artists,
-            coverImageUrl, 
+            coverImageUrl,
             songUrl
         };
     }
 
     async _getSongArtists(song: SongRecordType): Promise<Array<ArtistShortDataType>> {
-        const artist = await ArtistModel.findOne({_id: song.artistId}).lean();
+        const artist = await ArtistModel.findOne({ _id: song.artistId }).lean();
         const artists: Array<ArtistShortDataType> = [{
             id: song.artistId,
             name: artist.name
         }]
         for (const songCoArtistId of song.coArtistIds) {
-            const coArtist = await ArtistModel.findOne({_id: songCoArtistId}).lean();
+            const coArtist = await ArtistModel.findOne({ _id: songCoArtistId }).lean();
             artists.push({
                 id: coArtist._id,
                 name: coArtist.name

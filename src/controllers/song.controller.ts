@@ -15,7 +15,7 @@ class SongController {
 
     async getSongById(req, res, next) {
         try {
-            const {songId} = req.params;
+            const { songId } = req.params;
             const song: SongInfoResponseDataType = await songService.getSongById(songId);
             return res.json(song);
         } catch (error) {

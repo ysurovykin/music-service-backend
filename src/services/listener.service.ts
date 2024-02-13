@@ -5,7 +5,7 @@ import ListenerDto from '../dtos/listener.dto';
 class ListenerService {
 
     async getListenerById(listenerId: string): Promise<ListenerInfoResponseDataType> {
-        const listener = await ListenerModel.findOne({_id: listenerId}).lean();
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         if (!listener) {
             throw new NotFoundError(`Listener with id ${listenerId} not found`);
         }

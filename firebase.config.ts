@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getStorage } from 'firebase/storage';
-import {config} from 'dotenv';
+import { config } from 'dotenv';
 config();
 
 const firebaseConfig = {

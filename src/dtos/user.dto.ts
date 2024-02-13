@@ -1,6 +1,6 @@
 import { ProfileTypeEnum } from "../models/user.model";
 
-export default class UserDto{
+export default class UserDto {
     userId: string;
     email: string;
     name: string;
@@ -8,8 +8,8 @@ export default class UserDto{
     country: string;
     profileType: ProfileTypeEnum;
     birthDate: Object;
- 
-    constructor(model: any){
+
+    constructor(model: any) {
         this.userId = model._id || model.userId;
         this.email = model.email;
         this.name = model.name;

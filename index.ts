@@ -1,4 +1,4 @@
-import {config} from 'dotenv';
+import { config } from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -32,7 +32,7 @@ const start = async () => {
             useNewUrlParser: true,
             useUnifiedTopology: true
         } as ConnectOptions);
-       app.listen(PORT, () => console.log(`Server started on PORT = ${PORT}`)) ;
+        app.listen(PORT, () => console.log(`Server started on PORT = ${PORT}`));
     } catch (error) {
         console.log(error);
     }

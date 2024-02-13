@@ -14,7 +14,7 @@ class ArtistService {
     }
 
     async getArtistById(artistId: string): Promise<ArtistFullResponseDataType> {
-        const artist = await ArtistModel.findOne({_id: artistId}).lean();
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
         if (!artist) {
             throw new NotFoundError(`Artist with id ${artistId} not found`);
         }

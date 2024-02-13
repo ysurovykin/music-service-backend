@@ -15,7 +15,7 @@ class AlbumController {
 
     async getAlbumsByArtistId(req, res, next) {
         try {
-            const {artistId} = req.params;
+            const { artistId } = req.params;
             const album = await albumService.getAlbumsByArtistId(artistId);
             return res.json(album);
         } catch (error) {
@@ -25,7 +25,7 @@ class AlbumController {
 
     async getAlbumById(req, res, next) {
         try {
-            const {albumId} = req.params;
+            const { albumId } = req.params;
             const album = await albumService.getAlbumById(albumId);
             return res.json(album);
         } catch (error) {
