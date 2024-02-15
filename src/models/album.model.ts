@@ -4,7 +4,7 @@ import { SongInfoResponseDataType } from './song.model';
 
 export type CreateAlbumRequestDataType = {
   name: string;
-  artistId: String;
+  artistId: string;
   languages: string;
   genres: Array<string>;
 };
@@ -23,7 +23,7 @@ export type AlbumInfoResponseDataType = {
   albumId: string;
   name: string;
   date: Date;
-  downloadUrl: string;
+  coverImageUrl: string;
   artist: ArtistShortDataType;
 }
 
@@ -36,7 +36,7 @@ const AlbumSchema = model('Album', new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   artistId: { type: String, required: true },
-  coverImageLink: { type: String, required: true },
+  coverImageUrl: { type: String, required: true },
   likes: { type: Number, default: 0, required: true },
   languages: { type: [String], required: true },
   genres: { type: [String], required: true },

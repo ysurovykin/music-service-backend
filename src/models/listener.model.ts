@@ -11,6 +11,7 @@ export type ListenerInfoResponseDataType = {
 const ListenerSchema = model('Listener', new Schema({
   _id: { type: String },
   name: { type: String, required: true },
+  date: { type: Date, required: true },
 }));
 
 export default ListenerSchema;

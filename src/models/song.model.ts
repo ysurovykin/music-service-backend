@@ -41,11 +41,11 @@ export type SongRecordType = {
     artistId: string;
     coArtistIds: Array<string>;
     albumId: string;
-    coverImageLink: string;
+    coverImageUrl: string;
     plays: number;
     language: string;
     genres: Array<string>;
-    link: string;
+    songUrl: string;
     duration: number;
     date: Date;
 }
@@ -56,11 +56,11 @@ const SongSchema = model('Song', new Schema({
     artistId: { type: String, required: true },
     coArtistIds: { type: [String], required: true },
     albumId: { type: String, required: true },
-    coverImageLink: { type: String, required: true },
+    coverImageUrl: { type: String, required: true },
     plays: { type: Number, default: 0, required: true },
     language: { type: String, required: true },
     genres: { type: [String], required: true },
-    link: { type: String, required: true },
+    songUrl: { type: String, required: true },
     duration: { type: Number, required: true },
     date: { type: Date, required: true }
 }));

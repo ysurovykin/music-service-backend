@@ -26,7 +26,7 @@ class SongService {
         await SongModel.create({
             ...songData,
             _id: songId,
-            coverImageLink: album.coverImageLink,
+            coverImageUrl: album.coverImageUrl,
             artistId: songData.artistId,
             coArtistIds: songData.coArtistIds,
             albumId: album._id,
@@ -41,18 +41,18 @@ class SongService {
         if (!song) {
             throw new NotFoundError(`Song with id ${songId} not found`);
         }
-        const songInfo = await this._formatSongData(song);
+        const songInfo = await this.formatSongData(song);
         return songInfo;
     }
 
-    async _formatSongData(song: SongRecordType): Promise<SongInfoResponseDataType> {
+    async formatSongData(song: SongRecordType): Promise<SongInfoResponseDataType> {
         const album = await AlbumModel.findOne({ _id: song.albumId }).lean();
         const artists = await this._getSongArtists(song);
 
-        const storageCoverImageRef = ref(storage, song.coverImageLink);
+        const storageCoverImageRef = ref(storage, song.coverImageUrl);
         const coverImageUrl = await getDownloadURL(storageCoverImageRef);
 
-        const storageSongRef = ref(storage, song.link);
+        const storageSongRef = ref(storage, song.songUrl);
         const songUrl = await getDownloadURL(storageSongRef);
         const songDto = new SongDto(song);
         return {

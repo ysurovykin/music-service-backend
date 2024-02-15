@@ -20,18 +20,18 @@ class AlbumService {
             throw new ForbiddenError(`Album ${albumData.name} already exists for artist with id ${albumData.artistId}`);
         }
         const albumId = randomstring.generate(16);
-        const coverImageLink = `album-covers/${artist._id}/${albumId}`;
+        const coverImageUrl = `album-covers/${artist._id}/${albumId}`;
         await AlbumModel.create({
             _id: albumId,
             name: albumData.name,
             artistId: artist._id,
-            coverImageLink,
+            coverImageUrl,
             languages: albumData.languages,
             genres: albumData.genres,
             date: new Date()
         });
 
-        const storageRef = ref(storage, coverImageLink);
+        const storageRef = ref(storage, coverImageUrl);
         await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
     }
 
@@ -48,14 +48,14 @@ class AlbumService {
         const albums = await AlbumModel.find({ artistId }).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
-            const storageCoverImageRef = ref(storage, `${album.coverImageLink}`);
+            const storageCoverImageRef = ref(storage, `${album.coverImageUrl}`);
             const coverImageUrl = await getDownloadURL(storageCoverImageRef);
             albumDatas.push({
                 albumId: album._id,
                 artist: artistData,
                 name: album.name,
                 date: album.date,
-                downloadUrl: coverImageUrl
+                coverImageUrl
             });
         }
         return albumDatas;
@@ -64,9 +64,9 @@ class AlbumService {
     async getAlbumById(albumId: string): Promise<AlbumFullResponseDataType> {
         const album = await AlbumModel.findOne({ _id: albumId }).lean();
         if (!albumId) {
-            throw new NotFoundError(`Artist with id ${album.artistId} not found`);
+            throw new NotFoundError(`Album with id ${albumId} not found`);
         }
-        const storageCoverImageRef = ref(storage, `${album.coverImageLink}`);
+        const storageCoverImageRef = ref(storage, `${album.coverImageUrl}`);
         const coverImageUrl = await getDownloadURL(storageCoverImageRef);
 
         const artist = await ArtistModel.findOne({ _id: album.artistId }).lean();
@@ -81,7 +81,7 @@ class AlbumService {
         const albumSongs = await SongModel.find({ albumId: albumId }).lean();
         const albumSongUrls: Array<SongInfoResponseDataType> = [];
         for (const albumSong of albumSongs) {
-            const formatedSong = await songService._formatSongData(albumSong);
+            const formatedSong = await songService.formatSongData(albumSong);
             albumSongUrls.push(formatedSong);
         }
 
@@ -91,7 +91,7 @@ class AlbumService {
             name: album.name,
             date: album.date,
             songs: albumSongUrls,
-            downloadUrl: coverImageUrl,
+            coverImageUrl,
             artist: artistData
         };
     }

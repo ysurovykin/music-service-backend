@@ -22,14 +22,14 @@ class ArtistService {
         const artistAlbums = await AlbumModel.find({ artistId: artistId }).lean();
         const artistAlbumUrls: Array<ArtistAlbumDataType> = [];
         for (const artistAlbum of artistAlbums) {
-            const storageCoverImageRef = ref(storage, `${artistAlbum.coverImageLink}`);
+            const storageCoverImageRef = ref(storage, `${artistAlbum.coverImageUrl}`);
             const url = await getDownloadURL(storageCoverImageRef);
             artistAlbumUrls.push({
                 albumId: artistAlbum._id,
                 name: artistAlbum.name,
                 likes: artistAlbum.likes,
                 date: artistAlbum.date,
-                downloadUrl: url
+                coverImageUrl: url
             });
         }
 

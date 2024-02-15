@@ -3,6 +3,9 @@ import randomstring from 'randomstring';
 import { ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../firebase.config';
 import UserModel, { CreateUserRequestDataType } from '../models/user.model';
+import ArtistModel from '../models/artist.model';
+import ListenerModel from '../models/listener.model';
+import PlaylistModel from '../models/playlist.model';
 import UserDto from '../dtos/user.dto';
 import { NotFoundError, UnauthorizedError, ValidationError } from '../errors/api-errors';
 import tokenService from './token.service';
@@ -39,6 +42,28 @@ class UserService {
             // profileImageLink: `user-avatars/${userId}`,
             profileType: userData.profileType
         });
+
+        if (userData.profileType === 'listener') {
+            await ListenerModel.create({
+                _id: userId,
+                name: userData.name,
+                date: new Date()
+            });
+            const playlistId = randomstring.generate(16);
+            await PlaylistModel.create({
+                _id: playlistId,
+                name: 'Liked Songs',
+                editable: false,
+                listenerId: userId,
+                date: new Date()
+            });
+        } else if (userData.profileType === 'artist') {
+            await ArtistModel.create({
+                _id: userId,
+                name: userData.name,
+                date: new Date()
+            });
+        }
 
         // const storageRef = ref(storage, `user-avatars/${userId}`);
         // await uploadBytes(storageRef, file.buffer, {contentType: 'image/jpeg'});

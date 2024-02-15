@@ -19,7 +19,7 @@ export type ArtistAlbumDataType = {
   name: string;
   likes: number;
   date: Date;
-  downloadUrl: string;
+  coverImageUrl: string;
 }
 
 export type ArtistShortDataType = {
@@ -55,7 +55,7 @@ const ArtistSchema = model('Artist', new Schema({
   name: { type: String, required: true },
   description: { type: String, required: false },
   socialLinks: [SocialLinksSchema],
-  genres: { type: [String], required: true },
+  genres: [String],
   followers: { type: Number, required: true, default: 0 },
   date: { type: Date, required: true },
 }));
