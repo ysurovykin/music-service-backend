@@ -1,6 +1,6 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { PlaylistFullResponseDataType, PlaylistInfoResponseDataType, CreatePlaylistRequestDataType } from '../models/playlist.model';
+import { PlaylistFullResponseDataType, PlaylistInfoResponseDataType, CreatePlaylistRequestDataType, PlaylistTagEnum } from '../models/playlist.model';
 import ListenerModel from '../models/listener.model';
 import PlaylistModel from '../models/playlist.model';
 import SongModel, { SongInfoResponseDataType, SongRecordType } from '../models/song.model';
@@ -47,12 +47,16 @@ class PlaylistService {
         const playlists = await PlaylistModel.find({ listenerId }).lean();
         const playlistDatas: Array<PlaylistInfoResponseDataType> = [];
         for (const playlist of playlists) {
-            const storageCoverImageRef = ref(storage, `${playlist.coverImageUrl}`);
-            const coverImageUrl = await getDownloadURL(storageCoverImageRef);
+            let coverImageUrl: string;
+            if (playlist.coverImageUrl) {
+                const storageCoverImageRef = ref(storage, `${playlist.coverImageUrl}`);
+                coverImageUrl = await getDownloadURL(storageCoverImageRef);
+            }
             playlistDatas.push({
                 playlistId: playlist._id,
                 name: playlist.name,
                 date: playlist.date,
+                tag: playlist.tag as PlaylistTagEnum,
                 coverImageUrl
             });
         }
@@ -64,15 +68,19 @@ class PlaylistService {
         if (!playlistId) {
             throw new NotFoundError(`Playlist with id ${playlistId} not found`);
         }
-        const storageCoverImageRef = ref(storage, `${playlist.coverImageUrl}`);
-        const coverImageUrl = await getDownloadURL(storageCoverImageRef);
+        let coverImageUrl: string;
+        if (playlist.coverImageUrl) {
+            const storageCoverImageRef = ref(storage, `${playlist.coverImageUrl}`);
+            coverImageUrl = await getDownloadURL(storageCoverImageRef);
+        }
 
         return {
             playlistId,
             name: playlist.name,
             date: playlist.date,
             songs: playlist.songs,
-            coverImageUrl
+            coverImageUrl,
+            tag: playlist.tag as PlaylistTagEnum
         };
     }
 

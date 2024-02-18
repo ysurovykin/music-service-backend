@@ -12,11 +12,16 @@ export type PlaylistShortDataType = {
   id: string;
 }
 
+export enum PlaylistTagEnum {
+  'liked' = 'liked'
+}
+
 export type PlaylistInfoResponseDataType = {
   playlistId: string;
   name: string;
   date: Date;
   coverImageUrl: string;
+  tag: PlaylistTagEnum;
 }
 
 export type PlaylistFullResponseDataType = PlaylistInfoResponseDataType & {
@@ -30,6 +35,10 @@ const PlaylistSchema = model('Playlist', new Schema({
   coverImageUrl: { type: String, required: true },
   date: { type: Date, required: true },
   editable: { type: Boolean, required: true },
+  /**
+   * @type {PlaylistTagEnum} playlist tag
+   */
+  tag: { type: String, required: false },
   songs: [SongInfoResponseDataSchema]
 }));
 

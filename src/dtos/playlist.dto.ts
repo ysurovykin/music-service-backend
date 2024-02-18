@@ -5,6 +5,7 @@ export default class PlaylistDto {
     name: string;
     date: Date;
     coverImageUrl: string;
+    tag: string;
     songs: Array<SongInfoResponseDataType>;
 
     constructor(model: any) {
@@ -12,6 +13,7 @@ export default class PlaylistDto {
         this.name = model.name;
         this.date = model.date;
         this.coverImageUrl = model.coverImageUrl;
+        this.tag = model.tag;
         this.songs = model.songs;
     }
 }

@@ -49,11 +49,17 @@ class SongService {
         const album = await AlbumModel.findOne({ _id: song.albumId }).lean();
         const artists = await this._getSongArtists(song);
 
-        const storageCoverImageRef = ref(storage, song.coverImageUrl);
-        const coverImageUrl = await getDownloadURL(storageCoverImageRef);
+        let coverImageUrl: string;
+        if (song.coverImageUrl) {
+            const storageCoverImageRef = ref(storage, song.coverImageUrl);
+            coverImageUrl = await getDownloadURL(storageCoverImageRef);
+        }
 
-        const storageSongRef = ref(storage, song.songUrl);
-        const songUrl = await getDownloadURL(storageSongRef);
+        let songUrl: string;
+        if (song.songUrl) {
+            const storageSongRef = ref(storage, song.songUrl);
+            songUrl = await getDownloadURL(storageSongRef);
+        }
         const songDto = new SongDto(song);
         return {
             ...songDto,
