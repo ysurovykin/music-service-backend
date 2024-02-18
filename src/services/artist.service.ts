@@ -2,8 +2,6 @@ import ArtistModel, { ArtistAlbumDataType, ArtistFullResponseDataType, ArtistInf
 import AlbumModel from '../models/album.model';
 import { NotFoundError } from '../errors/api-errors';
 import ArtistDto from '../dtos/artist.dto';
-import { getDownloadURL, ref } from 'firebase/storage';
-import { storage } from '../../firebase.config';
 
 class ArtistService {
 
@@ -22,17 +20,12 @@ class ArtistService {
         const artistAlbums = await AlbumModel.find({ artistId: artistId }).lean();
         const artistAlbumUrls: Array<ArtistAlbumDataType> = [];
         for (const artistAlbum of artistAlbums) {
-            let coverImageUrl: string;
-            if (artistAlbum.coverImageUrl) {
-                const storageCoverImageRef = ref(storage, `${artistAlbum.coverImageUrl}`);
-                coverImageUrl = await getDownloadURL(storageCoverImageRef);
-            }
             artistAlbumUrls.push({
                 albumId: artistAlbum._id,
                 name: artistAlbum.name,
                 likes: artistAlbum.likes,
                 date: artistAlbum.date,
-                coverImageUrl
+                coverImageUrl: artistAlbum.coverImageUrl
             });
         }
 

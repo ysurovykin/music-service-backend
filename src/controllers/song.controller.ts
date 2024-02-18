@@ -7,7 +7,7 @@ class SongController {
             const file: Express.Multer.File = req.file;
             const songData: CreateSongRequestDataType = req.body;
             await songService.upload(songData, file);
-            return res.json(204);
+            return res.sendStatus(204);
         } catch (error) {
             next(error);
         }
@@ -18,6 +18,16 @@ class SongController {
             const { songId } = req.params;
             const song: SongInfoResponseDataType = await songService.getSongById(songId);
             return res.json(song);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async editPlaylists(req, res, next) {
+        try {
+            const { songId, editedPlaylists } = req.body;
+            await songService.editPlaylists(songId, editedPlaylists);
+            return res.sendStatus(204);
         } catch (error) {
             next(error);
         }

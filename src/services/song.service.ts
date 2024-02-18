@@ -1,12 +1,13 @@
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import mm from 'music-metadata';
 import { storage } from '../../firebase.config';
-import SongModel, { CreateSongRequestDataType, SongInfoResponseDataType, SongRecordType } from '../models/song.model';
+import SongModel, { CreateSongRequestDataType, EditedPlaylistType, SongInfoResponseDataType, SongRecordType } from '../models/song.model';
 import AlbumModel from '../models/album.model';
 import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import SongDto from '../dtos/song.dto';
 import ArtistModel from '../models/artist.model';
+import PlaylistModel from '../models/playlist.model';
 import { ArtistShortDataType } from '../models/artist.model';
 
 class SongService {
@@ -19,9 +20,15 @@ class SongService {
         const songMetadata = await mm.parseBuffer(file.buffer, 'audio/mpeg');
         const duration = songMetadata.format.duration;
         const songId = randomstring.generate(16);
-        const songLink = `songs/${songData.artistId}/${album._id}/${songId}`;
-        const storageRef = ref(storage, songLink);
+
+        const downloadUrl = `songs/${songData.artistId}/${album._id}/${songId}`;
+        const storageRef = ref(storage, downloadUrl);
         await uploadBytes(storageRef, file.buffer, { contentType: 'audio/mpeg' });
+        let songUrl = await getDownloadURL(storageRef);
+        const indexOfTokenQuery = songUrl.indexOf('&token')
+        if (indexOfTokenQuery) {
+            songUrl = songUrl.slice(0, indexOfTokenQuery);
+        }
 
         await SongModel.create({
             ...songData,
@@ -30,7 +37,7 @@ class SongService {
             artistId: songData.artistId,
             coArtistIds: songData.coArtistIds,
             albumId: album._id,
-            link: songLink,
+            songUrl,
             duration,
             date: new Date()
         });
@@ -45,21 +52,28 @@ class SongService {
         return songInfo;
     }
 
+    async editPlaylists(songId: string, editedPlaylists: Array<EditedPlaylistType>): Promise<void> {
+        const song = await SongModel.findOne({ _id: songId }).lean();
+        if (!song) {
+            throw new NotFoundError(`Song with id ${songId} not found`);
+        }
+        const formatedSong = await this.formatSongData(song);
+        for (let playlistToEdit of editedPlaylists) {
+            if (playlistToEdit.added) {
+                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $push: { songs: formatedSong } });
+            } else {
+                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $pull: { songs: { songId } } });
+            }
+        }
+    }
+
     async formatSongData(song: SongRecordType): Promise<SongInfoResponseDataType> {
         const album = await AlbumModel.findOne({ _id: song.albumId }).lean();
         const artists = await this._getSongArtists(song);
 
-        let coverImageUrl: string;
-        if (song.coverImageUrl) {
-            const storageCoverImageRef = ref(storage, song.coverImageUrl);
-            coverImageUrl = await getDownloadURL(storageCoverImageRef);
-        }
+        const playlists = await PlaylistModel.find({ songs: { $elemMatch: { songId: song._id } } }).lean();
+        const playlistIds = playlists.map(playlist => playlist._id);
 
-        let songUrl: string;
-        if (song.songUrl) {
-            const storageSongRef = ref(storage, song.songUrl);
-            songUrl = await getDownloadURL(storageSongRef);
-        }
         const songDto = new SongDto(song);
         return {
             ...songDto,
@@ -68,8 +82,9 @@ class SongService {
                 name: album.name
             },
             artists,
-            coverImageUrl,
-            songUrl
+            coverImageUrl: song.coverImageUrl,
+            songUrl: song.songUrl,
+            playlistIds
         };
     }
 

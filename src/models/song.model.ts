@@ -21,6 +21,12 @@ export type SongInfoResponseDataType = {
     coverImageUrl: string;
     duration: number;
     songUrl: string;
+    playlistIds: Array<string>;
+}
+
+export type EditedPlaylistType = {
+    playlistId: string;
+    added: boolean;
 }
 
 export const SongInfoResponseDataSchema = new Schema<SongInfoResponseDataType>({

@@ -7,7 +7,7 @@ class AlbumController {
             const image: Express.Multer.File = req.file;
             const albumData: CreateAlbumRequestDataType = req.body;
             await albumService.create(albumData, image);
-            return res.json(204);
+            return res.sendStatus(204);
         } catch (error) {
             next(error);
         }

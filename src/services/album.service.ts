@@ -3,10 +3,11 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import AlbumModel from '../models/album.model';
+import PlaylistModel from '../models/playlist.model';
 import SongModel, { SongInfoResponseDataType } from '../models/song.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
-import songService from '../services/song.service'
+import SongDto from '../dtos/song.dto';
 
 class AlbumService {
 
@@ -20,7 +21,16 @@ class AlbumService {
             throw new ForbiddenError(`Album ${albumData.name} already exists for artist with id ${albumData.artistId}`);
         }
         const albumId = randomstring.generate(16);
-        const coverImageUrl = `album-covers/${artist._id}/${albumId}`;
+        
+        const downloadUrl = `album-covers/${artist._id}/${albumId}`;
+        const storageRef = ref(storage, downloadUrl);
+        await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
+        let coverImageUrl = await getDownloadURL(storageRef);
+        const indexOfTokenQuery = coverImageUrl.indexOf('&token')
+        if (indexOfTokenQuery) {
+            coverImageUrl = coverImageUrl.slice(0, indexOfTokenQuery);
+        }
+
         await AlbumModel.create({
             _id: albumId,
             name: albumData.name,
@@ -30,9 +40,6 @@ class AlbumService {
             genres: albumData.genres,
             date: new Date()
         });
-
-        const storageRef = ref(storage, coverImageUrl);
-        await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
     }
 
     async getAlbumsByArtistId(artistId: string): Promise<Array<AlbumInfoResponseDataType>> {
@@ -48,17 +55,12 @@ class AlbumService {
         const albums = await AlbumModel.find({ artistId }).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
-            let coverImageUrl: string;
-            if (album.coverImageUrl) {
-                const storageCoverImageRef = ref(storage, `${album.coverImageUrl}`);
-                coverImageUrl = await getDownloadURL(storageCoverImageRef);
-            }
             albumDatas.push({
                 albumId: album._id,
                 artist: artistData,
                 name: album.name,
                 date: album.date,
-                coverImageUrl
+                coverImageUrl: album.coverImageUrl
             });
         }
         return albumDatas;
@@ -69,14 +71,8 @@ class AlbumService {
         if (!albumId) {
             throw new NotFoundError(`Album with id ${albumId} not found`);
         }
-        
-        let coverImageUrl: string;
-        if (album.coverImageUrl) {
-            const storageCoverImageRef = ref(storage, `${album.coverImageUrl}`);
-            coverImageUrl = await getDownloadURL(storageCoverImageRef);
-        }
 
-        const artist = await ArtistModel.findOne({ _id: album.artistId }).lean();
+        const artist = await ArtistModel.findOne({ _id: album.artistId }, { _id: 1, name: 1 });
         if (!artist) {
             throw new NotFoundError(`Artist with id ${album.artistId} not found`);
         }
@@ -88,8 +84,21 @@ class AlbumService {
         const albumSongs = await SongModel.find({ albumId: albumId }).lean();
         const albumSongUrls: Array<SongInfoResponseDataType> = [];
         for (const albumSong of albumSongs) {
-            const formatedSong = await songService.formatSongData(albumSong);
-            albumSongUrls.push(formatedSong);
+            const playlists = await PlaylistModel.find({ songs: { $elemMatch: { songId: albumSong._id } } }, { _id: 1 });
+            const playlistIds = playlists.map(playlist => playlist._id);
+
+            const songDto = new SongDto(albumSong);
+            albumSongUrls.push({
+                ...songDto,
+                album: {
+                    id: albumSong.albumId,
+                    name: album.name
+                },
+                artists: [artistData],
+                coverImageUrl: album.coverImageUrl,
+                songUrl: albumSong.songUrl,
+                playlistIds
+            });
         }
 
         return {
@@ -98,7 +107,7 @@ class AlbumService {
             name: album.name,
             date: album.date,
             songs: albumSongUrls,
-            coverImageUrl,
+            coverImageUrl: album.coverImageUrl,
             artist: artistData
         };
     }

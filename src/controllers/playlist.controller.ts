@@ -7,7 +7,7 @@ class PlaylistController {
             const image: Express.Multer.File = req.file;
             const playlistData: CreatePlaylistRequestDataType = req.body;
             await playlistService.create(playlistData, image);
-            return res.json(204);
+            return res.sendStatus(204);
         } catch (error) {
             next(error);
         }

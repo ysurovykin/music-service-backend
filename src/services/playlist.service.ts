@@ -3,8 +3,8 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { PlaylistFullResponseDataType, PlaylistInfoResponseDataType, CreatePlaylistRequestDataType, PlaylistTagEnum } from '../models/playlist.model';
 import ListenerModel from '../models/listener.model';
 import PlaylistModel from '../models/playlist.model';
-import SongModel, { SongInfoResponseDataType, SongRecordType } from '../models/song.model';
-import { ForbiddenError, NotFoundError } from '../errors/api-errors';
+import SongModel, { SongInfoResponseDataType } from '../models/song.model';
+import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import songService from './song.service'
 
@@ -16,7 +16,6 @@ class PlaylistService {
             throw new NotFoundError(`User with id ${playlistData.listenerId} not found`);
         }
         const playlistId = randomstring.generate(16);
-        const coverImageUrl = `playlist-covers/${listener._id}/${playlistId}`;
 
         const songs: Array<SongInfoResponseDataType> = [];
         if (playlistData.songIds?.length) {
@@ -26,6 +25,16 @@ class PlaylistService {
                 songs.push(formatedSong);
             }
         }
+
+        const downloadUrl = `playlist-covers/${listener._id}/${playlistId}`;
+        const storageRef = ref(storage, downloadUrl);
+        await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
+        let coverImageUrl = await getDownloadURL(storageRef);
+        const indexOfTokenQuery = coverImageUrl.indexOf('&token')
+        if (indexOfTokenQuery) {
+            coverImageUrl = coverImageUrl.slice(0, indexOfTokenQuery);
+        }
+
         await PlaylistModel.create({
             _id: playlistId,
             name: playlistData.name,
@@ -34,9 +43,6 @@ class PlaylistService {
             date: new Date(),
             songs
         });
-
-        const storageRef = ref(storage, coverImageUrl);
-        await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
     }
 
     async getPlaylistsByListenerId(listenerId: string): Promise<Array<PlaylistInfoResponseDataType>> {
@@ -47,17 +53,12 @@ class PlaylistService {
         const playlists = await PlaylistModel.find({ listenerId }).lean();
         const playlistDatas: Array<PlaylistInfoResponseDataType> = [];
         for (const playlist of playlists) {
-            let coverImageUrl: string;
-            if (playlist.coverImageUrl) {
-                const storageCoverImageRef = ref(storage, `${playlist.coverImageUrl}`);
-                coverImageUrl = await getDownloadURL(storageCoverImageRef);
-            }
             playlistDatas.push({
                 playlistId: playlist._id,
                 name: playlist.name,
                 date: playlist.date,
                 tag: playlist.tag as PlaylistTagEnum,
-                coverImageUrl
+                coverImageUrl: playlist.coverImageUrl
             });
         }
         return playlistDatas;
@@ -68,18 +69,13 @@ class PlaylistService {
         if (!playlistId) {
             throw new NotFoundError(`Playlist with id ${playlistId} not found`);
         }
-        let coverImageUrl: string;
-        if (playlist.coverImageUrl) {
-            const storageCoverImageRef = ref(storage, `${playlist.coverImageUrl}`);
-            coverImageUrl = await getDownloadURL(storageCoverImageRef);
-        }
 
         return {
             playlistId,
             name: playlist.name,
             date: playlist.date,
             songs: playlist.songs,
-            coverImageUrl,
+            coverImageUrl: playlist.coverImageUrl,
             tag: playlist.tag as PlaylistTagEnum
         };
     }
