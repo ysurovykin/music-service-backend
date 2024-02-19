@@ -52,7 +52,7 @@ class SongService {
         return songInfo;
     }
 
-    async editPlaylists(songId: string, editedPlaylists: Array<EditedPlaylistType>): Promise<void> {
+    async editPlaylists(songId: string, editedPlaylists: Array<EditedPlaylistType>): Promise<Array<string>> {
         const song = await SongModel.findOne({ _id: songId }).lean();
         if (!song) {
             throw new NotFoundError(`Song with id ${songId} not found`);
@@ -65,6 +65,10 @@ class SongService {
                 await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $pull: { songs: { songId } } });
             }
         }
+        const playlists = await PlaylistModel.find({ songs: { $elemMatch: { songId: song._id } } }).lean();
+        const playlistIds = playlists.map(playlist => playlist._id);
+
+        return playlistIds;
     }
 
     async formatSongData(song: SongRecordType): Promise<SongInfoResponseDataType> {
