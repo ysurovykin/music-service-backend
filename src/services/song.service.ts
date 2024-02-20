@@ -87,6 +87,7 @@ class SongService {
             },
             artists,
             coverImageUrl: song.coverImageUrl,
+            backgroundColor: song.backgroundColor,
             songUrl: song.songUrl,
             playlistIds
         };

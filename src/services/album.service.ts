@@ -8,6 +8,7 @@ import SongModel, { SongInfoResponseDataType } from '../models/song.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import SongDto from '../dtos/song.dto';
+import { getCoverDominantColor } from '../helpers/image-cover-color.helper';
 
 class AlbumService {
 
@@ -21,7 +22,7 @@ class AlbumService {
             throw new ForbiddenError(`Album ${albumData.name} already exists for artist with id ${albumData.artistId}`);
         }
         const albumId = randomstring.generate(16);
-        
+
         const downloadUrl = `album-covers/${artist._id}/${albumId}`;
         const storageRef = ref(storage, downloadUrl);
         await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
@@ -30,6 +31,7 @@ class AlbumService {
         if (indexOfTokenQuery) {
             coverImageUrl = coverImageUrl.slice(0, indexOfTokenQuery);
         }
+        const backgroundColor = await getCoverDominantColor(coverImageUrl);
 
         await AlbumModel.create({
             _id: albumId,
@@ -38,6 +40,7 @@ class AlbumService {
             coverImageUrl,
             languages: albumData.languages,
             genres: albumData.genres,
+            backgroundColor,
             date: new Date()
         });
     }
@@ -60,7 +63,8 @@ class AlbumService {
                 artist: artistData,
                 name: album.name,
                 date: album.date,
-                coverImageUrl: album.coverImageUrl
+                coverImageUrl: album.coverImageUrl,
+                backgroundColor: album.backgroundColor
             });
         }
         return albumDatas;
@@ -108,6 +112,7 @@ class AlbumService {
             date: album.date,
             songs: albumSongUrls,
             coverImageUrl: album.coverImageUrl,
+            backgroundColor: album.backgroundColor,
             artist: artistData
         };
     }

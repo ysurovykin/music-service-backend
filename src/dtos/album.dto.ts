@@ -4,6 +4,7 @@ export default class AlbumDto {
     coverImageUrl: string;
     likes: number;
     date: Date;
+    backgroundColor: string;
 
     constructor(model: any) {
         this.name = model.name;
@@ -11,5 +12,6 @@ export default class AlbumDto {
         this.coverImageUrl = model.coverImageUrl;
         this.likes = model.likes;
         this.date = model.date;
+        this.backgroundColor = model.backgroundColor;
     }
 }

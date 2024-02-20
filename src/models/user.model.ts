@@ -40,8 +40,7 @@ const UserSchema = model('User', new Schema({
     /**
      * @type {ProfileTypeEnum} profile type
      */
-    profileType: { type: String, required: true },
-    profileImageLink: { type: String, required: false },
+    profileType: { type: String, required: true }
 }));
 
 export default UserSchema;

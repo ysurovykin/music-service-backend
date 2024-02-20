@@ -39,7 +39,6 @@ class UserService {
                 month: birthDate.getMonth() + 1,
                 year: birthDate.getFullYear()
             },
-            // profileImageLink: `user-avatars/${userId}`,
             profileType: userData.profileType
         });
 
@@ -55,6 +54,7 @@ class UserService {
                 name: 'Liked Songs',
                 editable: false,
                 listenerId: userId,
+                backgroundColor: 'rgb(65, 177, 56)',
                 date: new Date()
             });
         } else if (userData.profileType === 'artist') {
@@ -64,9 +64,6 @@ class UserService {
                 date: new Date()
             });
         }
-
-        // const storageRef = ref(storage, `user-avatars/${userId}`);
-        // await uploadBytes(storageRef, file.buffer, {contentType: 'image/jpeg'});
 
         const userDto = new UserDto(newUser);
         const tokens = tokenService.generateTokens({ ...userDto });

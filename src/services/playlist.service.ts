@@ -7,6 +7,7 @@ import SongModel, { SongInfoResponseDataType } from '../models/song.model';
 import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import songService from './song.service'
+import { getCoverDominantColor } from '../helpers/image-cover-color.helper';
 
 class PlaylistService {
 
@@ -34,6 +35,7 @@ class PlaylistService {
         if (indexOfTokenQuery) {
             coverImageUrl = coverImageUrl.slice(0, indexOfTokenQuery);
         }
+        const backgroundColor = await getCoverDominantColor(coverImageUrl);
 
         await PlaylistModel.create({
             _id: playlistId,
@@ -41,6 +43,7 @@ class PlaylistService {
             listenerId: listener._id,
             coverImageUrl,
             date: new Date(),
+            backgroundColor,
             songs
         });
     }
@@ -58,7 +61,8 @@ class PlaylistService {
                 name: playlist.name,
                 date: playlist.date,
                 tag: playlist.tag as PlaylistTagEnum,
-                coverImageUrl: playlist.coverImageUrl
+                coverImageUrl: playlist.coverImageUrl,
+                backgroundColor: playlist.backgroundColor
             });
         }
         return playlistDatas;
@@ -76,6 +80,7 @@ class PlaylistService {
             date: playlist.date,
             songs: playlist.songs,
             coverImageUrl: playlist.coverImageUrl,
+            backgroundColor: playlist.backgroundColor,
             tag: playlist.tag as PlaylistTagEnum
         };
     }

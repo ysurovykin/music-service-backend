@@ -7,6 +7,7 @@ export default class PlaylistDto {
     coverImageUrl: string;
     tag: string;
     songs: Array<SongInfoResponseDataType>;
+    backgroundColor: string;
 
     constructor(model: any) {
         this.playlistId = model._id;
@@ -15,5 +16,6 @@ export default class PlaylistDto {
         this.coverImageUrl = model.coverImageUrl;
         this.tag = model.tag;
         this.songs = model.songs;
+        this.backgroundColor = model.backgroundColor;
     }
 }

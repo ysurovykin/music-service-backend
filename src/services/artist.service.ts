@@ -25,7 +25,8 @@ class ArtistService {
                 name: artistAlbum.name,
                 likes: artistAlbum.likes,
                 date: artistAlbum.date,
-                coverImageUrl: artistAlbum.coverImageUrl
+                coverImageUrl: artistAlbum.coverImageUrl,
+                backgroundColor: artistAlbum.backgroundColor
             });
         }
 

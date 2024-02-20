@@ -24,6 +24,7 @@ export type AlbumInfoResponseDataType = {
   name: string;
   date: Date;
   coverImageUrl: string;
+  backgroundColor: string;
   artist: ArtistShortDataType;
 }
 
@@ -41,6 +42,7 @@ const AlbumSchema = model('Album', new Schema({
   languages: { type: [String], required: true },
   genres: { type: [String], required: true },
   date: { type: Date, required: true },
+  backgroundColor: { type: String, required: false }
 }));
 
 export default AlbumSchema;

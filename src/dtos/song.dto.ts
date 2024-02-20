@@ -4,6 +4,7 @@ export default class SongDto {
     duration: number;
     plays: number;
     date: Date;
+    backgroundColor: string;
 
     constructor(model: any) {
         this.songId = model._id;
@@ -11,5 +12,6 @@ export default class SongDto {
         this.duration = model.duration;
         this.plays = model.plays;
         this.date = model.date;
+        this.backgroundColor = model.backgroundColor;
     }
 }

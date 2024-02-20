@@ -22,6 +22,7 @@ export type PlaylistInfoResponseDataType = {
   date: Date;
   coverImageUrl: string;
   tag: PlaylistTagEnum;
+  backgroundColor: string;
 }
 
 export type PlaylistFullResponseDataType = PlaylistInfoResponseDataType & {
@@ -39,7 +40,8 @@ const PlaylistSchema = model('Playlist', new Schema({
    * @type {PlaylistTagEnum} playlist tag
    */
   tag: { type: String, required: false },
-  songs: [SongInfoResponseDataSchema]
+  songs: [SongInfoResponseDataSchema],
+  backgroundColor: { type: String, required: true }
 }));
 
 export default PlaylistSchema;
