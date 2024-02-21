@@ -1,5 +1,15 @@
-import { getPaletteFromURL } from "color-thief-node";
-import colorsea from "colorsea";
+import { getPaletteFromURL, getColorFromURL } from "color-thief-node";
+
+const whiteContrastRatio = 3;
+const blackContrastRatio = 4;
+
+type FormatedPallete = {
+  color: Array<number>,
+  whiteRatio: number,
+  blackRatio: number,
+  isWhiteContrast: boolean,
+  isBlackContrast: boolean
+}
 
 function luminance(r: number, g: number, b: number): number {
   const rFormated = r / 255;
@@ -21,38 +31,84 @@ function contrastRatio(color1: Array<number>, color2: Array<number>): number {
   return (maxL + 0.05) / (minL + 0.05);
 }
 
-function getRequiredRatio() {
-  return 4;
-}
-
-function formatPallete(color: Array<number>): {color: Array<number>, ratio: number, isContrast: boolean} {
-  const textColor = [255, 255, 255];
-  const ratio = contrastRatio(color, textColor);
+function formatPallete(color: Array<number>): FormatedPallete {
+  const whiteTextColor = [255, 255, 255];
+  const blackTextColor = [0, 0, 0];
+  const whiteRatio = contrastRatio(color, whiteTextColor);
+  const blackRatio = contrastRatio(color, blackTextColor);
+  const isWhiteContrast = whiteRatio >= whiteContrastRatio;
+  const isBlackContrast = blackRatio >= blackContrastRatio;
   return {
     color,
-    ratio,
-    isContrast: ratio >= getRequiredRatio()
+    whiteRatio,
+    blackRatio,
+    isWhiteContrast,
+    isBlackContrast,
   };
 }
 
-function getContrastColor(pallete: Array<{color: Array<number>, ratio: number, isContrast: boolean}>) {
-  const contrastPallete = pallete.filter(currentPallete => currentPallete.isContrast);
-  if (contrastPallete.length) {
-    contrastPallete.sort((color1, color2) => color1.ratio - color2.ratio);
-    return contrastPallete[0].color;
-  } else {
-    pallete.sort((color1, color2) => color2.ratio - color1.ratio);
-    let finalPallete = pallete[0].color;
-    while (contrastRatio(finalPallete, [255, 255, 255]) < getRequiredRatio()) {
-      finalPallete = colorsea.rgb(finalPallete[0], finalPallete[1], finalPallete[2]).darken().rgb();
+function averageDifference(color: Array<number>) {
+  let totalDifference = Math.abs(color[0] - color[1]) + Math.abs(color[1] - color[2]) + Math.abs(color[2] - color[0]);
+  return totalDifference / 3;
+}
+
+function getContrastPallete(pallete: Array<FormatedPallete>) {
+  const sortedByContrastPalleteDesc = pallete
+    .sort((color1, color2) => Math.abs(color1.blackRatio - color1.whiteRatio) - Math.abs(color2.blackRatio - color2.whiteRatio));
+  for (const pallete of sortedByContrastPalleteDesc) {
+    if (averageDifference(pallete.color) > 40) {
+      return pallete;
     }
-    return finalPallete;
   }
+  return sortedByContrastPalleteDesc[0];
+}
+
+function getRGBA(pallete: FormatedPallete, isBlackContrast: boolean, maximumAlpha: number) {
+  if (isBlackContrast) {
+    const whiteContrastRatioDiff = pallete.whiteRatio / whiteContrastRatio;
+    const blackContrastRatioDiff = blackContrastRatio / pallete.blackRatio;
+    const alpha = Math.min(1 - whiteContrastRatioDiff, blackContrastRatioDiff - 1, maximumAlpha);
+    return `rgba(0, 0, 0, ${alpha})`;
+  } else {
+    const blackContrastRatioDiff = pallete.blackRatio / blackContrastRatio;
+    const whiteContrastRatioDiff = whiteContrastRatio / pallete.whiteRatio;
+    const alpha = Math.min(1 - blackContrastRatioDiff, whiteContrastRatioDiff - 1, maximumAlpha);
+    return `rgba(255, 255, 255, ${alpha})`;
+  }
+}
+
+function getColorShadow(pallete: FormatedPallete): string {
+  if (pallete.isBlackContrast && pallete.isWhiteContrast) {
+    return `rgba(0, 0, 0, 0)`;
+  } else if (pallete.isBlackContrast && !pallete.isWhiteContrast) {
+    return getRGBA(pallete, true, 0.6);
+  } else if (!pallete.isBlackContrast && pallete.isWhiteContrast) {
+    return getRGBA(pallete, false, 0.6);
+  } else {
+    if (pallete.blackRatio > pallete.whiteRatio) {
+      return getRGBA(pallete, true, 0.6);
+    } else if (pallete.blackRatio < pallete.whiteRatio) {
+      return getRGBA(pallete, false, 0.6);
+    } else {
+      return `rgba(0, 0, 0, 0)`;
+    }
+  }
+}
+
+export async function getDominantColorWithShadow(coverImageUrl: string) {
+  const colorPalette = await getPaletteFromURL(coverImageUrl);
+  const formatedPallete = colorPalette.map(pallete => formatPallete(pallete));
+  const pallete = getContrastPallete(formatedPallete);
+  const backgroundShadow = getColorShadow(pallete);
+  return {
+    backgroundColor: `rgb(${pallete.color.join(', ')})`,
+    backgroundShadow: backgroundShadow
+  };
 }
 
 export async function getCoverDominantColor(coverImageUrl: string) {
   const colorPalette = await getPaletteFromURL(coverImageUrl);
   const formatedPallete = colorPalette.map(pallete => formatPallete(pallete));
-  const color = getContrastColor(formatedPallete);
-  return `rgb(${color.join(', ')})`;
+  const pallete = getContrastPallete(formatedPallete);
+  return `rgb(${pallete.color.join(', ')})`;
 }

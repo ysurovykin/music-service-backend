@@ -8,7 +8,7 @@ import SongModel, { SongInfoResponseDataType } from '../models/song.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import SongDto from '../dtos/song.dto';
-import { getCoverDominantColor } from '../helpers/image-cover-color.helper';
+import { getDominantColorWithShadow } from '../helpers/image-cover-color.helper';
 
 class AlbumService {
 
@@ -31,7 +31,7 @@ class AlbumService {
         if (indexOfTokenQuery) {
             coverImageUrl = coverImageUrl.slice(0, indexOfTokenQuery);
         }
-        const backgroundColor = await getCoverDominantColor(coverImageUrl);
+        const backgroundColor = await getDominantColorWithShadow(coverImageUrl);
 
         await AlbumModel.create({
             _id: albumId,
@@ -40,7 +40,8 @@ class AlbumService {
             coverImageUrl,
             languages: albumData.languages,
             genres: albumData.genres,
-            backgroundColor,
+            backgroundColor: backgroundColor.backgroundColor,
+            backgroundShadow: backgroundColor.backgroundShadow,
             date: new Date()
         });
     }
@@ -64,7 +65,8 @@ class AlbumService {
                 name: album.name,
                 date: album.date,
                 coverImageUrl: album.coverImageUrl,
-                backgroundColor: album.backgroundColor
+                backgroundColor: album.backgroundColor,
+                backgroundShadow: album.backgroundShadow
             });
         }
         return albumDatas;
@@ -99,20 +101,22 @@ class AlbumService {
                     name: album.name
                 },
                 artists: [artistData],
-                coverImageUrl: album.coverImageUrl,
+                coverImageUrl: albumSong.coverImageUrl,
                 songUrl: albumSong.songUrl,
+                backgroundColor: albumSong.backgroundColor,
+                backgroundShadow: albumSong.backgroundShadow,
                 playlistIds
             });
         }
 
         return {
             albumId,
-            likes: album.likes,
             name: album.name,
             date: album.date,
             songs: albumSongUrls,
             coverImageUrl: album.coverImageUrl,
             backgroundColor: album.backgroundColor,
+            backgroundShadow: album.backgroundShadow,
             artist: artistData
         };
     }

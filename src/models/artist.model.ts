@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import { AlbumWithoutArtistType } from './album.model';
 
 export type ArtistSocialLinks = {
   name: string;
@@ -13,15 +14,6 @@ export type CreateArtistRequestDataType = {
   followers: number;
   genres: Array<string>;
 };
-
-export type ArtistAlbumDataType = {
-  albumId: string;
-  name: string;
-  likes: number;
-  date: Date;
-  coverImageUrl: string;
-  backgroundColor: string;
-}
 
 export type ArtistShortDataType = {
   name: string;
@@ -43,7 +35,7 @@ export type ArtistInfoResponseDataType = {
 }
 
 export type ArtistFullResponseDataType = ArtistInfoResponseDataType & {
-  albums: Array<ArtistAlbumDataType>;
+  albums: Array<AlbumWithoutArtistType>;
 }
 
 const SocialLinksSchema = new Schema({

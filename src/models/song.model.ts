@@ -20,6 +20,7 @@ export type SongInfoResponseDataType = {
     date: Date;
     coverImageUrl: string;
     backgroundColor: string;
+    backgroundShadow: string;
     duration: number;
     songUrl: string;
     playlistIds: Array<string>;
@@ -39,6 +40,7 @@ export const SongInfoResponseDataSchema = new Schema<SongInfoResponseDataType>({
     date: { type: Date, required: true },
     coverImageUrl: { type: String, required: true },
     backgroundColor: { type: String, required: true },
+    backgroundShadow: { type: String, required: true },
     duration: { type: Number, required: true },
     songUrl: { type: String, required: true },
 });
@@ -51,6 +53,7 @@ export type SongRecordType = {
     albumId: string;
     coverImageUrl: string;
     backgroundColor: string;
+    backgroundShadow: string;
     plays: number;
     language: string;
     genres: Array<string>;
@@ -72,7 +75,8 @@ const SongSchema = model('Song', new Schema({
     songUrl: { type: String, required: true },
     duration: { type: Number, required: true },
     date: { type: Date, required: true },
-    backgroundColor: { type: String, required: true }
+    backgroundColor: { type: String, required: true },
+    backgroundShadow: { type: String, required: true }
 }));
 
 export default SongSchema;

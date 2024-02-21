@@ -19,17 +19,20 @@ export const AlbumShortDataSchema = new Schema<AlbumShortDataType>({
   id: { type: String, required: true },
 });
 
-export type AlbumInfoResponseDataType = {
+export type AlbumWithoutArtistType = {
   albumId: string;
   name: string;
   date: Date;
   coverImageUrl: string;
   backgroundColor: string;
+  backgroundShadow: string;
+}
+
+export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
   artist: ArtistShortDataType;
 }
 
 export type AlbumFullResponseDataType = AlbumInfoResponseDataType & {
-  likes: number;
   songs: Array<SongInfoResponseDataType>;
 }
 
@@ -42,7 +45,8 @@ const AlbumSchema = model('Album', new Schema({
   languages: { type: [String], required: true },
   genres: { type: [String], required: true },
   date: { type: Date, required: true },
-  backgroundColor: { type: String, required: false }
+  backgroundColor: { type: String, required: true },
+  backgroundShadow: { type: String, required: true }
 }));
 
 export default AlbumSchema;
