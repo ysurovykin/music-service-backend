@@ -5,7 +5,7 @@ export default class AlbumDto {
     likes: number;
     date: Date;
     backgroundColor: string;
-    backgroundShadow: string;
+    lyricsBackgroundShadow: string;
 
     constructor(model: any) {
         this.name = model.name;
@@ -14,6 +14,6 @@ export default class AlbumDto {
         this.likes = model.likes;
         this.date = model.date;
         this.backgroundColor = model.backgroundColor;
-        this.backgroundShadow = model.backgroundShadow;
+        this.lyricsBackgroundShadow = model.lyricsBackgroundShadow;
     }
 }

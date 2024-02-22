@@ -25,7 +25,7 @@ export type AlbumWithoutArtistType = {
   date: Date;
   coverImageUrl: string;
   backgroundColor: string;
-  backgroundShadow: string;
+  lyricsBackgroundShadow: string;
 }
 
 export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
@@ -46,7 +46,7 @@ const AlbumSchema = model('Album', new Schema({
   genres: { type: [String], required: true },
   date: { type: Date, required: true },
   backgroundColor: { type: String, required: true },
-  backgroundShadow: { type: String, required: true }
+  lyricsBackgroundShadow: { type: String, required: true }
 }));
 
 export default AlbumSchema;

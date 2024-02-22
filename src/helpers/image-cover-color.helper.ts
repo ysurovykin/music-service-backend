@@ -1,4 +1,4 @@
-import { getPaletteFromURL, getColorFromURL } from "color-thief-node";
+import { getPaletteFromURL } from "color-thief-node";
 
 const whiteContrastRatio = 3;
 const blackContrastRatio = 4;
@@ -64,14 +64,12 @@ function getContrastPallete(pallete: Array<FormatedPallete>) {
 }
 
 function getRGBA(pallete: FormatedPallete, isBlackContrast: boolean, maximumAlpha: number) {
+  const blackContrastRatioDiff = pallete.blackRatio / blackContrastRatio;
+  const whiteContrastRatioDiff = pallete.whiteRatio / whiteContrastRatio;
   if (isBlackContrast) {
-    const whiteContrastRatioDiff = pallete.whiteRatio / whiteContrastRatio;
-    const blackContrastRatioDiff = blackContrastRatio / pallete.blackRatio;
     const alpha = Math.min(1 - whiteContrastRatioDiff, blackContrastRatioDiff - 1, maximumAlpha);
     return `rgba(0, 0, 0, ${alpha})`;
   } else {
-    const blackContrastRatioDiff = pallete.blackRatio / blackContrastRatio;
-    const whiteContrastRatioDiff = whiteContrastRatio / pallete.whiteRatio;
     const alpha = Math.min(1 - blackContrastRatioDiff, whiteContrastRatioDiff - 1, maximumAlpha);
     return `rgba(255, 255, 255, ${alpha})`;
   }
@@ -99,10 +97,10 @@ export async function getDominantColorWithShadow(coverImageUrl: string) {
   const colorPalette = await getPaletteFromURL(coverImageUrl);
   const formatedPallete = colorPalette.map(pallete => formatPallete(pallete));
   const pallete = getContrastPallete(formatedPallete);
-  const backgroundShadow = getColorShadow(pallete);
+  const lyricsBackgroundShadow = getColorShadow(pallete);
   return {
     backgroundColor: `rgb(${pallete.color.join(', ')})`,
-    backgroundShadow: backgroundShadow
+    lyricsBackgroundShadow: lyricsBackgroundShadow
   };
 }
 

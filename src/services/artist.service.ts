@@ -26,7 +26,7 @@ class ArtistService {
                 date: artistAlbum.date,
                 coverImageUrl: artistAlbum.coverImageUrl,
                 backgroundColor: artistAlbum.backgroundColor,
-                backgroundShadow: artistAlbum.backgroundShadow
+                lyricsBackgroundShadow: artistAlbum.lyricsBackgroundShadow
             });
         }
 

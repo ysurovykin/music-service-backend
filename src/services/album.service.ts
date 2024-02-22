@@ -41,7 +41,7 @@ class AlbumService {
             languages: albumData.languages,
             genres: albumData.genres,
             backgroundColor: backgroundColor.backgroundColor,
-            backgroundShadow: backgroundColor.backgroundShadow,
+            lyricsBackgroundShadow: backgroundColor.lyricsBackgroundShadow,
             date: new Date()
         });
     }
@@ -66,7 +66,7 @@ class AlbumService {
                 date: album.date,
                 coverImageUrl: album.coverImageUrl,
                 backgroundColor: album.backgroundColor,
-                backgroundShadow: album.backgroundShadow
+                lyricsBackgroundShadow: album.lyricsBackgroundShadow
             });
         }
         return albumDatas;
@@ -104,7 +104,7 @@ class AlbumService {
                 coverImageUrl: albumSong.coverImageUrl,
                 songUrl: albumSong.songUrl,
                 backgroundColor: albumSong.backgroundColor,
-                backgroundShadow: albumSong.backgroundShadow,
+                lyricsBackgroundShadow: albumSong.lyricsBackgroundShadow,
                 playlistIds
             });
         }
@@ -116,7 +116,7 @@ class AlbumService {
             songs: albumSongUrls,
             coverImageUrl: album.coverImageUrl,
             backgroundColor: album.backgroundColor,
-            backgroundShadow: album.backgroundShadow,
+            lyricsBackgroundShadow: album.lyricsBackgroundShadow,
             artist: artistData
         };
     }
