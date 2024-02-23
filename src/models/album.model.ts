@@ -14,11 +14,6 @@ export type AlbumShortDataType = {
   id: string;
 }
 
-export const AlbumShortDataSchema = new Schema<AlbumShortDataType>({
-  name: { type: String, required: true },
-  id: { type: String, required: true },
-});
-
 export type AlbumWithoutArtistType = {
   albumId: string;
   name: string;
@@ -30,10 +25,6 @@ export type AlbumWithoutArtistType = {
 
 export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
   artist: ArtistShortDataType;
-}
-
-export type AlbumFullResponseDataType = AlbumInfoResponseDataType & {
-  songs: Array<SongInfoResponseDataType>;
 }
 
 const AlbumSchema = model('Album', new Schema({

@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
-import { AlbumShortDataSchema, AlbumShortDataType } from './album.model';
-import { ArtistShortDataSchema, ArtistShortDataType } from './artist.model';
+import { AlbumShortDataType } from './album.model';
+import { ArtistShortDataType } from './artist.model';
 
 export type CreateSongRequestDataType = {
     name: string;
@@ -31,20 +31,6 @@ export type EditedPlaylistType = {
     added: boolean;
 }
 
-export const SongInfoResponseDataSchema = new Schema<SongInfoResponseDataType>({
-    songId: { type: String, required: true },
-    name: { type: String, required: true },
-    artists: [ArtistShortDataSchema],
-    album: AlbumShortDataSchema,
-    plays: { type: Number, required: true },
-    date: { type: Date, required: true },
-    coverImageUrl: { type: String, required: true },
-    backgroundColor: { type: String, required: true },
-    lyricsBackgroundShadow: { type: String, required: true },
-    duration: { type: Number, required: true },
-    songUrl: { type: String, required: true },
-});
-
 export type SongRecordType = {
     _id: string;
     name: string;
@@ -60,6 +46,17 @@ export type SongRecordType = {
     songUrl: string;
     duration: number;
     date: Date;
+}
+
+export type GetSongsResponseDataType = {
+    songs: Array<SongInfoResponseDataType>;
+    isMoreSongsForLoading: Boolean;
+}
+
+export type GetSongsOptionsType = {
+    albumId?: string;
+    artistId?: string;
+    playlistId?: string;
 }
 
 const SongSchema = model('Song', new Schema({

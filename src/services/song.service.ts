@@ -1,7 +1,7 @@
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import mm from 'music-metadata';
 import { storage } from '../../firebase.config';
-import SongModel, { CreateSongRequestDataType, EditedPlaylistType, SongInfoResponseDataType, SongRecordType } from '../models/song.model';
+import SongModel, { CreateSongRequestDataType, EditedPlaylistType, GetSongsOptionsType, GetSongsResponseDataType, SongInfoResponseDataType, SongRecordType } from '../models/song.model';
 import AlbumModel from '../models/album.model';
 import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
@@ -43,39 +43,58 @@ class SongService {
         });
     }
 
-    async getSongById(songId: string): Promise<SongInfoResponseDataType> {
+    async getSongById(listenerId: string, songId: string): Promise<SongInfoResponseDataType> {
         const song = await SongModel.findOne({ _id: songId }).lean();
         if (!song) {
             throw new NotFoundError(`Song with id ${songId} not found`);
         }
-        const songInfo = await this.formatSongData(song);
+        const songInfo = await this.formatSongData(listenerId, song);
         return songInfo;
     }
 
-    async editPlaylists(songId: string, editedPlaylists: Array<EditedPlaylistType>): Promise<Array<string>> {
-        const song = await SongModel.findOne({ _id: songId }).lean();
-        if (!song) {
-            throw new NotFoundError(`Song with id ${songId} not found`);
+    async getSongs(listenerId: string, options: GetSongsOptionsType, offset: number = 0,
+        limit: number = 10): Promise<GetSongsResponseDataType> {
+        let songs: Array<SongRecordType> = [];
+        options = typeof options === 'object' ? options : JSON.parse(options);
+        const songsToSkip = limit * offset;
+        if (options.playlistId) {
+            const playlistSongs = await PlaylistModel.findOne({ _id: options.playlistId }, { songIds: 1 }).lean();
+            const songIds = playlistSongs.songIds.slice(songsToSkip, limit + (songsToSkip));
+            songs = await SongModel.find({ _id: { $in: songIds } }).lean();
+        } else {
+            songs = await SongModel.find({ ...options }).skip(songsToSkip).limit(limit).lean();
         }
-        const formatedSong = await this.formatSongData(song);
+        const songsResponse: Array<SongInfoResponseDataType> = [];
+        for (const song of songs) {
+            const songFormated: SongInfoResponseDataType = await this.formatSongData(listenerId, song);
+            songsResponse.push(songFormated);
+        }
+
+        return {
+            songs: songsResponse,
+            isMoreSongsForLoading: songs.length === +limit
+        };
+    }
+
+    async editPlaylists(listenerId: string, songId: string, editedPlaylists: Array<EditedPlaylistType>): Promise<Array<string>> {
         for (let playlistToEdit of editedPlaylists) {
             if (playlistToEdit.added) {
-                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $push: { songs: formatedSong } });
+                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $push: { songIds: songId } });
             } else {
-                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $pull: { songs: { songId } } });
+                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $pull: { songIds: songId } });
             }
         }
-        const playlists = await PlaylistModel.find({ songs: { $elemMatch: { songId: song._id } } }).lean();
+        const playlists = await PlaylistModel.find({ listenerId, songIds: { $elemMatch: { $eq: songId } } }).lean();
         const playlistIds = playlists.map(playlist => playlist._id);
 
         return playlistIds;
     }
 
-    async formatSongData(song: SongRecordType): Promise<SongInfoResponseDataType> {
+    async formatSongData(listenerId: string, song: SongRecordType): Promise<SongInfoResponseDataType> {
         const album = await AlbumModel.findOne({ _id: song.albumId }).lean();
         const artists = await this._getSongArtists(song);
 
-        const playlists = await PlaylistModel.find({ songs: { $elemMatch: { songId: song._id } } }).lean();
+        const playlists = await PlaylistModel.find({ listenerId, songIds: { $elemMatch: { $eq: song._id } } }).lean();
         const playlistIds = playlists.map(playlist => playlist._id);
 
         const songDto = new SongDto(song);

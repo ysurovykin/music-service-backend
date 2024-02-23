@@ -1,6 +1,6 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { PlaylistFullResponseDataType, PlaylistInfoResponseDataType, CreatePlaylistRequestDataType, PlaylistTagEnum } from '../models/playlist.model';
+import { PlaylistInfoResponseDataType, CreatePlaylistRequestDataType, PlaylistTagEnum } from '../models/playlist.model';
 import ListenerModel from '../models/listener.model';
 import PlaylistModel from '../models/playlist.model';
 import SongModel, { SongInfoResponseDataType } from '../models/song.model';
@@ -22,7 +22,7 @@ class PlaylistService {
         if (playlistData.songIds?.length) {
             const songsToAdd = await SongModel.find({ _id: { $in: playlistData.songIds } }).lean();
             for (const song of songsToAdd) {
-                const formatedSong = await songService.formatSongData(song);
+                const formatedSong = await songService.formatSongData(listener._id, song);
                 songs.push(formatedSong);
             }
         }
@@ -68,7 +68,7 @@ class PlaylistService {
         return playlistDatas;
     }
 
-    async getPlaylistById(playlistId: string): Promise<PlaylistFullResponseDataType> {
+    async getPlaylistById(playlistId: string): Promise<PlaylistInfoResponseDataType> {
         const playlist = await PlaylistModel.findOne({ _id: playlistId }).lean();
         if (!playlistId) {
             throw new NotFoundError(`Playlist with id ${playlistId} not found`);
@@ -78,7 +78,6 @@ class PlaylistService {
             playlistId,
             name: playlist.name,
             date: playlist.date,
-            songs: playlist.songs,
             coverImageUrl: playlist.coverImageUrl,
             backgroundColor: playlist.backgroundColor,
             tag: playlist.tag as PlaylistTagEnum

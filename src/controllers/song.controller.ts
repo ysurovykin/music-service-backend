@@ -1,4 +1,4 @@
-import { CreateSongRequestDataType, SongInfoResponseDataType } from '../models/song.model';
+import { CreateSongRequestDataType, GetSongsResponseDataType, SongInfoResponseDataType } from '../models/song.model';
 import songService from '../services/song.service'
 
 class SongController {
@@ -16,8 +16,19 @@ class SongController {
     async getSongById(req, res, next) {
         try {
             const { songId } = req.params;
-            const song: SongInfoResponseDataType = await songService.getSongById(songId);
+            const { listenerId } = req.query;
+            const song: SongInfoResponseDataType = await songService.getSongById(listenerId, songId);
             return res.json(song);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getSongs(req, res, next) {
+        try {
+            const { listenerId, options, offset, limit } = req.query;
+            const songs: GetSongsResponseDataType = await songService.getSongs(listenerId, options, offset, limit);
+            return res.json(songs);
         } catch (error) {
             next(error);
         }
@@ -26,7 +37,8 @@ class SongController {
     async editPlaylists(req, res, next) {
         try {
             const { songId, editedPlaylists } = req.body;
-            const playlistIds: Array<string> = await songService.editPlaylists(songId, editedPlaylists);
+            const { listenerId } = req.query;
+            const playlistIds: Array<string> = await songService.editPlaylists(listenerId, songId, editedPlaylists);
             return res.json(playlistIds);
         } catch (error) {
             next(error);

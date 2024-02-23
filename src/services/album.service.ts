@@ -1,6 +1,6 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType } from '../models/album.model';
+import { AlbumInfoResponseDataType, CreateAlbumRequestDataType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import AlbumModel from '../models/album.model';
 import PlaylistModel from '../models/playlist.model';
@@ -72,7 +72,7 @@ class AlbumService {
         return albumDatas;
     }
 
-    async getAlbumById(albumId: string): Promise<AlbumFullResponseDataType> {
+    async getAlbumById(albumId: string): Promise<AlbumInfoResponseDataType> {
         const album = await AlbumModel.findOne({ _id: albumId }).lean();
         if (!albumId) {
             throw new NotFoundError(`Album with id ${albumId} not found`);
@@ -87,33 +87,10 @@ class AlbumService {
             id: artist._id
         };
 
-        const albumSongs = await SongModel.find({ albumId: albumId }).lean();
-        const albumSongUrls: Array<SongInfoResponseDataType> = [];
-        for (const albumSong of albumSongs) {
-            const playlists = await PlaylistModel.find({ songs: { $elemMatch: { songId: albumSong._id } } }, { _id: 1 });
-            const playlistIds = playlists.map(playlist => playlist._id);
-
-            const songDto = new SongDto(albumSong);
-            albumSongUrls.push({
-                ...songDto,
-                album: {
-                    id: albumSong.albumId,
-                    name: album.name
-                },
-                artists: [artistData],
-                coverImageUrl: albumSong.coverImageUrl,
-                songUrl: albumSong.songUrl,
-                backgroundColor: albumSong.backgroundColor,
-                lyricsBackgroundShadow: albumSong.lyricsBackgroundShadow,
-                playlistIds
-            });
-        }
-
         return {
             albumId,
             name: album.name,
             date: album.date,
-            songs: albumSongUrls,
             coverImageUrl: album.coverImageUrl,
             backgroundColor: album.backgroundColor,
             lyricsBackgroundShadow: album.lyricsBackgroundShadow,
