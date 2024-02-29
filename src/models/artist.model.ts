@@ -27,28 +27,35 @@ export type ArtistInfoResponseDataType = {
   description: string;
   socialLinks: Array<ArtistSocialLinks>;
   followers: number;
+  songsCount: number;
 }
 
 export type ArtistFullResponseDataType = ArtistInfoResponseDataType & {
   albums: Array<AlbumWithoutArtistType>;
 }
 
-const SocialLinksSchema = new Schema({
-  name: { type: String, required: true },
-  link: { type: String, required: true }
-});
-
 const ArtistSchema = model('Artist', new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   description: { type: String, required: false },
-  socialLinks: [SocialLinksSchema],
-  genres: [String],
+  /**
+   * type: Array<ArtistSocialLinks>
+   */
+  socialLinks: { type: Object, required: false },
+  /**
+   * Object structure: { [key: string]: number }
+   */
+  languages: { type: Object, required: false },
+  /**
+   * Object structure: { [key: string]: number }
+   */
+  genres: { type: Object, required: false },
   followers: { type: Number, required: true, default: 0 },
   date: { type: Date, required: true },
   coverImageUrl: { type: String, required: false },
   profileImageUrl: { type: String, required: false },
-  backgroundColor: { type: String, required: false }
+  backgroundColor: { type: String, required: false },
+  songsCount: { type: Number, required: true, default: 0 }
 }));
 
 export default ArtistSchema;

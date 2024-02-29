@@ -21,6 +21,33 @@ class SongService {
         const duration = songMetadata.format.duration;
         const songId = randomstring.generate(16);
 
+        const artist = await ArtistModel.findOne({ _id: album.artistId }, { genres: 1, languages: 1 }).lean();
+        const songGenres = typeof songData.genres === 'string' ? JSON.parse(songData.genres) : songData.genres;
+        const albumGenres = album.genres || {};
+        const artistGenres = artist.genres || {};
+        if (songGenres.length) {
+            for (const genreId of songGenres) {
+                albumGenres[genreId] = ++albumGenres[genreId] || 1;
+                artistGenres[genreId] = ++artistGenres[genreId] || 1;
+            }
+        }
+        const albumLanguages = album.languages || {};
+        const artistLanguages = artist.languages || {};
+        if (songData.language) {
+            albumLanguages[songData.language] = ++albumLanguages[songData.language] || 1;
+            artistLanguages[songData.language] = ++artistLanguages[songData.language] || 1;
+        }
+        const songIds = album.songIds || [];
+        songIds.length = Math.max(songIds.length, songData.indexInAlbum);
+        songIds[songData.indexInAlbum - 1] = songId;
+        await AlbumModel.updateOne({ _id: album._id }, {
+            $set: { genres: albumGenres, languages: albumLanguages, songIds }
+        });
+        await ArtistModel.updateOne({ _id: artist._id }, {
+            $set: { genres: artistGenres, languages: artistLanguages },
+            $inc: { songsCount: 1 }
+        });
+
         const downloadUrl = `songs/${songData.artistId}/${album._id}/${songId}`;
         const storageRef = ref(storage, downloadUrl);
         await uploadBytes(storageRef, file.buffer, { contentType: 'audio/mpeg' });
@@ -29,14 +56,22 @@ class SongService {
         if (indexOfTokenQuery) {
             songUrl = songUrl.slice(0, indexOfTokenQuery);
         }
-
+        let coArtistIds = []
+        if (songData.coArtistIds) {
+            coArtistIds = typeof songData.coArtistIds === 'string' ? JSON.parse(songData.coArtistIds) : songData.coArtistIds;
+        }
         await SongModel.create({
             ...songData,
             _id: songId,
+            name: songData.name,
             coverImageUrl: album.coverImageUrl,
             artistId: songData.artistId,
-            coArtistIds: songData.coArtistIds,
+            coArtistIds,
             albumId: album._id,
+            genres: songGenres,
+            language: songData.language,
+            backgroundColor: album.backgroundColor,
+            lyricsBackgroundShadow: album.lyricsBackgroundShadow,
             songUrl,
             duration,
             date: new Date()

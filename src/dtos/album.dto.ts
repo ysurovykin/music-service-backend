@@ -1,4 +1,5 @@
 export default class AlbumDto {
+    albumId: string;
     name: string;
     artistId: string;
     coverImageUrl: string;
@@ -6,8 +7,10 @@ export default class AlbumDto {
     date: Date;
     backgroundColor: string;
     lyricsBackgroundShadow: string;
+    songsCount: number;
 
     constructor(model: any) {
+        this.albumId = model._id;
         this.name = model.name;
         this.artistId = model.artistId;
         this.coverImageUrl = model.coverImageUrl;
@@ -15,5 +18,6 @@ export default class AlbumDto {
         this.date = model.date;
         this.backgroundColor = model.backgroundColor;
         this.lyricsBackgroundShadow = model.lyricsBackgroundShadow;
+        this.songsCount = model.songsCount;
     }
 }

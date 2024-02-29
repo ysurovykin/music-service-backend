@@ -5,8 +5,6 @@ import { SongInfoResponseDataType } from './song.model';
 export type CreateAlbumRequestDataType = {
   name: string;
   artistId: string;
-  languages: string;
-  genres: Array<string>;
 };
 
 export type AlbumShortDataType = {
@@ -25,6 +23,7 @@ export type AlbumWithoutArtistType = {
 
 export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
   artist: ArtistShortDataType;
+  songsCount: number;
 }
 
 const AlbumSchema = model('Album', new Schema({
@@ -33,11 +32,19 @@ const AlbumSchema = model('Album', new Schema({
   artistId: { type: String, required: true },
   coverImageUrl: { type: String, required: true },
   likes: { type: Number, default: 0, required: true },
-  languages: { type: [String], required: true },
-  genres: { type: [String], required: true },
+  /**
+   * Object structure: { [key: string]: number }
+   */
+  languages: { type: Object, required: false },
+  /**
+   * Object structure: { [key: string]: number }
+   */
+  genres: { type: Object, required: false },
   date: { type: Date, required: true },
   backgroundColor: { type: String, required: true },
-  lyricsBackgroundShadow: { type: String, required: true }
+  lyricsBackgroundShadow: { type: String, required: true },
+  songsCount: { type: Number, required: true, default: 0 },
+  songIds: [String]
 }));
 
 export default AlbumSchema;

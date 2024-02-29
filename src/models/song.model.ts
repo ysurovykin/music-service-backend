@@ -9,6 +9,7 @@ export type CreateSongRequestDataType = {
     albumId: string;
     language: string;
     genres: Array<string>;
+    indexInAlbum: number;
 };
 
 export type SongInfoResponseDataType = {

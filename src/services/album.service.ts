@@ -9,6 +9,7 @@ import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import SongDto from '../dtos/song.dto';
 import { getDominantColorWithShadow } from '../helpers/image-cover-color.helper';
+import AlbumDto from '../dtos/album.dto';
 
 class AlbumService {
 
@@ -38,8 +39,8 @@ class AlbumService {
             name: albumData.name,
             artistId: artist._id,
             coverImageUrl,
-            languages: albumData.languages,
-            genres: albumData.genres,
+            languages: [],
+            genres: [],
             backgroundColor: backgroundColor.backgroundColor,
             lyricsBackgroundShadow: backgroundColor.lyricsBackgroundShadow,
             date: new Date()
@@ -59,14 +60,10 @@ class AlbumService {
         const albums = await AlbumModel.find({ artistId }).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
+            const albumDto = new AlbumDto(album);
             albumDatas.push({
-                albumId: album._id,
+                ...albumDto,
                 artist: artistData,
-                name: album.name,
-                date: album.date,
-                coverImageUrl: album.coverImageUrl,
-                backgroundColor: album.backgroundColor,
-                lyricsBackgroundShadow: album.lyricsBackgroundShadow
             });
         }
         return albumDatas;
@@ -87,14 +84,11 @@ class AlbumService {
             id: artist._id
         };
 
+        const albumDto = new AlbumDto(album);
         return {
-            albumId,
-            name: album.name,
-            date: album.date,
-            coverImageUrl: album.coverImageUrl,
-            backgroundColor: album.backgroundColor,
-            lyricsBackgroundShadow: album.lyricsBackgroundShadow,
+            ...albumDto,
             artist: artistData
+
         };
     }
 

@@ -36,7 +36,7 @@ const UserSchema = model('User', new Schema({
     name: { type: String, required: true },
     gender: { type: String, required: true },
     country: { type: String, required: true },
-    birthDate: [BirthDateSchema],
+    birthDate: BirthDateSchema,
     /**
      * @type {ProfileTypeEnum} profile type
      */

@@ -10,6 +10,7 @@ export default class ArtistDto {
     coverImageUrl: string;
     profileImageUrl: string;
     backgroundColor: string;
+    songsCount: number;
 
     constructor(model: any) {
         this.artistId = model._id;
@@ -21,5 +22,6 @@ export default class ArtistDto {
         this.coverImageUrl = model.coverImageUrl;
         this.profileImageUrl = model.profileImageUrl;
         this.backgroundColor = model.backgroundColor;
+        this.songsCount = model.songsCount;
     }
 }
