@@ -34,16 +34,6 @@ class SongController {
         }
     }
 
-    async editPlaylists(req, res, next) {
-        try {
-            const { songId, editedPlaylists } = req.body;
-            const { listenerId } = req.query;
-            const playlistIds: Array<string> = await songService.editPlaylists(listenerId, songId, editedPlaylists);
-            return res.json(playlistIds);
-        } catch (error) {
-            next(error);
-        }
-    }
 }
 
 const songController = new SongController();

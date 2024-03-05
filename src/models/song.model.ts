@@ -27,11 +27,6 @@ export type SongInfoResponseDataType = {
     playlistIds: Array<string>;
 }
 
-export type EditedPlaylistType = {
-    playlistId: string;
-    added: boolean;
-}
-
 export type SongRecordType = {
     _id: string;
     name: string;

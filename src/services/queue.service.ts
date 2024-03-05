@@ -67,19 +67,9 @@ class QueueService {
         }
         const { songs, isMoreSongsForwardForLoading, isMoreSongsBehindForLoading } = await this._getSongIdsForQueue(allSongs,
             songId, songQueueId, shuffleEnabled, isNewQueue, extendForward);
-        let songsResponse: Array<QueueSongInfoResponseDataType> = [];
-        if (songs.length) {
-            songsResponse = await this._formatSongs(listenerId, songs);
-            const songsDataToSave = songsResponse.map(song => ({ songId: song.songId, songQueueId: song.songQueueId }));
-            const updatedQueue = isNewQueue ? [...songsDataToSave] :
-                extendForward ? [...(currentQueue.queue || []), ...songsDataToSave] :
-                    [...songsDataToSave, ...(currentQueue.queue || [])];
-
-            const updatedQueueData: UpdatedQueueDataType = { queue: allSongs };
-            if (options) {
-                updatedQueueData.lastUsedOptions = options;
-            }
-            await QueueModel.updateOne({ _id: listenerId }, { $set: { ...updatedQueueData } }, { upsert: true });
+        const songsResponse = await this._formatSongs(listenerId, songs);
+        if (isNewQueue) {
+            await QueueModel.updateOne({ _id: listenerId }, { $set: { queue: allSongs, lastUsedOptions: options } }, { upsert: true });
         }
         let songQueueIdToBePlayed: string;
         if (isNewQueue && !songQueueId) {

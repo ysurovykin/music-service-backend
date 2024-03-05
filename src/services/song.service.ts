@@ -1,7 +1,13 @@
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import mm from 'music-metadata';
 import { storage } from '../../firebase.config';
-import SongModel, { CreateSongRequestDataType, EditedPlaylistType, GetSongsOptionsType, GetSongsResponseDataType, SongInfoResponseDataType, SongRecordType } from '../models/song.model';
+import SongModel, {
+    CreateSongRequestDataType,
+    GetSongsOptionsType,
+    GetSongsResponseDataType,
+    SongInfoResponseDataType,
+    SongRecordType
+} from '../models/song.model';
 import AlbumModel from '../models/album.model';
 import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
@@ -109,20 +115,6 @@ class SongService {
             songs: songsResponse,
             isMoreSongsForLoading: songs.length === +limit
         };
-    }
-
-    async editPlaylists(listenerId: string, songId: string, editedPlaylists: Array<EditedPlaylistType>): Promise<Array<string>> {
-        for (let playlistToEdit of editedPlaylists) {
-            if (playlistToEdit.added) {
-                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $push: { songIds: songId } });
-            } else {
-                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $pull: { songIds: songId } });
-            }
-        }
-        const playlists = await PlaylistModel.find({ listenerId, songIds: { $elemMatch: { $eq: songId } } }).lean();
-        const playlistIds = playlists.map(playlist => playlist._id);
-
-        return playlistIds;
     }
 
     async formatSongData(listenerId: string, song: SongRecordType): Promise<SongInfoResponseDataType> {
