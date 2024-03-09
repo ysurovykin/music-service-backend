@@ -72,7 +72,9 @@ class QueueService {
             await QueueModel.updateOne({ _id: listenerId }, { $set: { queue: allSongs, lastUsedOptions: options } }, { upsert: true });
         }
         let songQueueIdToBePlayed: string;
-        if (isNewQueue && !songQueueId) {
+        if (isNewQueue && !songQueueId && !songId) {
+            songQueueIdToBePlayed = songs[0].songQueueId;
+        } else if (isNewQueue && !songQueueId) {
             songQueueIdToBePlayed = songs.find(song => song.songId === songId).songQueueId;
         } else {
             songQueueIdToBePlayed = songQueueId;
@@ -94,6 +96,7 @@ class QueueService {
             for (const songData of songsData) {
                 const songToBeFormated = songs.find(song => song._id === songData.songId);
                 const songFormated: SongInfoResponseDataType = await songService.formatSongData(listenerId, songToBeFormated);
+                songFormated.songUrl += `&token=${randomstring.generate(16)}`;
                 songsResponse.push({ ...songFormated, songQueueId: songData.songQueueId });
             }
         }
@@ -113,6 +116,12 @@ class QueueService {
         let endIndex: number;
         let isMoreSongsForwardForLoading: boolean;
         let isMoreSongsBehindForLoading: boolean;
+        if (isNewQueue && !songId && !songQueueId) {
+            startIndex = 0;
+            endIndex = 9;
+            isMoreSongsBehindForLoading = false;
+            isMoreSongsForwardForLoading = true;
+        }
         if (isNewQueue) {
             const currentSongIndex = allSongs.findIndex(song => song.songId === songId);
             const lastPossibleStartIndex = 0;

@@ -82,9 +82,15 @@ class PlaylistService {
                 backgroundColor: backgroundColor
             };
         } else if (playlistData.backgroundColor !== playlist.backgroundColor) {
-            const downloadUrl = `playlist-covers/${listener._id}/${playlistData.playlistId}`;
-            const storageRef = ref(storage, downloadUrl);
-            await deleteObject(storageRef);
+            if (playlist.coverImageUrl) {
+                try {
+                    const downloadUrl = `playlist-covers/${listener._id}/${playlistData.playlistId}`;
+                    const storageRef = ref(storage, downloadUrl);
+                    await deleteObject(storageRef);
+                } catch (error) {
+                    console.error('Error while deleting playlist cover image', error);
+                }
+            }
             const backgroundColor = playlistData.backgroundColor || 'rgb(17, 102, 11)';
             fieldsToSet = {
                 ...fieldsToSet,

@@ -7,6 +7,8 @@ const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/create', upload.single('image'), albumController.create);
+router.post('/add-to-library', albumController.addAlbumToLibrary);
+router.post('/remove-from-library', albumController.removeAlbumFromLibrary);
 router.get('/albums/:artistId', albumController.getAlbumsByArtistId);
 router.get('/:albumId', albumController.getAlbumById);
 

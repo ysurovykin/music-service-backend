@@ -3,8 +3,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { AlbumInfoResponseDataType, CreateAlbumRequestDataType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import AlbumModel from '../models/album.model';
-import PlaylistModel from '../models/playlist.model';
-import SongModel, { SongInfoResponseDataType } from '../models/song.model';
+import LikedAlbumstModel from '../models/liked-albums.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import SongDto from '../dtos/song.dto';
@@ -47,7 +46,7 @@ class AlbumService {
         });
     }
 
-    async getAlbumsByArtistId(artistId: string): Promise<Array<AlbumInfoResponseDataType>> {
+    async getAlbumsByArtistId(listenerId: string, artistId: string): Promise<Array<AlbumInfoResponseDataType>> {
         const artist = await ArtistModel.findOne({ _id: artistId }).lean();
         if (!artist) {
             throw new NotFoundError(`Artist with id ${artistId} not found`);
@@ -61,15 +60,17 @@ class AlbumService {
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
             const albumDto = new AlbumDto(album);
+            const likedAlbumInfo = await LikedAlbumstModel.findOne({ listenerId: listenerId, albumId: album._id }).lean();
             albumDatas.push({
                 ...albumDto,
                 artist: artistData,
+                isAddedToLibrary: !!likedAlbumInfo
             });
         }
         return albumDatas;
     }
 
-    async getAlbumById(albumId: string): Promise<AlbumInfoResponseDataType> {
+    async getAlbumById(listenerId: string, albumId: string): Promise<AlbumInfoResponseDataType> {
         const album = await AlbumModel.findOne({ _id: albumId }).lean();
         if (!albumId) {
             throw new NotFoundError(`Album with id ${albumId} not found`);
@@ -83,13 +84,36 @@ class AlbumService {
             name: artist.name,
             id: artist._id
         };
-
+        const likedAlbumInfo = await LikedAlbumstModel.findOne({ listenerId: listenerId, albumId: album._id }).lean();
         const albumDto = new AlbumDto(album);
         return {
             ...albumDto,
-            artist: artistData
-
+            artist: artistData,
+            isAddedToLibrary: !!likedAlbumInfo
         };
+    }
+
+    async addAlbumToLibrary(listenerId: string, albumId: string): Promise<void> {
+        const album = await AlbumModel.findOne({ _id: albumId }).lean();
+        if (!album) {
+            throw new NotFoundError(`Album with id ${albumId} not found`);
+        }
+        const id = randomstring.generate(16);
+        await LikedAlbumstModel.create({
+            _id: id,
+            albumId: album._id,
+            artistId: album.artistId,
+            listenerId: listenerId,
+            date: new Date()
+        });
+    }
+
+    async removeAlbumFromLibrary(listenerId: string, albumId: string): Promise<void> {
+        const album = await AlbumModel.findOne({ _id: albumId }).lean();
+        if (!album) {
+            throw new NotFoundError(`Album with id ${albumId} not found`);
+        }
+        await LikedAlbumstModel.deleteMany({ listenerId: listenerId, albumId: albumId });
     }
 
 }

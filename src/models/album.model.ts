@@ -24,6 +24,7 @@ export type AlbumWithoutArtistType = {
 export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
   artist: ArtistShortDataType;
   songsCount: number;
+  isAddedToLibrary: boolean;
 }
 
 const AlbumSchema = model('Album', new Schema({

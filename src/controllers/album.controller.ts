@@ -16,7 +16,8 @@ class AlbumController {
     async getAlbumsByArtistId(req, res, next) {
         try {
             const { artistId } = req.params;
-            const album = await albumService.getAlbumsByArtistId(artistId);
+            const { listenerId } = req.query;
+            const album = await albumService.getAlbumsByArtistId(listenerId, artistId);
             return res.json(album);
         } catch (error) {
             next(error);
@@ -26,7 +27,30 @@ class AlbumController {
     async getAlbumById(req, res, next) {
         try {
             const { albumId } = req.params;
-            const album = await albumService.getAlbumById(albumId);
+            const { listenerId } = req.query;
+            const album = await albumService.getAlbumById(listenerId, albumId);
+            return res.json(album);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async addAlbumToLibrary(req, res, next) {
+        try {
+            const { albumId } = req.body;
+            const { listenerId } = req.query;
+            const album = await albumService.addAlbumToLibrary(listenerId, albumId);
+            return res.json(album);
+        } catch (error) {
+            next(error);
+        }
+    }
+    
+    async removeAlbumFromLibrary(req, res, next) {
+        try {
+            const { albumId } = req.body;
+            const { listenerId } = req.query;
+            const album = await albumService.removeAlbumFromLibrary(listenerId, albumId);
             return res.json(album);
         } catch (error) {
             next(error);
