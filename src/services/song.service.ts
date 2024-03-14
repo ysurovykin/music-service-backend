@@ -5,6 +5,7 @@ import SongModel, {
     CreateSongRequestDataType,
     GetSongsOptionsType,
     GetSongsResponseDataType,
+    GetSongsSortingOptionsType,
     SongInfoResponseDataType,
     SongRecordType
 } from '../models/song.model';
@@ -84,26 +85,73 @@ class SongService {
         });
     }
 
-    async getSongById(listenerId: string, songId: string): Promise<SongInfoResponseDataType> {
+    async getSongById(listenerId: string, songId: string, playlistId: string): Promise<SongInfoResponseDataType> {
         const song = await SongModel.findOne({ _id: songId }).lean();
         if (!song) {
             throw new NotFoundError(`Song with id ${songId} not found`);
         }
         const songInfo = await this.formatSongData(listenerId, song);
+        if (playlistId) {
+            songInfo.date = new Date();
+        }
         return songInfo;
     }
 
     async getSongs(listenerId: string, options: GetSongsOptionsType, offset: number = 0,
-        limit: number = 10): Promise<GetSongsResponseDataType> {
+        limit: number = 10, onlyLiked?: boolean, sortingOptions?: GetSongsSortingOptionsType): Promise<GetSongsResponseDataType> {
         let songs: Array<SongRecordType> = [];
         options = typeof options === 'object' ? options : JSON.parse(options);
-        const songsToSkip = limit * offset;
-        if (options.playlistId) {
-            const playlistSongs = await PlaylistModel.findOne({ _id: options.playlistId }, { songIds: 1 }).lean();
-            const songIds = playlistSongs.songIds.slice(songsToSkip, limit + (songsToSkip));
-            songs = await SongModel.find({ _id: { $in: songIds } }).lean();
-        } else {
-            songs = await SongModel.find({ ...options }).skip(songsToSkip).limit(limit).lean();
+        const songsToSkip = +limit * +offset;
+        const playlistId = options.playlistId;
+        const albumId = options.albumId;
+        const artistId = options.artistId;
+        let likedSongIds: Array<string>;
+        if (onlyLiked) {
+            const likedSongs = await PlaylistModel.findOne({ listenerId: listenerId, tag: 'liked' }).lean();
+            likedSongIds = likedSongs.songIds.map(song => song.id);
+        }
+        if (playlistId) {
+            const songsAggregate = await PlaylistModel.aggregate([
+                { $match: { _id: playlistId } },
+                { $unwind: '$songIds' },
+                {
+                    $lookup: {
+                        from: 'songs',
+                        localField: 'songIds.id',
+                        foreignField: '_id',
+                        as: 'matchedSong'
+                    }
+                },
+                { $unwind: '$matchedSong' },
+                {
+                    $project: {
+                        _id: 0,
+                        song: {
+                            $mergeObjects: [
+                                '$matchedSong',
+                                { date: '$songIds.date' }
+                            ]
+                        }
+                    }
+                },
+                { $match: { 'song.date': { $exists: true } } },
+                { $sort: { 'song.date': -1 } },
+                { $skip: songsToSkip },
+                { $limit: +limit }
+            ]);
+            songs = songsAggregate.map(songAggregate => ({ ...songAggregate.song }));
+        } else if (albumId) {
+            const album = await AlbumModel.findOne({ _id: albumId }).lean();
+            const allSongs = await SongModel.find({ _id: { $in: album.songIds } }).lean();
+            const sortedSongs = allSongs.sort((a, b) => album.songIds.indexOf(a._id) - album.songIds.indexOf(b._id));
+            songs = sortedSongs.slice(songsToSkip, +limit + songsToSkip);
+        } else if (artistId) {
+            const sortingRequest = this.getSortingRequest(sortingOptions);
+            const findRequest: any = { artistId: artistId };
+            if (likedSongIds) {
+                findRequest._id = { $in: likedSongIds };
+            }
+            songs = await SongModel.find(findRequest).sort(sortingRequest).skip(songsToSkip).limit(+limit).lean();
         }
         const songsResponse: Array<SongInfoResponseDataType> = [];
         for (const song of songs) {
@@ -121,7 +169,7 @@ class SongService {
         const album = await AlbumModel.findOne({ _id: song.albumId }).lean();
         const artists = await this._getSongArtists(song);
 
-        const playlists = await PlaylistModel.find({ listenerId, songIds: { $elemMatch: { $eq: song._id } } }).lean();
+        const playlists = await PlaylistModel.find({ listenerId, songIds: { $elemMatch: { id: song._id } } }).lean();
         const playlistIds = playlists.map(playlist => playlist._id);
 
         const songDto = new SongDto(song);
@@ -156,6 +204,25 @@ class SongService {
         return artists;
     }
 
+    getSortingRequest(sortingOptions: GetSongsSortingOptionsType) {
+        const sortingRequest: any = {};
+        if (sortingOptions) {
+
+            if (sortingOptions.plays) {
+                sortingRequest.plays = sortingOptions.plays;
+            } else if (sortingOptions.name) {
+
+            } else if (sortingOptions.album) {
+
+            } else if (sortingOptions.date) {
+
+            } else if (sortingOptions.duration) {
+
+            }
+        }
+        sortingRequest.date = -1;
+        return sortingRequest;
+    }
 }
 
 const songService = new SongService();

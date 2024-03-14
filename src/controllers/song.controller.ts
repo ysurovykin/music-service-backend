@@ -16,8 +16,8 @@ class SongController {
     async getSongById(req, res, next) {
         try {
             const { songId } = req.params;
-            const { listenerId } = req.query;
-            const song: SongInfoResponseDataType = await songService.getSongById(listenerId, songId);
+            const { listenerId, playlistId } = req.query;
+            const song: SongInfoResponseDataType = await songService.getSongById(listenerId, songId, playlistId);
             return res.json(song);
         } catch (error) {
             next(error);
@@ -26,8 +26,8 @@ class SongController {
 
     async getSongs(req, res, next) {
         try {
-            const { listenerId, options, offset, limit } = req.query;
-            const songs: GetSongsResponseDataType = await songService.getSongs(listenerId, options, offset, limit);
+            const { listenerId, options, offset, limit, onlyLiked, sortingOptions } = req.query;
+            const songs: GetSongsResponseDataType = await songService.getSongs(listenerId, options, offset, limit, onlyLiked, sortingOptions);
             return res.json(songs);
         } catch (error) {
             next(error);

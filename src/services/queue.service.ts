@@ -1,7 +1,8 @@
 import QueueModel, { QueueInfoResponseDataType, GenerateQueueOptionsType, QueueSongInfoResponseDataType, QueueSongType, UpdatedQueueDataType } from '../models/queue.model';
 import songService from './song.service';
-import SongModel, { SongInfoResponseDataType, } from '../models/song.model';
+import SongModel, { GetSongsSortingOptionsType, SongInfoResponseDataType, SongRecordType, } from '../models/song.model';
 import PlaylistModel from '../models/playlist.model';
+import AlbumModel from '../models/album.model';
 import randomstring from 'randomstring';
 import { NotFoundError } from '../errors/api-errors';
 
@@ -45,21 +46,66 @@ class QueueService {
         await QueueModel.updateOne({ _id: listenerId }, { $pull: { queue: { songQueueId } } });
     }
 
-    async generateQueue(listenerId: string, songId: string, songQueueId: string, shuffleEnabled: boolean, isNewQueue: boolean,
-        extendForward: boolean, options: GenerateQueueOptionsType): Promise<QueueInfoResponseDataType> {
+    async generateQueue(listenerId: string, songId: string, songQueueId: string, shuffleEnabled: boolean,
+        isNewQueue: boolean, extendForward: boolean, options: GenerateQueueOptionsType, onlyLiked: boolean,
+        sortingOptions: GetSongsSortingOptionsType): Promise<QueueInfoResponseDataType> {
         const currentQueue = await QueueModel.findOne({ _id: listenerId }).lean();
+        let likedSongIds: Array<string>;
+        if (onlyLiked) {
+            const likedSongs = await PlaylistModel.findOne({ listenerId: listenerId, tag: 'liked' }).lean();
+            likedSongIds = likedSongs.songIds.map(song => song.id);
+        }
         if (options) {
             options = typeof options === 'object' ? options : JSON.parse(options);
         } else {
             options = currentQueue.lastUsedOptions;
         }
         let allSongs: Array<QueueSongType>;
+        const playlistId = options.playlistId;
+        const albumId = options.albumId;
+        const artistId = options.artistId;
         if (isNewQueue) {
-            if (options.playlistId) {
-                const playlistSongs = await PlaylistModel.findOne({ _id: options.playlistId }, { songIds: 1 }).lean();
-                allSongs = playlistSongs.songIds.map(id => ({ songId: id, songQueueId: randomstring.generate(16) }));
-            } else {
-                const songs = await SongModel.find({ ...options }, { _id: 1 }).lean();
+            if (playlistId) {
+                const songsAggregate = await PlaylistModel.aggregate([
+                    { $match: { _id: playlistId } },
+                    { $unwind: '$songIds' },
+                    {
+                        $lookup: {
+                            from: 'songs',
+                            localField: 'songIds.id',
+                            foreignField: '_id',
+                            as: 'matchedSong'
+                        }
+                    },
+                    { $unwind: '$matchedSong' },
+                    {
+                        $project: {
+                            _id: 0,
+                            song: {
+                                $mergeObjects: [
+                                    '$matchedSong',
+                                    { date: '$songIds.date' }
+                                ]
+                            }
+                        }
+                    },
+                    { $match: { 'song.date': { $exists: true } } },
+                    { $sort: { 'song.date': -1 } }
+                ]);
+                const playlistSongs: Array<SongRecordType> = songsAggregate.map(songAggregate => ({ ...songAggregate.song }));
+                allSongs = playlistSongs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
+            } else if (albumId) {
+                const album = await AlbumModel.findOne({ _id: albumId }).lean();
+                const allAlbumSongs = await SongModel.find({ _id: { $in: album.songIds } }, { _id: 1 }).lean();
+                const songs = allAlbumSongs.sort((a, b) => album.songIds.indexOf(a._id) - album.songIds.indexOf(b._id));
+                allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
+            } else if (artistId) {
+                const sortingRequest = songService.getSortingRequest(sortingOptions);
+                const findRequest: any = { artistId: artistId };
+                if (likedSongIds) {
+                    findRequest._id = { $in: likedSongIds };
+                }
+                const songs = await SongModel.find(findRequest, { _id: 1 }).sort(sortingRequest).lean();
                 allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
             }
         } else {

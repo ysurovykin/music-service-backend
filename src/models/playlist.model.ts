@@ -31,10 +31,25 @@ export type PlaylistInfoResponseDataType = {
   backgroundColor: string;
 }
 
+export type PlaylistFullResponseDataType = PlaylistInfoResponseDataType & {
+  songsCount: number;
+  songsTimeDuration: number; 
+}
+
 export type EditedPlaylistType = {
   playlistId: string;
   added: boolean;
 }
+
+export type PlaylistSongIdType = {
+  id: string;
+  date: Date;
+}
+
+const PlaylistSongIdSchema = new Schema({
+  id: { type: String, required: true },
+  date: { type: Date, required: true }
+});
 
 const PlaylistSchema = model('Playlist', new Schema({
   _id: { type: String },
@@ -44,7 +59,7 @@ const PlaylistSchema = model('Playlist', new Schema({
   coverImageUrl: { type: String, required: false },
   date: { type: Date, required: true },
   editable: { type: Boolean, required: true },
-  songIds: [String],
+  songIds: [PlaylistSongIdSchema],
   /**
    * @type {PlaylistTagEnum} playlist tag
    */

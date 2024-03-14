@@ -19,12 +19,16 @@ export type AlbumWithoutArtistType = {
   coverImageUrl: string;
   backgroundColor: string;
   lyricsBackgroundShadow: string;
+  isAddedToLibrary: boolean;
 }
 
 export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
   artist: ArtistShortDataType;
+}
+
+export type AlbumFullResponseDataType = AlbumInfoResponseDataType & {
   songsCount: number;
-  isAddedToLibrary: boolean;
+  songsTimeDuration: number; 
 }
 
 const AlbumSchema = model('Album', new Schema({

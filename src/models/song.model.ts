@@ -55,6 +55,14 @@ export type GetSongsOptionsType = {
     playlistId?: string;
 }
 
+export type GetSongsSortingOptionsType = {
+    name?: number,
+    album?: number,
+    plays?: number,
+    duration?: number,
+    date?: number
+}
+
 const SongSchema = model('Song', new Schema({
     _id: { type: String },
     name: { type: String, required: true },

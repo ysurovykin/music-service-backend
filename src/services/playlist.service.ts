@@ -1,6 +1,6 @@
 import { storage } from '../../firebase.config';
 import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { PlaylistInfoResponseDataType, CreatePlaylistRequestDataType, PlaylistTagEnum, EditedPlaylistType, EditPlaylistRequestDataType } from '../models/playlist.model';
+import { PlaylistInfoResponseDataType, CreatePlaylistRequestDataType, PlaylistTagEnum, EditedPlaylistType, EditPlaylistRequestDataType, PlaylistFullResponseDataType } from '../models/playlist.model';
 import ListenerModel from '../models/listener.model';
 import PlaylistModel from '../models/playlist.model';
 import SongModel, { SongInfoResponseDataType } from '../models/song.model';
@@ -17,14 +17,9 @@ class PlaylistService {
             throw new NotFoundError(`User with id ${listenerId} not found`);
         }
         const playlistId = randomstring.generate(16);
-
-        const songs: Array<SongInfoResponseDataType> = [];
+        let songIds = [];
         if (playlistData.songIds?.length) {
-            const songsToAdd = await SongModel.find({ _id: { $in: playlistData.songIds } }).lean();
-            for (const song of songsToAdd) {
-                const formatedSong = await songService.formatSongData(listener._id, song);
-                songs.push(formatedSong);
-            }
+            songIds = playlistData.songIds.map(songId => ({ id: songId, date: new Date() }));
         }
         let coverImageUrl: string;
         let backgroundColor: string;
@@ -47,11 +42,10 @@ class PlaylistService {
             description: playlistData.description,
             listenerId: listener._id,
             coverImageUrl,
-            songIds: playlistData.songIds,
+            songIds: songIds,
             editable: true,
             date: new Date(),
-            backgroundColor,
-            songs
+            backgroundColor
         });
     }
 
@@ -148,7 +142,7 @@ class PlaylistService {
         return playlistDatas;
     }
 
-    async getPlaylistById(playlistId: string): Promise<PlaylistInfoResponseDataType> {
+    async getPlaylistById(playlistId: string): Promise<PlaylistFullResponseDataType> {
         const playlist = await PlaylistModel.findOne({ _id: playlistId }).lean();
         if (!playlistId) {
             throw new NotFoundError(`Playlist with id ${playlistId} not found`);
@@ -156,6 +150,17 @@ class PlaylistService {
         const coverImageUrl = playlist.coverImageUrl ?
             playlist.coverImageUrl + '&token=' + randomstring.generate(16) :
             '';
+        const songIds = playlist.songIds.map(song => song.id);
+        const songsInfo = await SongModel.aggregate([
+            { $match: { _id: { $in: songIds } } },
+            {
+                $group: {
+                    _id: null,
+                    totalDuration: { $sum: '$duration' },
+                    totalCount: { $count: {} }
+                }
+            },
+        ]);
         return {
             playlistId,
             name: playlist.name,
@@ -164,19 +169,25 @@ class PlaylistService {
             editable: playlist.editable,
             coverImageUrl: coverImageUrl,
             backgroundColor: playlist.backgroundColor,
-            tag: playlist.tag as PlaylistTagEnum
+            tag: playlist.tag as PlaylistTagEnum,
+            songsTimeDuration: +songsInfo[0]?.totalDuration,
+            songsCount: +songsInfo[0]?.totalCount
         };
     }
 
     async editSongPlaylists(listenerId: string, songId: string, editedPlaylists: Array<EditedPlaylistType>): Promise<Array<string>> {
         for (let playlistToEdit of editedPlaylists) {
             if (playlistToEdit.added) {
-                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $push: { songIds: songId } });
+                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, {
+                    $push: { songIds: { id: songId, date: new Date() } }
+                });
             } else {
-                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, { $pull: { songIds: songId } });
+                await PlaylistModel.updateOne({ _id: playlistToEdit.playlistId }, {
+                    $pull: { songIds: { id: songId } }
+                });
             }
         }
-        const playlists = await PlaylistModel.find({ listenerId, songIds: { $elemMatch: { $eq: songId } } }).lean();
+        const playlists = await PlaylistModel.find({ listenerId, songIds: { $elemMatch: { id: songId } } }).lean();
         const playlistIds = playlists.map(playlist => playlist._id);
 
         return playlistIds;

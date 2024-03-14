@@ -24,6 +24,17 @@ class AlbumController {
         }
     }
 
+    async getAlbumsWhereArtistAppears(req, res, next) {
+        try {
+            const { artistId } = req.params;
+            const { listenerId } = req.query;
+            const album = await albumService.getAlbumsWhereArtistAppears(listenerId, artistId);
+            return res.json(album);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getAlbumById(req, res, next) {
         try {
             const { albumId } = req.params;

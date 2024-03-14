@@ -1,12 +1,11 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { AlbumInfoResponseDataType, CreateAlbumRequestDataType } from '../models/album.model';
+import AlbumModel, { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
-import AlbumModel from '../models/album.model';
 import LikedAlbumstModel from '../models/liked-albums.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
-import SongDto from '../dtos/song.dto';
+import SongModel from '../models/song.model';
 import { getDominantColorWithShadow } from '../helpers/image-cover-color.helper';
 import AlbumDto from '../dtos/album.dto';
 
@@ -70,7 +69,32 @@ class AlbumService {
         return albumDatas;
     }
 
-    async getAlbumById(listenerId: string, albumId: string): Promise<AlbumInfoResponseDataType> {
+    async getAlbumsWhereArtistAppears(listenerId: string, artistId: string): Promise<Array<AlbumInfoResponseDataType>> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        if (!artist) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+
+        const albumIds = await SongModel.distinct(('albumId'), { coArtistIds: artistId }).lean();
+        const albums = await AlbumModel.find({ _id: { $in: albumIds } }).lean();
+        const albumDatas: Array<AlbumInfoResponseDataType> = [];
+        for (const album of albums) {
+            const albumDto = new AlbumDto(album);
+            const artist = await ArtistModel.findOne({ _id: album.artistId }, { _id: 1, name: 1 }).lean();
+            const likedAlbumInfo = await LikedAlbumstModel.findOne({ listenerId: listenerId, albumId: album._id }).lean();
+            albumDatas.push({
+                ...albumDto,
+                artist: {
+                    name: artist.name,
+                    id: artist._id
+                },
+                isAddedToLibrary: !!likedAlbumInfo
+            });
+        }
+        return albumDatas;
+    }
+
+    async getAlbumById(listenerId: string, albumId: string): Promise<AlbumFullResponseDataType> {
         const album = await AlbumModel.findOne({ _id: albumId }).lean();
         if (!albumId) {
             throw new NotFoundError(`Album with id ${albumId} not found`);
@@ -85,11 +109,23 @@ class AlbumService {
             id: artist._id
         };
         const likedAlbumInfo = await LikedAlbumstModel.findOne({ listenerId: listenerId, albumId: album._id }).lean();
+        const songsInfo = await SongModel.aggregate([
+            { $match: { albumId: albumId } },
+            {
+                $group: {
+                    _id: null,
+                    totalDuration: { $sum: '$duration' },
+                    totalCount: { $count: {} }
+                }
+            },
+        ]);
         const albumDto = new AlbumDto(album);
         return {
             ...albumDto,
             artist: artistData,
-            isAddedToLibrary: !!likedAlbumInfo
+            isAddedToLibrary: !!likedAlbumInfo,
+            songsTimeDuration: songsInfo[0]?.totalDuration,
+            songsCount: songsInfo[0]?.totalCount
         };
     }
 

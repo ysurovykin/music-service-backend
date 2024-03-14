@@ -10,6 +10,7 @@ router.post('/create', upload.single('image'), albumController.create);
 router.post('/add-to-library', albumController.addAlbumToLibrary);
 router.post('/remove-from-library', albumController.removeAlbumFromLibrary);
 router.get('/albums/:artistId', albumController.getAlbumsByArtistId);
+router.get('/albums/artist-appears/:artistId', albumController.getAlbumsWhereArtistAppears);
 router.get('/:albumId', albumController.getAlbumById);
 
 

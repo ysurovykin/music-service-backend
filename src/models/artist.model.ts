@@ -27,11 +27,24 @@ export type ArtistInfoResponseDataType = {
   description: string;
   socialLinks: Array<ArtistSocialLinks>;
   followers: number;
+  profileImageUrl: string;
+  backgroundColor: string;
   songsCount: number;
 }
 
 export type ArtistFullResponseDataType = ArtistInfoResponseDataType & {
-  albums: Array<AlbumWithoutArtistType>;
+  isFollowed: boolean;
+  songsCount: number;
+  songsTimeDuration: number;
+  likedSongsTimeDuration: number;
+  likedSongsCount: number;
+  albumsCount: number;
+  albumsWhereAppearsCount: number;
+}
+
+export type ArtistGenresType = {
+  name: string;
+  percentage: number;
 }
 
 const ArtistSchema = model('Artist', new Schema({
@@ -52,7 +65,6 @@ const ArtistSchema = model('Artist', new Schema({
   genres: { type: Object, required: false },
   followers: { type: Number, required: true, default: 0 },
   date: { type: Date, required: true },
-  coverImageUrl: { type: String, required: false },
   profileImageUrl: { type: String, required: false },
   backgroundColor: { type: String, required: false },
   songsCount: { type: Number, required: true, default: 0 }
