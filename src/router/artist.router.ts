@@ -14,6 +14,7 @@ router.post('/follow', artistController.followArtist);
 router.post('/unfollow', artistController.unfollowArtist);
 router.get('/genres/:artistId', artistController.getGenres);
 router.get('/most-recent-release/:artistId', artistController.getMostRecentRelease);
+router.get('/artists-in-library/:listenerId', artistController.getArtistsInListenerLibrary);
 
 
 export default router;

@@ -47,6 +47,11 @@ export type ArtistGenresType = {
   percentage: number;
 }
 
+export type GetArtistsInListenerLibraryResponseType = {
+  followedArtists: Array<ArtistInfoResponseDataType>;
+  isMoreFollowedArtistsForLoading: boolean; 
+}
+
 const ArtistSchema = model('Artist', new Schema({
   _id: { type: String },
   name: { type: String, required: true },

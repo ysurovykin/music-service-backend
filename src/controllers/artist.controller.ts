@@ -84,6 +84,17 @@ class ArtistController {
             next(error);
         }
     }
+    
+    async getArtistsInListenerLibrary(req, res, next) {
+        try {
+            const { listenerId } = req.params;
+            const { offset, limit } = req.query;
+            const response = await artistService.getArtistsInListenerLibrary(listenerId, offset, limit);
+            return res.json(response);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 const artistController = new ArtistController();

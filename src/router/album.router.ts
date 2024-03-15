@@ -12,6 +12,7 @@ router.post('/remove-from-library', albumController.removeAlbumFromLibrary);
 router.get('/albums/:artistId', albumController.getAlbumsByArtistId);
 router.get('/albums/artist-appears/:artistId', albumController.getAlbumsWhereArtistAppears);
 router.get('/:albumId', albumController.getAlbumById);
+router.get('/albums-in-library/:listenerId', albumController.getAlbumsInListenerLibrary);
 
 
 export default router;

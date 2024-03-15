@@ -1,6 +1,6 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import AlbumModel, { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType } from '../models/album.model';
+import AlbumModel, { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType, GetAlbumsInListenerLibraryResponseType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import LikedAlbumstModel from '../models/liked-albums.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
@@ -150,6 +150,31 @@ class AlbumService {
             throw new NotFoundError(`Album with id ${albumId} not found`);
         }
         await LikedAlbumstModel.deleteMany({ listenerId: listenerId, albumId: albumId });
+    }
+
+    async getAlbumsInListenerLibrary(listenerId: string, offset: number = 0,
+        limit: number = 10): Promise<GetAlbumsInListenerLibraryResponseType> {
+        const likedAlbums = await LikedAlbumstModel.find({ listenerId: listenerId }).skip(+offset * +limit).limit(+limit).lean();
+        const albumIds = likedAlbums.map(likedAlbum => likedAlbum.albumId);
+        const albums = await AlbumModel.find({ _id: { $in: albumIds } }).lean();
+        const albumDatas: Array<AlbumInfoResponseDataType> = [];
+        for (const album of albums) {
+            const artist = await ArtistModel.findOne({ _id: album.artistId }, { _id: 1, name: 1 });
+            const artistData: ArtistShortDataType = {
+                name: artist.name,
+                id: artist._id
+            };
+            const albumDto = new AlbumDto(album);
+            albumDatas.push({
+                ...albumDto,
+                artist: artistData,
+                isAddedToLibrary: false
+            });
+        }
+        return {
+            likedAlbums: albumDatas,
+            isMoreLikedAlbumsForLoading: albumDatas.length === +limit
+        };
     }
 
 }

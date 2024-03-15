@@ -31,6 +31,11 @@ export type AlbumFullResponseDataType = AlbumInfoResponseDataType & {
   songsTimeDuration: number; 
 }
 
+export type GetAlbumsInListenerLibraryResponseType = {
+  likedAlbums: Array<AlbumInfoResponseDataType>;
+  isMoreLikedAlbumsForLoading: boolean;
+}
+
 const AlbumSchema = model('Album', new Schema({
   _id: { type: String },
   name: { type: String, required: true },

@@ -2,7 +2,8 @@ import ArtistModel, {
     ArtistFullResponseDataType,
     ArtistGenresType,
     ArtistInfoResponseDataType,
-    ArtistShortDataType
+    ArtistShortDataType,
+    GetArtistsInListenerLibraryResponseType
 } from '../models/artist.model';
 import FollowedArtistsModel from '../models/followed-artists.model';
 import { NotFoundError } from '../errors/api-errors';
@@ -177,6 +178,18 @@ class ArtistService {
             isAddedToLibrary: !!likedAlbumInfo,
             songsTimeDuration: songsInfo[0]?.totalDuration,
             songsCount: songsInfo[0]?.totalCount
+        };
+    }
+
+    async getArtistsInListenerLibrary(listenerId: string, offset: number = 0,
+        limit: number = 10): Promise<GetArtistsInListenerLibraryResponseType> {
+        const followedArtists = await FollowedArtistsModel.find({ listenerId: listenerId }).skip(+offset * +limit).limit(+limit).lean();
+        const artistIds = followedArtists.map(followedArtist => followedArtist.artistId);
+        const artists = await ArtistModel.find({ _id: { $in: artistIds } }).lean();
+        const artstDtos: Array<ArtistInfoResponseDataType> = artists.map(artstData => new ArtistDto(artstData));
+        return {
+            followedArtists: artstDtos,
+            isMoreFollowedArtistsForLoading: artstDtos.length === +limit
         };
     }
 

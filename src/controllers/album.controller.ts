@@ -56,7 +56,7 @@ class AlbumController {
             next(error);
         }
     }
-    
+
     async removeAlbumFromLibrary(req, res, next) {
         try {
             const { albumId } = req.body;
@@ -67,6 +67,18 @@ class AlbumController {
             next(error);
         }
     }
+
+    async getAlbumsInListenerLibrary(req, res, next) {
+        try {
+            const { listenerId } = req.params;
+            const { offset, limit } = req.query;
+            const response = await albumService.getAlbumsInListenerLibrary(listenerId, offset, limit);
+            return res.json(response);
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }
 
 const albumController = new AlbumController();
