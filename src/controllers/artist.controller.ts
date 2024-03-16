@@ -3,7 +3,8 @@ import artistService from '../services/artist.service'
 class ArtistController {
     async getArtists(req, res, next) {
         try {
-            const artists = await artistService.getArtists();
+            const { offset, limit, search } = req.query;
+            const artists = await artistService.getArtists(offset, limit, search);
             return res.json(artists);
         } catch (error) {
             next(error);

@@ -79,6 +79,16 @@ class AlbumController {
         }
     }
 
+    async getAlbums(req, res, next) {
+        try {
+            const { offset, limit, search } = req.query;
+            const response = await albumService.getAlbums(offset, limit, search);
+            return res.json(response);
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }
 
 const albumController = new AlbumController();

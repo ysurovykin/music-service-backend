@@ -47,6 +47,11 @@ export type ArtistGenresType = {
   percentage: number;
 }
 
+export type GetArtistsResponseType = {
+  artists: Array<ArtistInfoResponseDataType>;
+  isMoreArtistsForLoading: boolean;
+}
+
 export type GetArtistsInListenerLibraryResponseType = {
   followedArtists: Array<ArtistInfoResponseDataType>;
   isMoreFollowedArtistsForLoading: boolean; 

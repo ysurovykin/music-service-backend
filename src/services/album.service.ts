@@ -1,6 +1,6 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import AlbumModel, { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType, GetAlbumsInListenerLibraryResponseType } from '../models/album.model';
+import AlbumModel, { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType, GetAlbumsInListenerLibraryResponseType, GetAlbumsResponseType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import LikedAlbumstModel from '../models/liked-albums.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
@@ -168,7 +168,7 @@ class AlbumService {
             albumDatas.push({
                 ...albumDto,
                 artist: artistData,
-                isAddedToLibrary: false
+                isAddedToLibrary: true
             });
         }
         return {
@@ -176,6 +176,30 @@ class AlbumService {
             isMoreLikedAlbumsForLoading: albumDatas.length === +limit
         };
     }
+
+    async getAlbums(offset: number = 0, limit: number = 10, search: string): Promise<GetAlbumsResponseType> {
+        const albums = await AlbumModel.find({ name: { $regex: search, $options: 'i' } }).sort({ likes: -1 })
+            .skip(+offset * +limit).limit(+limit).lean();
+        const albumDatas: Array<AlbumInfoResponseDataType> = [];
+        for (const album of albums) {
+            const artist = await ArtistModel.findOne({ _id: album.artistId }, { _id: 1, name: 1 });
+            const artistData: ArtistShortDataType = {
+                name: artist.name,
+                id: artist._id
+            };
+            const albumDto = new AlbumDto(album);
+            albumDatas.push({
+                ...albumDto,
+                artist: artistData,
+                isAddedToLibrary: false
+            });
+        }
+        return {
+            albums: albumDatas,
+            isMoreAlbumsForLoading: albumDatas.length === +limit
+        };
+    }
+
 
 }
 

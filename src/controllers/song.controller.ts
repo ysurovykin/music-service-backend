@@ -26,8 +26,8 @@ class SongController {
 
     async getSongs(req, res, next) {
         try {
-            const { listenerId, options, offset, limit, onlyLiked, sortingOptions } = req.query;
-            const songs: GetSongsResponseDataType = await songService.getSongs(listenerId, options, offset, limit, onlyLiked, sortingOptions);
+            const { listenerId, offset, limit, options, onlyLiked, sortingOptions, search } = req.query;
+            const songs: GetSongsResponseDataType = await songService.getSongs(listenerId, offset, limit, options, onlyLiked, sortingOptions, search);
             return res.json(songs);
         } catch (error) {
             next(error);

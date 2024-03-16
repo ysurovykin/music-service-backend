@@ -31,6 +31,11 @@ export type AlbumFullResponseDataType = AlbumInfoResponseDataType & {
   songsTimeDuration: number; 
 }
 
+export type GetAlbumsResponseType = {
+  albums: Array<AlbumInfoResponseDataType>;
+  isMoreAlbumsForLoading: boolean;
+}
+
 export type GetAlbumsInListenerLibraryResponseType = {
   likedAlbums: Array<AlbumInfoResponseDataType>;
   isMoreLikedAlbumsForLoading: boolean;

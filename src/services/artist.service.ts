@@ -3,7 +3,8 @@ import ArtistModel, {
     ArtistGenresType,
     ArtistInfoResponseDataType,
     ArtistShortDataType,
-    GetArtistsInListenerLibraryResponseType
+    GetArtistsInListenerLibraryResponseType,
+    GetArtistsResponseType
 } from '../models/artist.model';
 import FollowedArtistsModel from '../models/followed-artists.model';
 import { NotFoundError } from '../errors/api-errors';
@@ -20,10 +21,20 @@ import AlbumDto from '../dtos/album.dto';
 
 class ArtistService {
 
-    async getArtists(): Promise<Array<ArtistInfoResponseDataType>> {
-        const artists = await ArtistModel.find().limit(10).lean();
-        const artstDtos: Array<ArtistInfoResponseDataType> = artists.map(artstData => new ArtistDto(artstData));
-        return artstDtos;
+    async getArtists(offset: number, limit: number, search: string): Promise<GetArtistsResponseType> {
+        let artstDtos: Array<ArtistInfoResponseDataType>;
+        if (search) {
+            const artists = await ArtistModel.find({ name: { $regex: search, $options: 'i' } }).sort({ followers: -1 })
+                .skip(+offset * +limit).limit(+limit).lean();
+            artstDtos = artists.map(artstData => new ArtistDto(artstData));
+        } else {
+            const artists = await ArtistModel.find().skip(+offset * +limit).limit(+limit).lean();
+            artstDtos = artists.map(artstData => new ArtistDto(artstData));
+        }
+        return {
+            artists: artstDtos,
+            isMoreArtistsForLoading: artstDtos.length === limit
+        }
     }
 
     async changeArtistProfileImage(artistId: string, file: Express.Multer.File): Promise<void> {

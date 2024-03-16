@@ -48,82 +48,98 @@ class QueueService {
 
     async generateQueue(listenerId: string, songId: string, songQueueId: string, shuffleEnabled: boolean,
         isNewQueue: boolean, extendForward: boolean, options: GenerateQueueOptionsType, onlyLiked: boolean,
-        sortingOptions: GetSongsSortingOptionsType): Promise<QueueInfoResponseDataType> {
+        sortingOptions: GetSongsSortingOptionsType, search: string): Promise<QueueInfoResponseDataType> {
         const currentQueue = await QueueModel.findOne({ _id: listenerId }).lean();
         let likedSongIds: Array<string>;
         if (onlyLiked) {
             const likedSongs = await PlaylistModel.findOne({ listenerId: listenerId, tag: 'liked' }).lean();
             likedSongIds = likedSongs.songIds.map(song => song.id);
         }
-        if (options) {
-            options = typeof options === 'object' ? options : JSON.parse(options);
-        } else {
-            options = currentQueue.lastUsedOptions;
-        }
         let allSongs: Array<QueueSongType>;
-        const playlistId = options.playlistId;
-        const albumId = options.albumId;
-        const artistId = options.artistId;
-        if (isNewQueue) {
-            if (playlistId) {
-                const songsAggregate = await PlaylistModel.aggregate([
-                    { $match: { _id: playlistId } },
-                    { $unwind: '$songIds' },
-                    {
-                        $lookup: {
-                            from: 'songs',
-                            localField: 'songIds.id',
-                            foreignField: '_id',
-                            as: 'matchedSong'
-                        }
-                    },
-                    { $unwind: '$matchedSong' },
-                    {
-                        $project: {
-                            _id: 0,
-                            song: {
-                                $mergeObjects: [
-                                    '$matchedSong',
-                                    { date: '$songIds.date' }
-                                ]
-                            }
-                        }
-                    },
-                    { $match: { 'song.date': { $exists: true } } },
-                    { $sort: { 'song.date': -1 } }
-                ]);
-                const playlistSongs: Array<SongRecordType> = songsAggregate.map(songAggregate => ({ ...songAggregate.song }));
-                allSongs = playlistSongs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
-            } else if (albumId) {
-                const album = await AlbumModel.findOne({ _id: albumId }).lean();
-                const allAlbumSongs = await SongModel.find({ _id: { $in: album.songIds } }, { _id: 1 }).lean();
-                const songs = allAlbumSongs.sort((a, b) => album.songIds.indexOf(a._id) - album.songIds.indexOf(b._id));
-                allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
-            } else if (artistId) {
-                const sortingRequest = songService.getSortingRequest(sortingOptions);
-                const findRequest: any = { artistId: artistId };
-                if (likedSongIds) {
-                    findRequest._id = { $in: likedSongIds };
-                }
-                const songs = await SongModel.find(findRequest, { _id: 1 }).sort(sortingRequest).lean();
-                allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
-            }
+        let isMoreSongsForwardForLoading: boolean;
+        let isMoreSongsBehindForLoading: boolean;
+        let queueSongs: Array<QueueSongType>;
+        let songQueueIdToBePlayed: string;
+        if (!options && search) {
+            const songs = await SongModel.findOne({ _id: songId }, { _id: 1 }).lean();
+            allSongs = Array(100).fill(songs).map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }))
+            queueSongs = allSongs.slice(10, 20);
+            songQueueIdToBePlayed = queueSongs[0].songQueueId;
+            isMoreSongsForwardForLoading = true;
+            isMoreSongsBehindForLoading = false;
         } else {
-            allSongs = currentQueue.queue;
+            if (options) {
+                options = typeof options === 'object' ? options : JSON.parse(options);
+            } else {
+                options = currentQueue.lastUsedOptions;
+            }
+            const playlistId = options.playlistId;
+            const albumId = options.albumId;
+            const artistId = options.artistId;
+            if (isNewQueue) {
+                if (playlistId) {
+                    const songsAggregate = await PlaylistModel.aggregate([
+                        { $match: { _id: playlistId } },
+                        { $unwind: '$songIds' },
+                        {
+                            $lookup: {
+                                from: 'songs',
+                                localField: 'songIds.id',
+                                foreignField: '_id',
+                                as: 'matchedSong'
+                            }
+                        },
+                        { $unwind: '$matchedSong' },
+                        {
+                            $project: {
+                                _id: 0,
+                                song: {
+                                    $mergeObjects: [
+                                        '$matchedSong',
+                                        { date: '$songIds.date' }
+                                    ]
+                                }
+                            }
+                        },
+                        { $match: { 'song.date': { $exists: true } } },
+                        { $sort: { 'song.date': -1 } }
+                    ]);
+                    const playlistSongs: Array<SongRecordType> = songsAggregate.map(songAggregate => ({ ...songAggregate.song }));
+                    allSongs = playlistSongs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
+                } else if (albumId) {
+                    const album = await AlbumModel.findOne({ _id: albumId }).lean();
+                    const allAlbumSongs = await SongModel.find({ _id: { $in: album.songIds } }, { _id: 1 }).lean();
+                    const songs = allAlbumSongs.sort((a, b) => album.songIds.indexOf(a._id) - album.songIds.indexOf(b._id));
+                    allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
+                } else if (artistId) {
+                    const sortingRequest = songService.getSortingRequest(sortingOptions);
+                    const findRequest: any = { artistId: artistId };
+                    if (likedSongIds) {
+                        findRequest._id = { $in: likedSongIds };
+                    }
+                    const songs = await SongModel.find(findRequest, { _id: 1 }).sort(sortingRequest).lean();
+                    allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
+                }
+            } else {
+                allSongs = currentQueue.queue;
+            }
+            const result = await this._getSongIdsForQueue(allSongs, songId, songQueueId, shuffleEnabled, isNewQueue, extendForward);
+            queueSongs = result.songs;
+            isMoreSongsForwardForLoading = result.isMoreSongsForwardForLoading;
+            isMoreSongsBehindForLoading = result.isMoreSongsBehindForLoading;
+
+            if (isNewQueue && !songQueueId && !songId) {
+                songQueueIdToBePlayed = queueSongs[0].songQueueId;
+            } else if (isNewQueue && !songQueueId) {
+                songQueueIdToBePlayed = queueSongs.find(song => song.songId === songId).songQueueId;
+            } else {
+                songQueueIdToBePlayed = songQueueId;
+            }
         }
-        const { songs, isMoreSongsForwardForLoading, isMoreSongsBehindForLoading } = await this._getSongIdsForQueue(allSongs,
-            songId, songQueueId, shuffleEnabled, isNewQueue, extendForward);
-        const songsResponse = await this._formatSongs(listenerId, songs);
+
+        const songsResponse = await this._formatSongs(listenerId, queueSongs);
         if (isNewQueue) {
             await QueueModel.updateOne({ _id: listenerId }, { $set: { queue: allSongs, lastUsedOptions: options } }, { upsert: true });
-        }
-        let songQueueIdToBePlayed: string;
-        if (isNewQueue && !songQueueId && !songId) {
-            songQueueIdToBePlayed = songs[0].songQueueId;
-        } else if (isNewQueue && !songQueueId) {
-            songQueueIdToBePlayed = songs.find(song => song.songId === songId).songQueueId;
-        } else {
-            songQueueIdToBePlayed = songQueueId;
         }
 
         return {
