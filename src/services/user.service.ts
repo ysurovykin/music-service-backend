@@ -53,6 +53,7 @@ class UserService {
                 _id: playlistId,
                 name: 'Liked Songs',
                 editable: false,
+                pinned: true,
                 listenerId: userId,
                 backgroundColor: 'rgb(65, 177, 56)',
                 date: new Date()

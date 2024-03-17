@@ -194,10 +194,12 @@ class ArtistService {
 
     async getArtistsInListenerLibrary(listenerId: string, offset: number = 0,
         limit: number = 10): Promise<GetArtistsInListenerLibraryResponseType> {
-        const followedArtists = await FollowedArtistsModel.find({ listenerId: listenerId }).skip(+offset * +limit).limit(+limit).lean();
+        const followedArtists = await FollowedArtistsModel.find({ listenerId: listenerId })
+            .sort({ date: -1 }).skip(+offset * +limit).limit(+limit).lean();
         const artistIds = followedArtists.map(followedArtist => followedArtist.artistId);
         const artists = await ArtistModel.find({ _id: { $in: artistIds } }).lean();
-        const artstDtos: Array<ArtistInfoResponseDataType> = artists.map(artstData => new ArtistDto(artstData));
+        const sortedArtists = artists.sort((a, b) => artistIds.indexOf(a._id) - artistIds.indexOf(b._id));
+        const artstDtos: Array<ArtistInfoResponseDataType> = sortedArtists.map(artstData => new ArtistDto(artstData));
         return {
             followedArtists: artstDtos,
             isMoreFollowedArtistsForLoading: artstDtos.length === +limit

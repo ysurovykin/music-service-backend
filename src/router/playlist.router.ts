@@ -11,6 +11,7 @@ router.post('/edit', upload.single('image'), playlistController.editPlaylistById
 router.get('/playlists/:listenerId', playlistController.getPlaylistsByListenerId);
 router.get('/:playlistId', playlistController.getPlaylistById);
 router.post('/edit-song-paylists', playlistController.editSongPlaylists);
-
+router.post('/pin', playlistController.pinPlaylist);
+router.post('/unpin', playlistController.unpinPlaylist);
 
 export default router;

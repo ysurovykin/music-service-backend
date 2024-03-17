@@ -26,6 +26,7 @@ export type PlaylistInfoResponseDataType = {
   description: string;
   date: Date;
   editable: boolean;
+  pinned: boolean;
   coverImageUrl: string;
   tag: PlaylistTagEnum;
   backgroundColor: string;
@@ -59,6 +60,7 @@ const PlaylistSchema = model('Playlist', new Schema({
   coverImageUrl: { type: String, required: false },
   date: { type: Date, required: true },
   editable: { type: Boolean, required: true },
+  pinned: { type: Boolean, required: false },
   songIds: [PlaylistSongIdSchema],
   /**
    * @type {PlaylistTagEnum} playlist tag

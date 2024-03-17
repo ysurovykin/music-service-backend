@@ -3,15 +3,14 @@ import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage
 import { PlaylistInfoResponseDataType, CreatePlaylistRequestDataType, PlaylistTagEnum, EditedPlaylistType, EditPlaylistRequestDataType, PlaylistFullResponseDataType } from '../models/playlist.model';
 import ListenerModel from '../models/listener.model';
 import PlaylistModel from '../models/playlist.model';
-import SongModel, { SongInfoResponseDataType } from '../models/song.model';
+import SongModel from '../models/song.model';
 import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
-import songService from './song.service'
 import { getCoverDominantColor } from '../helpers/image-cover-color.helper';
 
 class PlaylistService {
 
-    async create(listenerId: string, playlistData: CreatePlaylistRequestDataType, file: Express.Multer.File): Promise<any> {
+    async create(listenerId: string, playlistData: CreatePlaylistRequestDataType, file: Express.Multer.File): Promise<void> {
         const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         if (!listener) {
             throw new NotFoundError(`User with id ${listenerId} not found`);
@@ -118,11 +117,11 @@ class PlaylistService {
     }
 
     async getPlaylistsByListenerId(listenerId: string): Promise<Array<PlaylistInfoResponseDataType>> {
-        const artist = await ListenerModel.findOne({ _id: listenerId }).lean();
-        if (!artist) {
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
+        if (!listener) {
             throw new NotFoundError(`User with id ${listenerId} not found`);
         }
-        const playlists = await PlaylistModel.find({ listenerId }).lean();
+        const playlists = await PlaylistModel.find({ listenerId }).sort({ pinned: -1, date: -1 }).lean();
         const playlistDatas: Array<PlaylistInfoResponseDataType> = [];
         for (const playlist of playlists) {
             const coverImageUrl = playlist.coverImageUrl ?
@@ -134,6 +133,7 @@ class PlaylistService {
                 description: playlist.description,
                 date: playlist.date,
                 editable: playlist.editable,
+                pinned: playlist.pinned,
                 tag: playlist.tag as PlaylistTagEnum,
                 coverImageUrl: coverImageUrl,
                 backgroundColor: playlist.backgroundColor
@@ -167,6 +167,7 @@ class PlaylistService {
             description: playlist.description,
             date: playlist.date,
             editable: playlist.editable,
+            pinned: playlist.pinned,
             coverImageUrl: coverImageUrl,
             backgroundColor: playlist.backgroundColor,
             tag: playlist.tag as PlaylistTagEnum,
@@ -191,6 +192,22 @@ class PlaylistService {
         const playlistIds = playlists.map(playlist => playlist._id);
 
         return playlistIds;
+    }
+
+    async pinPlaylist(listenerId: string, playlistId: string): Promise<void> {
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
+        if (!listener) {
+            throw new NotFoundError(`User with id ${listenerId} not found`);
+        }
+        await PlaylistModel.updateOne({ listenerId: listenerId, _id: playlistId }, { $set: { pinned: true } });
+    }
+
+    async unpinPlaylist(listenerId: string, playlistId: string): Promise<void> {
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
+        if (!listener) {
+            throw new NotFoundError(`User with id ${listenerId} not found`);
+        }
+        await PlaylistModel.updateOne({ listenerId: listenerId, _id: playlistId }, { $unset: { pinned: 1 } });
     }
 
 }

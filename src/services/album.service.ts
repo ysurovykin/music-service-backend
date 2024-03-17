@@ -154,11 +154,13 @@ class AlbumService {
 
     async getAlbumsInListenerLibrary(listenerId: string, offset: number = 0,
         limit: number = 10): Promise<GetAlbumsInListenerLibraryResponseType> {
-        const likedAlbums = await LikedAlbumstModel.find({ listenerId: listenerId }).skip(+offset * +limit).limit(+limit).lean();
+        const likedAlbums = await LikedAlbumstModel.find({ listenerId: listenerId })
+            .sort({ date: -1 }).skip(+offset * +limit).limit(+limit).lean();
         const albumIds = likedAlbums.map(likedAlbum => likedAlbum.albumId);
         const albums = await AlbumModel.find({ _id: { $in: albumIds } }).lean();
+        const sortedAlbums = albums.sort((a, b) => albumIds.indexOf(a._id) - albumIds.indexOf(b._id));
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
-        for (const album of albums) {
+        for (const album of sortedAlbums) {
             const artist = await ArtistModel.findOne({ _id: album.artistId }, { _id: 1, name: 1 });
             const artistData: ArtistShortDataType = {
                 name: artist.name,

@@ -56,6 +56,28 @@ class PlaylistController {
             next(error);
         }
     }
+
+    async pinPlaylist(req, res, next) {
+        try {
+            const { playlistId } = req.body;
+            const { listenerId } = req.query;
+            await playlistService.pinPlaylist(listenerId, playlistId);
+            return res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async unpinPlaylist(req, res, next) {
+        try {
+            const { playlistId } = req.body;
+            const { listenerId } = req.query;
+            await playlistService.unpinPlaylist(listenerId, playlistId);
+            return res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 const playlistController = new PlaylistController();
