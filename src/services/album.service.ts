@@ -8,6 +8,7 @@ import randomstring from 'randomstring';
 import SongModel from '../models/song.model';
 import { getDominantColorWithShadow } from '../helpers/image-cover-color.helper';
 import AlbumDto from '../dtos/album.dto';
+import listenerService from './listener.service';
 
 class AlbumService {
 
@@ -120,6 +121,9 @@ class AlbumService {
             },
         ]);
         const albumDto = new AlbumDto(album);
+
+        await listenerService._updateVisitedContent(listenerId, 'album', {...albumDto, artist: artistData, type: 'album'});
+
         return {
             ...albumDto,
             artist: artistData,

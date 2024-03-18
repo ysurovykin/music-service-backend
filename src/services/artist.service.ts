@@ -18,6 +18,7 @@ import { storage } from '../../firebase.config';
 import randomstring from 'randomstring';
 import { getDominantColorWithShadow } from '../helpers/image-cover-color.helper';
 import AlbumDto from '../dtos/album.dto';
+import listenerService from './listener.service';
 
 class ArtistService {
 
@@ -110,6 +111,9 @@ class ArtistService {
         const albumsWhereAppearsCount = await SongModel.distinct(('albumId'), { coArtistIds: artistId }).count();
 
         const artistDto = new ArtistDto(artist);
+
+        await listenerService._updateVisitedContent(listenerId, 'artist', {...artistDto, type: 'artist'});
+
         return {
             ...artistDto,
             isFollowed: !!followedArtistInfo,

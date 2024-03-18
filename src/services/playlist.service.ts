@@ -7,6 +7,8 @@ import SongModel from '../models/song.model';
 import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import { getCoverDominantColor } from '../helpers/image-cover-color.helper';
+import listenerService from './listener.service';
+import PlaylistDto from '../dtos/playlist.dto';
 
 class PlaylistService {
 
@@ -127,16 +129,10 @@ class PlaylistService {
             const coverImageUrl = playlist.coverImageUrl ?
                 playlist.coverImageUrl + '&token=' + randomstring.generate(16) :
                 '';
+            const playlistDto = new PlaylistDto(playlist)
             playlistDatas.push({
-                playlistId: playlist._id,
-                name: playlist.name,
-                description: playlist.description,
-                date: playlist.date,
-                editable: playlist.editable,
-                pinned: playlist.pinned,
-                tag: playlist.tag as PlaylistTagEnum,
-                coverImageUrl: coverImageUrl,
-                backgroundColor: playlist.backgroundColor
+                ...playlistDto,
+                coverImageUrl: coverImageUrl
             });
         }
         return playlistDatas;
@@ -161,16 +157,18 @@ class PlaylistService {
                 }
             },
         ]);
-        return {
-            playlistId,
-            name: playlist.name,
-            description: playlist.description,
-            date: playlist.date,
-            editable: playlist.editable,
-            pinned: playlist.pinned,
+
+        const playlistDto = new PlaylistDto(playlist);
+
+        await listenerService._updateVisitedContent(playlist.listenerId, 'playlist', {
+            ...playlistDto,
             coverImageUrl: coverImageUrl,
-            backgroundColor: playlist.backgroundColor,
-            tag: playlist.tag as PlaylistTagEnum,
+            type: 'playlist'
+        });
+
+        return {
+            ...playlistDto,
+            coverImageUrl: coverImageUrl,
             songsTimeDuration: +songsInfo[0]?.totalDuration,
             songsCount: +songsInfo[0]?.totalCount
         };

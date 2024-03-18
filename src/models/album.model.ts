@@ -19,7 +19,7 @@ export type AlbumWithoutArtistType = {
   coverImageUrl: string;
   backgroundColor: string;
   lyricsBackgroundShadow: string;
-  isAddedToLibrary: boolean;
+  isAddedToLibrary?: boolean;
 }
 
 export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
