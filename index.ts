@@ -10,6 +10,7 @@ import artistRouter from './src/router/artist.router.ts';
 import listenerRouter from './src/router/listener.router.ts';
 import playlistRouter from './src/router/playlist.router.ts';
 import queueRouter from './src/router/queue.router.ts';
+import lyricsRouter from './src/router/lyrics.router.ts';
 
 config();
 const PORT = process.env.PORT || 5000;
@@ -28,6 +29,7 @@ app.use('/artist', artistRouter);
 app.use('/listener', listenerRouter);
 app.use('/playlist', playlistRouter);
 app.use('/queue', queueRouter);
+app.use('/lyrics', lyricsRouter);
 
 const start = async () => {
     try {

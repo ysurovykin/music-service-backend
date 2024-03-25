@@ -57,7 +57,7 @@ export type GetArtistsInListenerLibraryResponseType = {
   isMoreFollowedArtistsForLoading: boolean; 
 }
 
-const ArtistSchema = model('Artist', new Schema({
+const ArtistModel = model('Artist', new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   description: { type: String, required: false },
@@ -80,4 +80,4 @@ const ArtistSchema = model('Artist', new Schema({
   songsCount: { type: Number, required: true, default: 0 }
 }));
 
-export default ArtistSchema;
+export default ArtistModel;

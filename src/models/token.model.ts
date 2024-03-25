@@ -5,9 +5,9 @@ export type TokenType = {
     refreshToken: string;
 };
 
-const TokenSchema = model('Token', new Schema({
+const TokenModel = model('Token', new Schema({
     userId: { type: String, required: true },
     refreshToken: { type: String, required: true }
 }));
 
-export default TokenSchema;
+export default TokenModel;

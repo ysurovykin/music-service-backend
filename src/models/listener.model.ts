@@ -30,7 +30,7 @@ const VisitedContentSchema = new Schema({
   visitsCounter: { type: Number, required: true },
 });
 
-const ListenerSchema = model('Listener', new Schema({
+const ListenerModel = model('Listener', new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   date: { type: Date, required: true },
@@ -39,4 +39,4 @@ const ListenerSchema = model('Listener', new Schema({
   visitedContent: [VisitedContentSchema]
 }));
 
-export default ListenerSchema;
+export default ListenerModel;

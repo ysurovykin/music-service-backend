@@ -63,7 +63,7 @@ export type GetSongsSortingOptionsType = {
     date?: number
 }
 
-const SongSchema = model('Song', new Schema({
+const SongModel = model('Song', new Schema({
     _id: { type: String },
     name: { type: String, required: true },
     artistId: { type: String, required: true },
@@ -80,4 +80,4 @@ const SongSchema = model('Song', new Schema({
     lyricsBackgroundShadow: { type: String, required: true }
 }));
 
-export default SongSchema;
+export default SongModel;

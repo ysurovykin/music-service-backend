@@ -52,7 +52,7 @@ const PlaylistSongIdSchema = new Schema({
   date: { type: Date, required: true }
 });
 
-const PlaylistSchema = model('Playlist', new Schema({
+const PlaylistModel = model('Playlist', new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   description: { type: String, required: false },
@@ -69,4 +69,4 @@ const PlaylistSchema = model('Playlist', new Schema({
   backgroundColor: { type: String, required: true }
 }));
 
-export default PlaylistSchema;
+export default PlaylistModel;
