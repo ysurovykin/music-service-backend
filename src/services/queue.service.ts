@@ -1,4 +1,4 @@
-import QueueModel, { QueueInfoResponseDataType, GenerateQueueOptionsType, QueueSongInfoResponseDataType, QueueSongType, UpdatedQueueDataType } from '../models/queue.model';
+import QueueModel, { QueueInfoResponseDataType, GenerateQueueOptionsType, QueueSongInfoResponseDataType, QueueSongType, UpdatedQueueDataType, RepeatSongStatesType, RepeatSongStateEnum } from '../models/queue.model';
 import songService from './song.service';
 import SongModel, { GetSongsSortingOptionsType, SongInfoResponseDataType, SongRecordType, } from '../models/song.model';
 import PlaylistModel from '../models/playlist.model';
@@ -48,7 +48,7 @@ class QueueService {
 
     async generateQueue(listenerId: string, songId: string, songQueueId: string, shuffleEnabled: boolean,
         isNewQueue: boolean, extendForward: boolean, options: GenerateQueueOptionsType, onlyLiked: boolean,
-        sortingOptions: GetSongsSortingOptionsType, search: string): Promise<QueueInfoResponseDataType> {
+        sortingOptions: GetSongsSortingOptionsType, search: string, repeatSongState: RepeatSongStatesType): Promise<QueueInfoResponseDataType> {
         const currentQueue = await QueueModel.findOne({ _id: listenerId }).lean();
         let likedSongIds: Array<string>;
         if (onlyLiked) {
@@ -123,7 +123,8 @@ class QueueService {
             } else {
                 allSongs = currentQueue.queue;
             }
-            const result = await this._getSongIdsForQueue(allSongs, songId, songQueueId, shuffleEnabled, isNewQueue, extendForward);
+            const result = await
+                this._getSongIdsForQueue(allSongs, songId, songQueueId, shuffleEnabled, repeatSongState, isNewQueue, extendForward);
             queueSongs = result.songs;
             isMoreSongsForwardForLoading = result.isMoreSongsForwardForLoading;
             isMoreSongsBehindForLoading = result.isMoreSongsBehindForLoading;
@@ -166,7 +167,7 @@ class QueueService {
     }
 
     async _getSongIdsForQueue(allSongs: Array<QueueSongType>, songId: string, songQueueId: string, shuffleEnabled: boolean,
-        isNewQueue: boolean, extendForward: boolean): Promise<{
+        repeatSongState: RepeatSongStatesType, isNewQueue: boolean, extendForward: boolean): Promise<{
             songs: Array<QueueSongType>,
             isMoreSongsForwardForLoading: boolean,
             isMoreSongsBehindForLoading: boolean
@@ -176,6 +177,8 @@ class QueueService {
         }
         let startIndex: number;
         let endIndex: number;
+        let additionalStartIndex: number;
+        let additionalEndIndex: number;
         let isMoreSongsForwardForLoading: boolean;
         let isMoreSongsBehindForLoading: boolean;
         if (isNewQueue && !songId && !songQueueId) {
@@ -195,19 +198,48 @@ class QueueService {
         } else {
             const currentSongIndex = allSongs.findIndex(song => song.songQueueId === songQueueId);
             if (extendForward) {
-                const lastPossibleIndex = allSongs.length - 1;
-                startIndex = currentSongIndex + 1;
-                endIndex = Math.min(currentSongIndex + 9, lastPossibleIndex);
-                isMoreSongsForwardForLoading = endIndex !== lastPossibleIndex;
+                const currentEndIndex = currentSongIndex + 9;
+                if (repeatSongState === RepeatSongStateEnum.loop) {
+                    const lastPossibleIndex = allSongs.length - 1;
+                    startIndex = currentSongIndex + 1;
+                    endIndex = Math.min(currentEndIndex, lastPossibleIndex);
+                    if (currentEndIndex > lastPossibleIndex) {
+                        additionalEndIndex = currentEndIndex - lastPossibleIndex;
+                    }
+                    isMoreSongsForwardForLoading = true;
+                } else {
+                    const lastPossibleIndex = allSongs.length - 1;
+                    startIndex = currentSongIndex + 1;
+                    endIndex = Math.min(currentEndIndex, lastPossibleIndex);
+                    isMoreSongsForwardForLoading = endIndex !== lastPossibleIndex;
+                }
             } else {
-                const lastPossibleIndex = 0;
-                startIndex = Math.max(currentSongIndex - 9, lastPossibleIndex);
-                endIndex = currentSongIndex - 1;
-                isMoreSongsBehindForLoading = startIndex !== lastPossibleIndex;
+                const currentStartIndex = currentSongIndex - 9;
+                if (repeatSongState === RepeatSongStateEnum.loop) {
+                    const lastPossibleIndex = 0;
+                    startIndex = Math.max(currentStartIndex, lastPossibleIndex);
+                    endIndex = currentSongIndex - 1;
+                    if (currentStartIndex < lastPossibleIndex) {
+                        additionalStartIndex = allSongs.length - (lastPossibleIndex - currentStartIndex);
+                    }
+                    isMoreSongsBehindForLoading = true;
+                } else {
+                    const lastPossibleIndex = 0;
+                    startIndex = Math.max(currentStartIndex, lastPossibleIndex);
+                    endIndex = currentSongIndex - 1;
+                    isMoreSongsBehindForLoading = startIndex !== lastPossibleIndex;
+                }
             }
         }
 
-        const songs = allSongs.slice(startIndex, endIndex + 1);
+        let songs: Array<QueueSongType> = allSongs.slice(startIndex, endIndex + 1);
+        if (additionalStartIndex) {
+            const additionalSongs = allSongs.slice(additionalStartIndex, allSongs.length - 1);
+            songs = [...additionalSongs, ...songs];
+        } else if (additionalEndIndex) {
+            const additionalSongs = allSongs.slice(0, additionalEndIndex);
+            songs = [...songs, ...additionalSongs];
+        }
 
         return {
             songs,

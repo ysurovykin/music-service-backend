@@ -14,10 +14,11 @@ class QueueController {
 
     async generateQueue(req, res, next) {
         try {
-            const { songId, songQueueId, shuffleEnabled, isNewQueue, extendForward, options, onlyLiked, sortingOptions, search } = req.body;
+            const { songId, songQueueId, shuffleEnabled, isNewQueue, extendForward, options, onlyLiked,
+                sortingOptions, search, repeatSongState } = req.body;
             const { listenerId } = req.query;
-            const response: QueueInfoResponseDataType = await queueService.generateQueue(listenerId, songId, songQueueId, 
-                shuffleEnabled, isNewQueue, extendForward, options, onlyLiked, sortingOptions, search);
+            const response: QueueInfoResponseDataType = await queueService.generateQueue(listenerId, songId, songQueueId,
+                shuffleEnabled, isNewQueue, extendForward, options, onlyLiked, sortingOptions, search, repeatSongState);
             return res.json(response);
         } catch (error) {
             next(error);

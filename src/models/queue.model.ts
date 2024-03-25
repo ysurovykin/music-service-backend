@@ -28,6 +28,14 @@ export type UpdatedQueueDataType = {
     lastUsedOptions?: GenerateQueueOptionsType;
 }
 
+export enum RepeatSongStateEnum {
+    'none' = 'none',
+    'loop' = 'loop',
+    'one' = 'one'
+}
+
+export type RepeatSongStatesType = 'none' | 'loop' | 'one';
+
 const QueueSongSchema = new Schema({
     songId: { type: String, required: true },
     songQueueId: { type: String, required: true }
