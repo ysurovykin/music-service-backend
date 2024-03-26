@@ -6,8 +6,9 @@ import songController from '../controllers/song.controller';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.get('/songs', songController.getSongs);
-router.get('/:songId', songController.getSongById);
-router.post('/upload', upload.single('song'), songController.upload);
+router.get('/songs', authMiddleware, songController.getSongs);
+router.get('/:songId', authMiddleware, songController.getSongById);
+router.post('/upload', authMiddleware, upload.single('song'), songController.upload);
+router.post('/record-song-play-row-data', authMiddleware, songController.recordSongPlayRowData);
 
 export default router;

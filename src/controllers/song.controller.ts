@@ -34,6 +34,18 @@ class SongController {
         }
     }
 
+    async recordSongPlayRowData(req, res, next) {
+        try {
+            const { songId, time } = req.body;
+            const { listenerId } = req.query;
+            await songService.recordSongPlayRowData(listenerId, songId, time);
+            return res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
 }
 
 const songController = new SongController();

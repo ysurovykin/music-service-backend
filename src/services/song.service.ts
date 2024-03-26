@@ -16,6 +16,7 @@ import SongDto from '../dtos/song.dto';
 import ArtistModel from '../models/artist.model';
 import PlaylistModel from '../models/playlist.model';
 import { ArtistShortDataType } from '../models/artist.model';
+import SongPlaysRawDataModel from '../models/song-plays-raw-data.model';
 
 class SongService {
 
@@ -168,6 +169,17 @@ class SongService {
             songs: songsResponse,
             isMoreSongsForLoading: songs.length === +limit
         };
+    }
+
+    async recordSongPlayRowData(listenerId: string, songId: string, time: number) {
+        const rowDataId = randomstring.generate(16);
+        await SongPlaysRawDataModel.create({
+            _id: rowDataId,
+            listenerId: listenerId,
+            songId: songId,
+            time: time,
+            date: new Date()
+        })
     }
 
     async formatSongData(listenerId: string, song: SongRecordType): Promise<SongInfoResponseDataType> {

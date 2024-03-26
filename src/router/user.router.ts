@@ -9,8 +9,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.post('/login', userController.login);
 router.post('/logout', userController.logout);
 router.post('/registration', userController.registration);
-router.post('/refresh', userController.refresh);
+router.get('/refresh', userController.refresh);
 
-router.get('/:email', userController.getUserByEmail);
+router.get('/:email', authMiddleware, userController.getUserByEmail);
 
 export default router;

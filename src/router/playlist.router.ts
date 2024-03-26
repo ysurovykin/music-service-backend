@@ -6,12 +6,12 @@ import playlistController from '../controllers/playlist.controller';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/create', upload.single('image'), playlistController.create);
-router.post('/edit', upload.single('image'), playlistController.editPlaylistById);
-router.get('/playlists/:listenerId', playlistController.getPlaylistsByListenerId);
-router.get('/:playlistId', playlistController.getPlaylistById);
-router.post('/edit-song-paylists', playlistController.editSongPlaylists);
-router.post('/pin', playlistController.pinPlaylist);
-router.post('/unpin', playlistController.unpinPlaylist);
+router.post('/create', authMiddleware, upload.single('image'), playlistController.create);
+router.post('/edit', authMiddleware, upload.single('image'), playlistController.editPlaylistById);
+router.get('/playlists/:listenerId', authMiddleware, playlistController.getPlaylistsByListenerId);
+router.get('/:playlistId', authMiddleware, playlistController.getPlaylistById);
+router.post('/edit-song-paylists', authMiddleware, playlistController.editSongPlaylists);
+router.post('/pin', authMiddleware, playlistController.pinPlaylist);
+router.post('/unpin', authMiddleware, playlistController.unpinPlaylist);
 
 export default router;

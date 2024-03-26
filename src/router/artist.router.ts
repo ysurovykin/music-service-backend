@@ -6,15 +6,15 @@ import artistController from '../controllers/artist.controller';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.get('/artists', artistController.getArtists);
-router.get('/:artistId', artistController.getArtistById);
-router.post('/change-profile-image', upload.single('image'), artistController.changeArtistProfileImage);
-router.post('/remove-profile-image', artistController.removeArtistProfileImage);
-router.post('/follow', artistController.followArtist);
-router.post('/unfollow', artistController.unfollowArtist);
-router.get('/genres/:artistId', artistController.getGenres);
-router.get('/most-recent-release/:artistId', artistController.getMostRecentRelease);
-router.get('/artists-in-library/:listenerId', artistController.getArtistsInListenerLibrary);
+router.get('/artists', authMiddleware, artistController.getArtists);
+router.get('/:artistId', authMiddleware, artistController.getArtistById);
+router.post('/change-profile-image', upload.single('image'), authMiddleware, artistController.changeArtistProfileImage);
+router.post('/remove-profile-image', authMiddleware, artistController.removeArtistProfileImage);
+router.post('/follow', authMiddleware, artistController.followArtist);
+router.post('/unfollow', authMiddleware, artistController.unfollowArtist);
+router.get('/genres/:artistId', authMiddleware, artistController.getGenres);
+router.get('/most-recent-release/:artistId', authMiddleware, artistController.getMostRecentRelease);
+router.get('/artists-in-library/:listenerId', authMiddleware, artistController.getArtistsInListenerLibrary);
 
 
 export default router;

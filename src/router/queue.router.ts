@@ -1,11 +1,12 @@
 import { Router } from 'express';
+import authMiddleware from '../middlewares/auth.middleware';
 import queueController from '../controllers/queue.controller';
 
 const router = Router();
 
-router.get('/', queueController.getQueue);
-router.post('/generate', queueController.generateQueue);
-router.post('/add-song', queueController.addSongToQueue);
-router.post('/remove-song', queueController.removeSongFromQueue);
+router.get('/', authMiddleware, queueController.getQueue);
+router.post('/generate', authMiddleware, queueController.generateQueue);
+router.post('/add-song', authMiddleware, queueController.addSongToQueue);
+router.post('/remove-song', authMiddleware, queueController.removeSongFromQueue);
 
 export default router;

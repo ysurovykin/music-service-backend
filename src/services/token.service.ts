@@ -10,8 +10,8 @@ type TokensType = {
 class TokenService {
 
     generateTokens(payload: UserDto): TokensType {
-        const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '30s' })
-        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' })
+        const accessToken = jwt.sign(payload, process.env.LISTENER_JWT_ACCESS_SECRET, { expiresIn: '24h' })
+        const refreshToken = jwt.sign(payload, process.env.LISTENER_JWT_REFRESH_SECRET, { expiresIn: '30d' })
 
         return {
             accessToken,
@@ -34,7 +34,7 @@ class TokenService {
 
     validateAccessToken(token: string): UserDto | null {
         try {
-            const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+            const userData = jwt.verify(token, process.env.LISTENER_JWT_ACCESS_SECRET);
             return userData as UserDto;
         } catch (error) {
             return null;
@@ -43,7 +43,7 @@ class TokenService {
 
     validateRefreshToken(token: string): UserDto | null {
         try {
-            const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+            const userData = jwt.verify(token, process.env.LISTENER_JWT_REFRESH_SECRET);
             return userData as UserDto;
         } catch (error) {
             return null;
