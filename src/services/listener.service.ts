@@ -41,14 +41,14 @@ class ListenerService {
         } else {
             let visitedContentToParse = [];
             const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-            const mostRecentVisited = visitedContent.filter(contnet => contnet.lastVisited < oneWeekAgo);
+            const mostRecentVisited = visitedContent.filter(contnet => contnet.lastVisited > oneWeekAgo);
             if (mostRecentVisited.length >= 8) {
                 mostRecentVisited.sort((a, b) => b.visitsCounter - a.visitsCounter);
-                visitedContentToParse.slice(0, 8);
+                visitedContentToParse = visitedContentToParse.slice(0, 8);
             } else {
-                const oldVisited = visitedContent.filter(contnet => contnet.lastVisited > oneWeekAgo);
+                const oldVisited = visitedContent.filter(contnet => contnet.lastVisited < oneWeekAgo);
                 const mostRecentVisitedSorted = mostRecentVisited
-                    .sort((a, b) => a.visitsCounter - b.visitsCounter);
+                    .sort((a, b) => b.visitsCounter - a.visitsCounter);
                 const oldVisitedSorted = oldVisited.sort((a, b) => b.visitsCounter - a.visitsCounter)
                     .slice(0, 8 - mostRecentVisitedSorted.length);
                 visitedContentToParse = [...mostRecentVisited, ...oldVisitedSorted];
@@ -120,23 +120,33 @@ class ListenerService {
         }
         const visitedContentInfo = visitedContent && visitedContent.find(item => item.type === contentType && item.contnetId === contentId);
         if (visitedContentInfo) {
-            await ListenerModel.updateOne({ _id: listenerId, 'visitedContent.type': contentType, 'visitedContent.contentId': contentId},
+            await ListenerModel.updateOne({ _id: listenerId },
                 {
-                    $set: { "visitedContent.$.lastVisited": new Date() },
-                    $inc: { "visitedContent.$.visitsCounter": 1 }
+                    $set: { "visitedContent.$[updateElement].lastVisited": new Date() },
+                    $inc: { "visitedContent.$[updateElement].visitsCounter": 1 }
+                },
+                {
+                    arrayFilters: [
+                        {
+                            'updateElement.contnetId': contentId,
+                            'updateElement.type': contentType
+                        }
+                    ]
                 }
             )
         } else {
-            await ListenerModel.updateOne({ _id: listenerId},
-            {
-                $push: { "visitedContent": {
-                    type: contentType,
-                    contnetId: contentId,
-                    lastVisited: new Date(),
-                    visitsCounter: 1
-                } },
-            }
-        )
+            await ListenerModel.updateOne({ _id: listenerId },
+                {
+                    $push: {
+                        "visitedContent": {
+                            type: contentType,
+                            contnetId: contentId,
+                            lastVisited: new Date(),
+                            visitsCounter: 1
+                        }
+                    },
+                }
+            )
         }
     }
 
