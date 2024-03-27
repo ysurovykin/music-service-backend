@@ -11,7 +11,6 @@ export type CreateArtistRequestDataType = {
   country: string;
   description?: string;
   socialLinks?: Array<ArtistSocialLinks>;
-  followers: number;
   genres: Array<string>;
 };
 
@@ -27,6 +26,7 @@ export type ArtistInfoResponseDataType = {
   description: string;
   socialLinks: Array<ArtistSocialLinks>;
   followers: number;
+  monthlyListeners: number;
   profileImageUrl: string;
   backgroundColor: string;
   songsCount: number;
@@ -74,6 +74,9 @@ const ArtistModel = model('Artist', new Schema({
    */
   genres: { type: Object, required: false },
   followers: { type: Number, required: true, default: 0 },
+  followersUpdatedAt: { type: Date, required: false },
+  monthlyListeners: { type: Number, required: true, default: 0 },
+  monthlyListenersUpdatedAt: { type: Date, required: false },
   date: { type: Date, required: true },
   profileImageUrl: { type: String, required: false },
   backgroundColor: { type: String, required: false },

@@ -36,6 +36,7 @@ const ListenerModel = model('Listener', new Schema({
   date: { type: Date, required: true },
   profileImageUrl: { type: String, required: false },
   backgroundColor: { type: String, required: false },
+  lastProcessedSongPlayDataAt: { type: Date, required: false },
   visitedContent: [VisitedContentSchema]
 }));
 

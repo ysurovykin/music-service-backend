@@ -2,11 +2,11 @@ import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import AlbumModel, { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType, GetAlbumsInListenerLibraryResponseType, GetAlbumsResponseType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
-import LikedAlbumstModel from '../models/liked-albums.model';
+import LikedAlbumstModel from '../models/likedAlbums.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import SongModel from '../models/song.model';
-import { getDominantColorWithShadow } from '../helpers/image-cover-color.helper';
+import { getDominantColorWithShadow } from '../helpers/imageCoverColor.helper';
 import AlbumDto from '../dtos/album.dto';
 import listenerService from './listener.service';
 

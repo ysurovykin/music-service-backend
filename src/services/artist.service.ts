@@ -6,17 +6,17 @@ import ArtistModel, {
     GetArtistsInListenerLibraryResponseType,
     GetArtistsResponseType
 } from '../models/artist.model';
-import FollowedArtistsModel from '../models/followed-artists.model';
+import FollowedArtistsModel from '../models/followedArtists.model';
 import { NotFoundError } from '../errors/api-errors';
 import ArtistDto from '../dtos/artist.dto';
 import SongModel from '../models/song.model';
-import LikedAlbumstModel from '../models/liked-albums.model';
+import LikedAlbumstModel from '../models/likedAlbums.model';
 import AlbumModel, { AlbumFullResponseDataType } from '../models/album.model';
 import PlaylistModel from '../models/playlist.model';
 import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../firebase.config';
 import randomstring from 'randomstring';
-import { getDominantColorWithShadow } from '../helpers/image-cover-color.helper';
+import { getDominantColorWithShadow } from '../helpers/imageCoverColor.helper';
 import AlbumDto from '../dtos/album.dto';
 import listenerService from './listener.service';
 

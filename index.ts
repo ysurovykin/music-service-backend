@@ -11,6 +11,10 @@ import listenerRouter from './src/router/listener.router.ts';
 import playlistRouter from './src/router/playlist.router.ts';
 import queueRouter from './src/router/queue.router.ts';
 import lyricsRouter from './src/router/lyrics.router.ts';
+import { registerJob } from './src/jobs/jobRegister.ts';
+import { processSongPlayRawDataJob } from './src/jobs/song/processSongPlayRawData.job.ts';
+import { updateArtistMonthlyListenersJob } from './src/jobs/song/updateArtistMonthlyListeners.job.ts';
+import { updateArtistFollowersJob } from './src/jobs/song/updateArtistFollowers.job.ts';
 
 config();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +42,9 @@ const start = async () => {
             useNewUrlParser: true,
             useUnifiedTopology: true
         } as ConnectOptions);
+        registerJob(processSongPlayRawDataJob, 60 * 24); //once a day
+        registerJob(updateArtistMonthlyListenersJob, 60 * 24); //once a day
+        registerJob(updateArtistFollowersJob, 60 * 24); //once a day
         app.listen(PORT, () => console.log(`Server started on PORT = ${PORT}`));
     } catch (error) {
         console.log(error);

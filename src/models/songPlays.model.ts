@@ -9,7 +9,7 @@ const SongPlaysModel = model('SongPlays', new Schema({
   listenerId: { type: String, required: true },
   songId: { type: String, required: true },
 
-  // plays: {'MM/yyyy': SongPlaysType}
+  // plays: {'yyyy/MM': SongPlaysType}
   plays: { type: Object, required: true }
 }));
 

@@ -10,7 +10,7 @@ export default class SongDto {
         this.songId = model._id;
         this.name = model.name;
         this.duration = model.duration;
-        this.plays = model.plays;
+        this.plays = Math.floor(model.plays);
         this.date = model.date;
         this.backgroundColor = model.backgroundColor;
     }

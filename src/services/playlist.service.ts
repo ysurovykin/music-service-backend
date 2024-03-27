@@ -6,7 +6,7 @@ import PlaylistModel from '../models/playlist.model';
 import SongModel from '../models/song.model';
 import { NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
-import { getCoverDominantColor } from '../helpers/image-cover-color.helper';
+import { getCoverDominantColor } from '../helpers/imageCoverColor.helper';
 import listenerService from './listener.service';
 import PlaylistDto from '../dtos/playlist.dto';
 
