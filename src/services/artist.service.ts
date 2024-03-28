@@ -113,7 +113,7 @@ class ArtistService {
 
         const artistDto = new ArtistDto(artist);
 
-        await listenerService._updateVisitedContent(listenerId, 'artist', {...artistDto, type: 'artist'});
+        await listenerService._updateVisitedContent(listenerId, 'artist', { ...artistDto, type: 'artist' });
 
         return {
             ...artistDto,
@@ -210,6 +210,33 @@ class ArtistService {
             followedArtists: artstDtos,
             isMoreFollowedArtistsForLoading: artstDtos.length === +limit
         };
+    }
+
+    async getFansAlsoLikeArtists(listenerId: string, artistId: string): Promise<Array<ArtistInfoResponseDataType>> {
+        const fans = await FollowedArtistsModel.find({ listenerId: { $ne: listenerId }, artistId: artistId }, { listenerId: 1 }).lean();
+        const fansIds = fans.map(fan => fan.listenerId);
+        const results = await FollowedArtistsModel.aggregate([
+            { $match: { listenerId: { $in: fansIds }, artistId: { $ne: artistId } } },
+            {
+                $group: {
+                    _id: '$artistId',
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { count: -1 } },
+            { $limit: 10 },
+            {
+                $project: {
+                    _id: 0,
+                    artistId: '$_id',
+                    count: '$count',
+                },
+            },
+        ]);
+        const artistIds = results.map(artist => artist.artistId);
+        const artists = await ArtistModel.find({ _id: { $in: artistIds } }).lean();
+        const artstDtos: Array<ArtistInfoResponseDataType> = artists.map(artstData => new ArtistDto(artstData));
+        return artstDtos;
     }
 
 }
