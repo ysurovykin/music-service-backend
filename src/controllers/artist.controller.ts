@@ -89,8 +89,8 @@ class ArtistController {
     async getArtistsInListenerLibrary(req, res, next) {
         try {
             const { listenerId } = req.params;
-            const { offset, limit } = req.query;
-            const response = await artistService.getArtistsInListenerLibrary(listenerId, offset, limit);
+            const { offset, limit, search } = req.query;
+            const response = await artistService.getArtistsInListenerLibrary(listenerId, offset, limit, search);
             return res.json(response);
         } catch (error) {
             next(error);

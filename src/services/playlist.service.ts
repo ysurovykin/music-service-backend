@@ -118,12 +118,14 @@ class PlaylistService {
         }
     }
 
-    async getPlaylistsByListenerId(listenerId: string): Promise<Array<PlaylistInfoResponseDataType>> {
+    async getPlaylistsByListenerId(listenerId: string, search: string = ''): Promise<Array<PlaylistInfoResponseDataType>> {
         const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         if (!listener) {
             throw new NotFoundError(`User with id ${listenerId} not found`);
         }
-        const playlists = await PlaylistModel.find({ listenerId }).sort({ pinned: -1, date: -1 }).lean();
+        search = search.replace('/', '');
+        const playlists = await PlaylistModel.find({ listenerId, name: { $regex: search, $options: 'i' } })
+            .sort({ pinned: -1, date: -1 }).lean();
         const playlistDatas: Array<PlaylistInfoResponseDataType> = [];
         for (const playlist of playlists) {
             const coverImageUrl = playlist.coverImageUrl ?

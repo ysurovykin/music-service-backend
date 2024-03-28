@@ -25,6 +25,7 @@ class ArtistService {
     async getArtists(offset: number, limit: number, search: string): Promise<GetArtistsResponseType> {
         let artstDtos: Array<ArtistInfoResponseDataType>;
         if (search) {
+            search = search.replace('/', '');
             const artists = await ArtistModel.find({ name: { $regex: search, $options: 'i' } }).sort({ followers: -1 })
                 .skip(+offset * +limit).limit(+limit).lean();
             artstDtos = artists.map(artstData => new ArtistDto(artstData));
@@ -197,11 +198,12 @@ class ArtistService {
     }
 
     async getArtistsInListenerLibrary(listenerId: string, offset: number = 0,
-        limit: number = 10): Promise<GetArtistsInListenerLibraryResponseType> {
+        limit: number = 10, search: string = ''): Promise<GetArtistsInListenerLibraryResponseType> {
         const followedArtists = await FollowedArtistsModel.find({ listenerId: listenerId })
             .sort({ date: -1 }).skip(+offset * +limit).limit(+limit).lean();
         const artistIds = followedArtists.map(followedArtist => followedArtist.artistId);
-        const artists = await ArtistModel.find({ _id: { $in: artistIds } }).lean();
+        search = search.replace('/', '');
+        const artists = await ArtistModel.find({ _id: { $in: artistIds }, name: { $regex: search, $options: 'i' } }).lean();
         const sortedArtists = artists.sort((a, b) => artistIds.indexOf(a._id) - artistIds.indexOf(b._id));
         const artstDtos: Array<ArtistInfoResponseDataType> = sortedArtists.map(artstData => new ArtistDto(artstData));
         return {

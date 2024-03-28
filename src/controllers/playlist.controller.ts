@@ -29,7 +29,8 @@ class PlaylistController {
     async getPlaylistsByListenerId(req, res, next) {
         try {
             const { listenerId } = req.params;
-            const playlist = await playlistService.getPlaylistsByListenerId(listenerId);
+            const { search } = req.query;
+            const playlist = await playlistService.getPlaylistsByListenerId(listenerId, search);
             return res.json(playlist);
         } catch (error) {
             next(error);

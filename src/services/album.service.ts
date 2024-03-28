@@ -122,7 +122,7 @@ class AlbumService {
         ]);
         const albumDto = new AlbumDto(album);
 
-        await listenerService._updateVisitedContent(listenerId, 'album', {...albumDto, artist: artistData, type: 'album'});
+        await listenerService._updateVisitedContent(listenerId, 'album', { ...albumDto, artist: artistData, type: 'album' });
 
         return {
             ...albumDto,
@@ -157,11 +157,12 @@ class AlbumService {
     }
 
     async getAlbumsInListenerLibrary(listenerId: string, offset: number = 0,
-        limit: number = 10): Promise<GetAlbumsInListenerLibraryResponseType> {
+        limit: number = 10, search: string = ''): Promise<GetAlbumsInListenerLibraryResponseType> {
         const likedAlbums = await LikedAlbumstModel.find({ listenerId: listenerId })
             .sort({ date: -1 }).skip(+offset * +limit).limit(+limit).lean();
         const albumIds = likedAlbums.map(likedAlbum => likedAlbum.albumId);
-        const albums = await AlbumModel.find({ _id: { $in: albumIds } }).lean();
+        search = search.replace('/', '');
+        const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' } }).lean();
         const sortedAlbums = albums.sort((a, b) => albumIds.indexOf(a._id) - albumIds.indexOf(b._id));
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of sortedAlbums) {
@@ -183,7 +184,8 @@ class AlbumService {
         };
     }
 
-    async getAlbums(offset: number = 0, limit: number = 10, search: string): Promise<GetAlbumsResponseType> {
+    async getAlbums(offset: number = 0, limit: number = 10, search: string = ''): Promise<GetAlbumsResponseType> {
+        search = search.replace('/', '');
         const albums = await AlbumModel.find({ name: { $regex: search, $options: 'i' } }).sort({ likes: -1 })
             .skip(+offset * +limit).limit(+limit).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];

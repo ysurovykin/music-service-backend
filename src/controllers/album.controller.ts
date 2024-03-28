@@ -71,8 +71,8 @@ class AlbumController {
     async getAlbumsInListenerLibrary(req, res, next) {
         try {
             const { listenerId } = req.params;
-            const { offset, limit } = req.query;
-            const response = await albumService.getAlbumsInListenerLibrary(listenerId, offset, limit);
+            const { offset, limit, search } = req.query;
+            const response = await albumService.getAlbumsInListenerLibrary(listenerId, offset, limit, search);
             return res.json(response);
         } catch (error) {
             next(error);
