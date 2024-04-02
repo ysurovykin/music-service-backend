@@ -11,10 +11,12 @@ import listenerRouter from './src/router/listener.router.ts';
 import playlistRouter from './src/router/playlist.router.ts';
 import queueRouter from './src/router/queue.router.ts';
 import lyricsRouter from './src/router/lyrics.router.ts';
+import songRadioRouter from './src/router/songRadio.router.ts';
 import { registerJob } from './src/jobs/jobRegister.ts';
 import { processSongPlayRawDataJob } from './src/jobs/song/processSongPlayRawData.job.ts';
 import { updateArtistMonthlyListenersJob } from './src/jobs/song/updateArtistMonthlyListeners.job.ts';
 import { updateArtistFollowersJob } from './src/jobs/song/updateArtistFollowers.job.ts';
+import errorMiddleware from './src/middlewares/error.middleware.ts';
 
 config();
 const PORT = process.env.PORT || 5000;
@@ -34,6 +36,8 @@ app.use('/listener', listenerRouter);
 app.use('/playlist', playlistRouter);
 app.use('/queue', queueRouter);
 app.use('/lyrics', lyricsRouter);
+app.use('/song-radio', songRadioRouter);
+app.use(errorMiddleware);
 
 const start = async () => {
     try {

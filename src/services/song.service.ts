@@ -17,6 +17,7 @@ import ArtistModel from '../models/artist.model';
 import PlaylistModel from '../models/playlist.model';
 import { ArtistShortDataType } from '../models/artist.model';
 import SongPlaysRawDataModel from '../models/songPlaysRawData.model';
+import SongRadioModel from '../models/songRadio.model';
 
 class SongService {
 
@@ -99,7 +100,7 @@ class SongService {
     }
 
     async getSongs(listenerId: string, offset: number = 0, limit: number = 10, options?: GetSongsOptionsType,
-        onlyLiked?: boolean, sortingOptions?: GetSongsSortingOptionsType, search?: string): Promise<GetSongsResponseDataType> {
+        onlyLiked?: boolean, sortingOptions?: GetSongsSortingOptionsType, search: string = ''): Promise<GetSongsResponseDataType> {
         let songs: Array<SongRecordType> = [];
         options = !options || typeof options === 'object' ? options : JSON.parse(options);
         const songsToSkip = +limit * +offset;
@@ -109,12 +110,14 @@ class SongService {
             likedSongIds = likedSongs.songIds.map(song => song.id);
         }
         if (!options) {
+            search = search.replace('/', '');
             songs = await SongModel.find({ name: { $regex: search, $options: 'i' } })
                 .sort({ plays: -1 }).skip(songsToSkip).limit(+limit).lean();
         } else {
             const playlistId = options.playlistId;
             const albumId = options.albumId;
             const artistId = options.artistId;
+            const songRadioBaseSongId = options.songRadioBaseSongId;
             if (playlistId) {
                 const songsAggregate = await PlaylistModel.aggregate([
                     { $match: { _id: playlistId } },
@@ -157,6 +160,11 @@ class SongService {
                     findRequest._id = { $in: likedSongIds };
                 }
                 songs = await SongModel.find(findRequest).sort(sortingRequest).skip(songsToSkip).limit(+limit).lean();
+            } else if (songRadioBaseSongId) {
+                const songRadio = await SongRadioModel.findOne({ listenerId: listenerId, baseSongId: songRadioBaseSongId }).lean();
+                const allSongs = await SongModel.find({ _id: { $in: songRadio.songIds } }).lean();
+                const sortedSongs = allSongs.sort((a, b) => songRadio.songIds.indexOf(a._id) - songRadio.songIds.indexOf(b._id));
+                songs = sortedSongs.slice(songsToSkip, +limit + songsToSkip);
             }
         }
         const songsResponse: Array<SongInfoResponseDataType> = [];

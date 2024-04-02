@@ -16,6 +16,7 @@ export type GenerateQueueOptionsType = {
     albumId?: string;
     artistId?: string;
     playlistId?: string;
+    songRadioBaseSongId?: string;
 }
 
 export type QueueSongType = {
