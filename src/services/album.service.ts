@@ -38,8 +38,8 @@ class AlbumService {
             name: albumData.name,
             artistId: artist._id,
             coverImageUrl,
-            languages: [],
-            genres: [],
+            languages: {},
+            genres: {},
             backgroundColor: backgroundColor.backgroundColor,
             lyricsBackgroundShadow: backgroundColor.lyricsBackgroundShadow,
             date: new Date()

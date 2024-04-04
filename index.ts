@@ -17,6 +17,7 @@ import { processSongPlayRawDataJob } from './src/jobs/song/processSongPlayRawDat
 import { updateArtistMonthlyListenersJob } from './src/jobs/song/updateArtistMonthlyListeners.job.ts';
 import { updateArtistFollowersJob } from './src/jobs/song/updateArtistFollowers.job.ts';
 import errorMiddleware from './src/middlewares/error.middleware.ts';
+import { generateHomePageContentJob } from './src/jobs/listener/generateHomePageContent.job.ts';
 
 config();
 const PORT = process.env.PORT || 5000;
@@ -49,6 +50,7 @@ const start = async () => {
         registerJob(processSongPlayRawDataJob, 60 * 24); //once a day
         registerJob(updateArtistMonthlyListenersJob, 60 * 24); //once a day
         registerJob(updateArtistFollowersJob, 60 * 24); //once a day
+        registerJob(generateHomePageContentJob, 60 * 6); //every 6 hours
         app.listen(PORT, () => console.log(`Server started on PORT = ${PORT}`));
     } catch (error) {
         console.log(error);

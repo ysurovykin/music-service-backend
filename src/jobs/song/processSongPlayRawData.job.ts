@@ -4,10 +4,11 @@ import SongPlaysRawDataModel from "../../models/songPlaysRawData.model";
 import SongPlaysModel from "../../models/songPlays.model";
 import SongModel from "../../models/song.model";
 import ArtistPlaysModel from "../../models/artistPlays.model";
+import AlbumPlaysModel from "../../models/albumPlays.model";
 
 export async function processSongPlayRawDataJob() {
   try {
-    const dayAgoDate = moment().subtract(1, 'day');
+    const dayAgoDate = moment().subtract(1, 'day').toDate();
     const listeners = await ListenerModel.find({
       $or: [
         { lastProcessedSongPlayDataAt: { $lt: dayAgoDate } },
@@ -55,19 +56,42 @@ async function processListenerSongPlayData(listenerId: string) {
 
       await SongPlaysModel.updateOne(
         { listenerId: listenerId, songId: data.songId },
-        { $inc: { [`plays.${songPlayDate}`]: songPlays, } },
+        { $inc: { [`plays.${songPlayDate}`]: songPlays } },
         { upsert: true }
       );
+      if (songPlays >= 1) {
+        const genresToUpdate = {};
+        for (const genre of song.genres) {
+          genresToUpdate[`favoriteGenres.${genre}`] = songPlays;
+        }
+
+        await ListenerModel.updateOne(
+          { _id: listenerId },
+          { $inc: genresToUpdate },
+          { upsert: true }
+        );
+      }
       await ArtistPlaysModel.updateOne(
         { listenerId: listenerId, artistId: song.artistId },
-        { $set: { lastPlayedDate: data.latestDate || new Date() } },
+        {
+          $set: { lastPlayedDate: data.latestDate || new Date() },
+          $inc: { [`plays.${songPlayDate}`]: songPlays },
+        },
+        { upsert: true }
+      );
+      await AlbumPlaysModel.updateOne(
+        { listenerId: listenerId, artistId: song.artistId, albumId: song.albumId },
+        {
+          $set: { lastPlayedDate: data.latestDate || new Date() },
+          $inc: { [`plays.${songPlayDate}`]: songPlays },
+        },
         { upsert: true }
       );
       await SongModel.updateOne({ _id: data.songId }, { $inc: { plays: songPlays } });
 
       await SongPlaysRawDataModel.deleteMany({ listenerId: listenerId });
-      console.log('Successfully processed songs play data for listener with id ' + listenerId);
     }
+    console.log('Successfully processed songs play data for listener with id ' + listenerId);
   } catch (error) {
     console.log('Error while processing processSongPlayRawDataJob for listener with id ' + listenerId, error);
   }

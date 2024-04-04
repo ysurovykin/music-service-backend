@@ -1,11 +1,20 @@
-import ListenerModel, { ListenerInfoResponseDataType, MostVisitedContentDataType, VisitedContentDataType } from '../models/listener.model';
+import ListenerModel, {
+    HomePageContentDataType,
+    HomePageContentTypesEnum,
+    ListenerInfoResponseDataType,
+    ContentDataType,
+    VisitedContentDataType,
+    HomePageContentResponseDataType
+} from '../models/listener.model';
 import { NotFoundError } from '../errors/api-errors';
 import ListenerDto from '../dtos/listener.dto';
 import ArtistDto from '../dtos/artist.dto';
-import ArtistModel, { ArtistInfoResponseDataType, ArtistShortDataType } from '../models/artist.model';
+import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import AlbumModel, { AlbumInfoResponseDataType } from '../models/album.model';
 import AlbumDto from '../dtos/album.dto';
-import PlaylistModel, { PlaylistInfoResponseDataType, PlaylistTagEnum } from '../models/playlist.model';
+import PlaylistModel, { PlaylistTagEnum } from '../models/playlist.model';
+import LikedAlbumstModel from '../models/likedAlbums.model';
+import { generateHomePageContent } from '../jobs/listener/generateHomePageContent.job';
 
 class ListenerService {
 
@@ -21,19 +30,19 @@ class ListenerService {
         };
     }
 
-    async getRecentMostVisitedContent(listenerId: string): Promise<Array<MostVisitedContentDataType>> {
+    async getRecentMostVisitedContent(listenerId: string): Promise<Array<ContentDataType>> {
         const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         if (!listener) {
             throw new NotFoundError(`Listener with id ${listenerId} not found`);
         }
         const visitedContent = listener.visitedContent;
-        let mostVisitedContent: Array<MostVisitedContentDataType> = [];
+        let mostVisitedContent: Array<ContentDataType> = [];
         let visitedContentFormated: Array<VisitedContentDataType> = [];
         if (!visitedContent || !visitedContent.length) {
             visitedContentFormated = [];
         } else if (visitedContent.length <= 8) {
             visitedContentFormated = visitedContent.sort((a, b) => b.visitsCounter - a.visitsCounter).map(content => ({
-                contnetId: content.contnetId,
+                contentId: content.contentId,
                 lastVisited: content.lastVisited,
                 type: content.type,
                 visitsCounter: content.visitsCounter
@@ -41,12 +50,12 @@ class ListenerService {
         } else {
             let visitedContentToParse = [];
             const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-            const mostRecentVisited = visitedContent.filter(contnet => contnet.lastVisited > oneWeekAgo);
+            const mostRecentVisited = visitedContent.filter(content => content.lastVisited > oneWeekAgo);
             if (mostRecentVisited.length >= 8) {
                 mostRecentVisited.sort((a, b) => b.visitsCounter - a.visitsCounter);
                 visitedContentToParse = visitedContentToParse.slice(0, 8);
             } else {
-                const oldVisited = visitedContent.filter(contnet => contnet.lastVisited < oneWeekAgo);
+                const oldVisited = visitedContent.filter(content => content.lastVisited < oneWeekAgo);
                 const mostRecentVisitedSorted = mostRecentVisited
                     .sort((a, b) => b.visitsCounter - a.visitsCounter);
                 const oldVisitedSorted = oldVisited.sort((a, b) => b.visitsCounter - a.visitsCounter)
@@ -54,7 +63,7 @@ class ListenerService {
                 visitedContentToParse = [...mostRecentVisited, ...oldVisitedSorted];
             }
             visitedContentFormated = visitedContentToParse.map(content => ({
-                contnetId: content.contnetId,
+                contentId: content.contentId,
                 lastVisited: content.lastVisited,
                 type: content.type,
                 visitsCounter: content.visitsCounter
@@ -62,14 +71,14 @@ class ListenerService {
         }
         for (let place of visitedContentFormated) {
             if (place.type === 'artist') {
-                const artist = await ArtistModel.findOne({ _id: place.contnetId }).lean();
+                const artist = await ArtistModel.findOne({ _id: place.contentId }).lean();
                 const artistDto = new ArtistDto(artist);
                 mostVisitedContent.push({
                     ...artistDto,
                     type: 'artist'
                 });
             } else if (place.type === 'album') {
-                const album = await AlbumModel.findOne({ _id: place.contnetId }).lean();
+                const album = await AlbumModel.findOne({ _id: place.contentId }).lean();
                 const artist = await ArtistModel.findOne({ _id: album.artistId }).lean();
                 if (!artist) {
                     throw new NotFoundError(`Artist with id ${album.artistId} not found`);
@@ -86,7 +95,7 @@ class ListenerService {
                     type: 'album'
                 });
             } else if (place.type === 'playlist') {
-                const playlist = await PlaylistModel.findOne({ _id: place.contnetId }).lean();
+                const playlist = await PlaylistModel.findOne({ _id: place.contentId }).lean();
                 mostVisitedContent.push({
                     playlistId: playlist._id,
                     name: playlist.name,
@@ -104,10 +113,70 @@ class ListenerService {
         return mostVisitedContent;
     }
 
-    async _updateVisitedContent(listenerId: string, contentType: 'artist' | 'album' | 'playlist',
-        content: ArtistInfoResponseDataType & { type: 'artist' } |
-            AlbumInfoResponseDataType & { type: 'album' } |
-            PlaylistInfoResponseDataType & { type: 'playlist' }) {
+    async getHomePageContent(listenerId: string): Promise<Array<HomePageContentResponseDataType>> {
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
+        if (!listener) {
+            throw new NotFoundError(`Listener with id ${listenerId} not found`);
+        }
+        let homePageContent: Array<HomePageContentDataType> = listener.homePageContent
+            .map(content => ({ ...content, contentType: content.contentType as HomePageContentTypesEnum }));
+        if (!homePageContent) {
+            homePageContent = await generateHomePageContent(listenerId);
+        }
+        const homePageContentResponse: Array<HomePageContentResponseDataType> = [];
+        for (const content of homePageContent) {
+            if (content.contentType === 'album') {
+                const albums = await AlbumModel.find({ _id: { $in: content.contentIds } }).lean();
+                const albumDatas: Array<AlbumInfoResponseDataType> = [];
+                for (const album of albums) {
+                    const albumDto = new AlbumDto(album);
+                    const artist = await ArtistModel.findOne({ _id: album.artistId }, { _id: 1, name: 1 }).lean();
+                    const likedAlbumInfo = await LikedAlbumstModel.findOne({ listenerId: listenerId, albumId: album._id }).lean();
+                    albumDatas.push({
+                        ...albumDto,
+                        artist: {
+                            name: artist.name,
+                            id: artist._id
+                        },
+                        isAddedToLibrary: !!likedAlbumInfo
+                    });
+                }
+                homePageContentResponse.push({
+                    contentTitle: content.contentTitle,
+                    contentType: HomePageContentTypesEnum.artist,
+                    content: albumDatas.map(album => ({ ...album, type: 'album' }))
+                });
+            } else if (content.contentType === 'artist') {
+                const artists = await ArtistModel.find({ _id: { $in: content.contentIds } }).lean();
+                homePageContentResponse.push({
+                    contentTitle: content.contentTitle,
+                    contentType: HomePageContentTypesEnum.artist,
+                    content: artists.map(artist => ({ ...new ArtistDto(artist), type: 'artist' }))
+                });
+            } else if (content.contentType === 'playlist') {
+                const playlists = await PlaylistModel.find({ _id: { $in: content.contentIds } }).lean();
+                homePageContentResponse.push({
+                    contentTitle: content.contentTitle,
+                    contentType: HomePageContentTypesEnum.artist,
+                    content: playlists.map(playlist => ({
+                        playlistId: playlist._id,
+                        name: playlist.name,
+                        description: playlist.description,
+                        date: playlist.date,
+                        editable: playlist.editable,
+                        pinned: playlist.pinned,
+                        tag: playlist.tag as PlaylistTagEnum,
+                        coverImageUrl: playlist.coverImageUrl,
+                        backgroundColor: playlist.backgroundColor,
+                        type: 'playlist'
+                    }))
+                });
+            }
+        }
+        return homePageContentResponse;
+    }
+
+    async _updateVisitedContent(listenerId: string, contentType: 'artist' | 'album' | 'playlist', content: ContentDataType) {
         const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         const visitedContent = listener.visitedContent;
         let contentId: string;
@@ -118,7 +187,7 @@ class ListenerService {
         } else if (content.type === 'playlist') {
             contentId = content.playlistId;
         }
-        const visitedContentInfo = visitedContent && visitedContent.find(item => item.type === contentType && item.contnetId === contentId);
+        const visitedContentInfo = visitedContent && visitedContent.find(item => item.type === contentType && item.contentId === contentId);
         if (visitedContentInfo) {
             await ListenerModel.updateOne({ _id: listenerId },
                 {
@@ -128,7 +197,7 @@ class ListenerService {
                 {
                     arrayFilters: [
                         {
-                            'updateElement.contnetId': contentId,
+                            'updateElement.contentId': contentId,
                             'updateElement.type': contentType
                         }
                     ]
@@ -140,7 +209,7 @@ class ListenerService {
                     $push: {
                         "visitedContent": {
                             type: contentType,
-                            contnetId: contentId,
+                            contentId: contentId,
                             lastVisited: new Date(),
                             visitsCounter: 1
                         }

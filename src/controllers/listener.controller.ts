@@ -21,6 +21,16 @@ class ListenerController {
             next(error);
         }
     }
+
+    async getHomePageContent(req, res, next) {
+        try {
+            const { listenerId } = req.params;
+            const listener = await listenerService.getHomePageContent(listenerId);
+            return res.json(listener);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 const listenerController = new ListenerController();

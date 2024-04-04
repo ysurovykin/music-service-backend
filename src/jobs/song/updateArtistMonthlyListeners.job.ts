@@ -4,7 +4,7 @@ import ArtistModel from "../../models/artist.model";
 
 export async function updateArtistMonthlyListenersJob() {
   try {
-    const weekAgoDate = moment().subtract(7, 'days');
+    const weekAgoDate = moment().subtract(7, 'days').toDate();
     const artists = await ArtistModel.find({
       $or: [
         { monthlyListenersUpdatedAt: { $lt: weekAgoDate } },

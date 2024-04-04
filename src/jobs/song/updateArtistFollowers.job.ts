@@ -4,7 +4,7 @@ import FollowedArtistsModel from "../../models/followedArtists.model";
 
 export async function updateArtistFollowersJob() {
   try {
-    const weekAgoDate = moment().subtract(7, 'days');
+    const weekAgoDate = moment().subtract(7, 'days').toDate();
     const artists = await ArtistModel.find({
       $or: [
         { followersUpdatedAt: { $lt: weekAgoDate } },
