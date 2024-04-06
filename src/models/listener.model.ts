@@ -9,6 +9,13 @@ export type CreateListenerRequestDataType = {
 
 export type ListenerInfoResponseDataType = {
   name: string;
+  profileImageUrl: string;
+  backgroundColor: string;
+  subscription: string;
+}
+
+export type EditProfileRequestDataType = {
+  name: string;
 }
 
 export type ContentDataType =
@@ -36,7 +43,7 @@ export enum HomePageContentTypesEnum {
   'playlist' = 'playlist'
 }
 
-export type HomePageContentResponseDataType= {
+export type HomePageContentResponseDataType = {
   contentType: HomePageContentTypesEnum,
   contentTitle: string,
   content: Array<ContentDataType>
@@ -47,6 +54,12 @@ export type HomePageContentDataType = {
   contentType: HomePageContentTypesEnum,
   contentTitle: string,
   contentIds: Array<string>
+}
+
+export type GetAccountContentCountResponseDataType = {
+  playlistCount: number;
+  followedArtistsCount: number;
+  likedAlbumsCount: number;
 }
 
 const HomePageContentSchema = new Schema({

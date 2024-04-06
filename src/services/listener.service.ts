@@ -4,9 +4,11 @@ import ListenerModel, {
     ListenerInfoResponseDataType,
     ContentDataType,
     VisitedContentDataType,
-    HomePageContentResponseDataType
+    HomePageContentResponseDataType,
+    EditProfileRequestDataType,
+    GetAccountContentCountResponseDataType
 } from '../models/listener.model';
-import { NotFoundError } from '../errors/api-errors';
+import { NotFoundError, ValidationError } from '../errors/api-errors';
 import ListenerDto from '../dtos/listener.dto';
 import ArtistDto from '../dtos/artist.dto';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
@@ -15,6 +17,10 @@ import AlbumDto from '../dtos/album.dto';
 import PlaylistModel, { PlaylistTagEnum } from '../models/playlist.model';
 import LikedAlbumstModel from '../models/likedAlbums.model';
 import { generateHomePageContent } from '../jobs/listener/generateHomePageContent.job';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { storage } from '../../firebase.config';
+import { getCoverDominantColor } from '../helpers/imageCoverColor.helper';
+import FollowedArtistsModel from '../models/followedArtists.model';
 
 class ListenerService {
 
@@ -174,6 +180,56 @@ class ListenerService {
             }
         }
         return homePageContentResponse;
+    }
+
+    async editProfile(listenerId: string, file: Express.Multer.File, profileData: EditProfileRequestDataType): Promise<void> {
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
+        if (!listener) {
+            throw new NotFoundError(`Listener with id ${listenerId} not found`);
+        }
+        if (file) {
+            const downloadUrl = `listener-profile-images/${listener._id}`;
+            const storageRef = ref(storage, downloadUrl);
+            await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
+            let profileImageUrl = await getDownloadURL(storageRef);
+            const indexOfTokenQuery = profileImageUrl.indexOf('&token')
+            if (indexOfTokenQuery) {
+                profileImageUrl = profileImageUrl.slice(0, indexOfTokenQuery);
+            }
+            const backgroundColor = await getCoverDominantColor(profileImageUrl);
+            await ListenerModel.updateOne({ _id: listenerId }, {
+                $set: {
+                    name: profileData.name,
+                    profileImageUrl: profileImageUrl,
+                    backgroundColor: backgroundColor
+                }
+            })
+        } else {
+            const downloadUrl = `listener-profile-images/${listener._id}`;
+            const storageRef = ref(storage, downloadUrl);
+            await deleteObject(storageRef);
+            await ListenerModel.updateOne({ _id: listenerId }, {
+                $set: { name: profileData.name },
+                $unset: { profileImageUrl: 1, backgroundColor: 1 }
+            })
+        }
+    }
+
+    async getAccountContentCount(listenerId: string): Promise<GetAccountContentCountResponseDataType> {
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
+        if (!listener) {
+            throw new NotFoundError(`Listener with id ${listenerId} not found`);
+        }
+
+        const playlistCount = await PlaylistModel.count({ listenerId: listenerId });
+        const followedArtistsCount = await FollowedArtistsModel.count({ listenerId: listenerId });
+        const likedAlbumsCount = await LikedAlbumstModel.count({ listenerId: listenerId });
+
+        return {
+            playlistCount: playlistCount,
+            followedArtistsCount: followedArtistsCount,
+            likedAlbumsCount: likedAlbumsCount,
+        }
     }
 
     async _updateVisitedContent(listenerId: string, contentType: 'artist' | 'album' | 'playlist', content: ContentDataType) {

@@ -1,4 +1,4 @@
-import { ProfileTypeEnum } from "../models/user.model";
+import { BirthDate, ProfileTypeEnum } from "../models/user.model";
 
 export default class UserDto {
     userId: string;
@@ -7,7 +7,7 @@ export default class UserDto {
     gender: string;
     country: string;
     profileType: ProfileTypeEnum;
-    birthDate: Object;
+    birthDate: BirthDate;
 
     constructor(model: any) {
         this.userId = model._id || model.userId;

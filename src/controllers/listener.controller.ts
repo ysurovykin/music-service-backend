@@ -1,3 +1,4 @@
+import { EditProfileRequestDataType } from '../models/listener.model';
 import listenerService from '../services/listener.service'
 
 class ListenerController {
@@ -31,6 +32,29 @@ class ListenerController {
             next(error);
         }
     }
+
+    async editProfile(req, res, next) {
+        try {
+            const image: Express.Multer.File = req.file;
+            const { listenerId } = req.query;
+            const profileData: EditProfileRequestDataType = req.body;
+            const listener = await listenerService.editProfile(listenerId, image, profileData);
+            return res.json(listener);
+        } catch (error) {
+            next(error);
+        }
+    }
+    
+    async getAccountContentCount(req, res, next) {
+        try {
+            const { listenerId } = req.params;
+            const listener = await listenerService.getAccountContentCount(listenerId);
+            return res.json(listener);
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }
 
 const listenerController = new ListenerController();
