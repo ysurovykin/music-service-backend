@@ -93,14 +93,14 @@ class UserService {
         await tokenService.removeToken(refreshToken);
     }
 
-    async refresh(refreshToken: string): Promise<AuthorizedUserData> {
+    async refresh(refreshToken: string, isRetry: boolean): Promise<AuthorizedUserData> {
         if (!refreshToken) {
-            throw new UnauthorizedError()
+            throw new UnauthorizedError(undefined, { isRetry });
         }
         const userData = tokenService.validateRefreshToken(refreshToken);
         const currentToken = await tokenService.findToken(refreshToken);
         if (!userData || !currentToken) {
-            throw new UnauthorizedError()
+            throw new UnauthorizedError(undefined, { isRetry });
         }
         const user = await UserModel.findById(userData.userId).lean();
         const userDto = new UserDto(user);

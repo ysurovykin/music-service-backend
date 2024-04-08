@@ -1,9 +1,11 @@
 export class ApiError extends Error {
     status: number;
+    details: Object;
 
-    constructor(message: string, status: number) {
+    constructor(message: string, status: number, details?: Object) {
         super(message);
         this.status = status;
+        this.details = details;
     }
 }
 
@@ -27,10 +29,12 @@ export class ForbiddenError extends ApiError {
 
 export class UnauthorizedError extends ApiError {
     status: number;
+    details: Object;
 
-    constructor() {
-        super('User is not authorized', 401);
+    constructor(message: string = 'User is not authorized', details?: Object) {
+        super(message, 401, details);
         this.status = 401;
+        this.details = details;
     }
 }
 
