@@ -6,6 +6,7 @@ import AlbumModel from '../models/album.model';
 import randomstring from 'randomstring';
 import { NotFoundError } from '../errors/api-errors';
 import SongRadioModel from '../models/songRadio.model';
+import ListenerModel from '../models/listener.model';
 
 class QueueService {
 
@@ -77,6 +78,7 @@ class QueueService {
             const playlistId = options.playlistId;
             const albumId = options.albumId;
             const artistId = options.artistId;
+            const listenerId = options.listenerId;
             const songRadioBaseSongId = options.songRadioBaseSongId;
             if (isNewQueue) {
                 if (playlistId) {
@@ -126,6 +128,13 @@ class QueueService {
                     const allSongRadioSongs = await SongModel.find({ _id: { $in: songRadio.songIds } }, { _id: 1 }).lean();
                     const songs = allSongRadioSongs.sort((a, b) => songRadio.songIds.indexOf(a._id) - songRadio.songIds.indexOf(b._id));
                     allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
+                } else if (listenerId) {
+                    const listenerData = await ListenerModel.findOne({ listenerId: listenerId }, { topSongsThisMonth: 1 }).lean();
+                    if (listenerData.topSongsThisMonth?.length) {
+                        const listenerTopSongsThisMonth = await SongModel.find({ _id: { $in: listenerData.topSongsThisMonth } }).lean();
+                        const songs = listenerTopSongsThisMonth.sort((a, b) =>  listenerData.topSongsThisMonth.indexOf(a._id) -  listenerData.topSongsThisMonth.indexOf(b._id));
+                        allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
+                    }
                 }
             } else {
                 allSongs = currentQueue.queue;

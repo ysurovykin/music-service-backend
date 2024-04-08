@@ -4,7 +4,8 @@ import ArtistModel, {
     ArtistInfoResponseDataType,
     ArtistShortDataType,
     GetArtistsInListenerLibraryResponseType,
-    GetArtistsResponseType
+    GetArtistsResponseType,
+    GetListenerTopArtistsThisMonthResponseType
 } from '../models/artist.model';
 import FollowedArtistsModel from '../models/followedArtists.model';
 import { NotFoundError } from '../errors/api-errors';
@@ -19,6 +20,7 @@ import randomstring from 'randomstring';
 import { getDominantColorWithShadow } from '../helpers/imageCoverColor.helper';
 import AlbumDto from '../dtos/album.dto';
 import listenerService from './listener.service';
+import ListenerModel from '../models/listener.model';
 
 class ArtistService {
 
@@ -199,16 +201,31 @@ class ArtistService {
 
     async getArtistsInListenerLibrary(listenerId: string, offset: number = 0,
         limit: number = 10, search: string = ''): Promise<GetArtistsInListenerLibraryResponseType> {
-        const followedArtists = await FollowedArtistsModel.find({ listenerId: listenerId })
-            .sort({ date: -1 }).skip(+offset * +limit).limit(+limit).lean();
+        const followedArtists = await FollowedArtistsModel.find({ listenerId: listenerId }).sort({ date: -1 }).lean();
         const artistIds = followedArtists.map(followedArtist => followedArtist.artistId);
         search = search.replace('/', '');
-        const artists = await ArtistModel.find({ _id: { $in: artistIds }, name: { $regex: search, $options: 'i' } }).lean();
+        const artists = await ArtistModel.find({ _id: { $in: artistIds }, name: { $regex: search, $options: 'i' } })
+            .skip(+offset * +limit).limit(+limit).lean();
         const sortedArtists = artists.sort((a, b) => artistIds.indexOf(a._id) - artistIds.indexOf(b._id));
         const artstDtos: Array<ArtistInfoResponseDataType> = sortedArtists.map(artstData => new ArtistDto(artstData));
         return {
             followedArtists: artstDtos,
             isMoreFollowedArtistsForLoading: artstDtos.length === +limit
+        };
+    }
+
+    async getListenerTopArtistsThisMonth(listenerId: string, offset: number = 0,
+        limit: number = 10, search: string = ''): Promise<GetListenerTopArtistsThisMonthResponseType> {
+        const listener = await ListenerModel.findOne({ listenerId: listenerId }).lean();
+        const artistIds = listener.topArtistsThisMonth || [];
+        search = search.replace('/', '');
+        const artists = await ArtistModel.find({ _id: { $in: artistIds }, name: { $regex: search, $options: 'i' } })
+            .skip(+offset * +limit).limit(+limit).lean();
+        const sortedArtists = artists.sort((a, b) => artistIds.indexOf(a._id) - artistIds.indexOf(b._id));
+        const artstDtos: Array<ArtistInfoResponseDataType> = sortedArtists.map(artstData => new ArtistDto(artstData));
+        return {
+            topArtistsThisMonth: artstDtos,
+            isMoreTopArtistsThisMonthForLoading: artstDtos.length === +limit
         };
     }
 

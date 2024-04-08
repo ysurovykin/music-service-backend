@@ -29,6 +29,6 @@ async function updateArtistMonthlyListeners(artistId: string) {
     );
     console.log('Successfully updated monthly listeners for artist with id ' + artistId);
   } catch (error) {
-    console.log('Error while processing updateArtistMonthlyListenersJob for artist with id ' + artistId, error);
+    console.log('Error while processing updateArtistMonthlyListeners job for artist with id ' + artistId, error);
   }
 }

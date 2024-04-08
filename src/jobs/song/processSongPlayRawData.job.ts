@@ -56,7 +56,10 @@ async function processListenerSongPlayData(listenerId: string) {
 
       await SongPlaysModel.updateOne(
         { listenerId: listenerId, songId: data.songId },
-        { $inc: { [`plays.${songPlayDate}`]: songPlays } },
+        {
+          $set: { lastPlayedDate: data.latestDate || new Date() },
+          $inc: { [`plays.${songPlayDate}`]: songPlays }
+        },
         { upsert: true }
       );
       if (songPlays >= 1) {
@@ -93,6 +96,6 @@ async function processListenerSongPlayData(listenerId: string) {
     }
     console.log('Successfully processed songs play data for listener with id ' + listenerId);
   } catch (error) {
-    console.log('Error while processing processSongPlayRawDataJob for listener with id ' + listenerId, error);
+    console.log('Error while processing processSongPlayRawData job for listener with id ' + listenerId, error);
   }
 }

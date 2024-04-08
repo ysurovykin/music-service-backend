@@ -14,6 +14,7 @@ router.get('/albums/:artistId', authMiddleware, albumController.getAlbumsByArtis
 router.get('/albums/artist-appears/:artistId', authMiddleware, albumController.getAlbumsWhereArtistAppears);
 router.get('/:albumId', authMiddleware, albumController.getAlbumById);
 router.get('/albums-in-library/:listenerId', authMiddleware, albumController.getAlbumsInListenerLibrary);
+router.get('/top-albums-this-month/:listenerId', authMiddleware, albumController.getListenerTopAlbumsThisMonth);
 
 
 export default router;

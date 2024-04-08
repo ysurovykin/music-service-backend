@@ -10,7 +10,7 @@ import SongRadioModel, {
     SongRadioInfoResponseDataType,
     SongRadioRecordType
 } from '../models/songRadio.model';
-import { mainSampleSizeMultiplier, mainArtistSampleSizeMultiplier, coArtistSampleSizeMultiplier, secondarySampleSizeMultiplier } from '../../config';
+import { mainSampleSizeMultiplier, mainArtistSampleSizeMultiplier, coArtistSampleSizeMultiplier, secondarySampleSizeMultiplier, freeSubscriptionSongRadioLimit, paidSubscriptionSongRadioLimit } from '../../config';
 import GenresModel from '../models/genres.model';
 
 class SongRadioService {
@@ -31,7 +31,8 @@ class SongRadioService {
         let songRadio: SongRadioRecordType;
         let songIdsToExclude = songRadioExists?.songIds || [songId];
         const song = await SongModel.findOne({ _id: songId }).lean();
-        const songIds = await this._generateSongRadio(song, 20, songIdsToExclude);
+        const songRadioTotalSize = listener.subscription === 'free' ? freeSubscriptionSongRadioLimit : paidSubscriptionSongRadioLimit;
+        const songIds = await this._generateSongRadio(song, songRadioTotalSize, songIdsToExclude);
         if (songRadioExists) {
             songRadio = await SongRadioModel
                 .findOneAndUpdate({ _id: songRadioExists._id }, { $set: { songIds: songIds, lastUpdatedAt: new Date() } }, { new: true });

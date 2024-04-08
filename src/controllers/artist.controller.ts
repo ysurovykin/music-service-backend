@@ -97,6 +97,17 @@ class ArtistController {
         }
     }
 
+    async getListenerTopArtistsThisMonth(req, res, next) {
+        try {
+            const { listenerId } = req.params;
+            const { offset, limit, search } = req.query;
+            const response = await artistService.getListenerTopArtistsThisMonth(listenerId, offset, limit, search);
+            return res.json(response);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getFansAlsoLikeArtists(req, res, next) {
         try {
             const { artistId } = req.params;

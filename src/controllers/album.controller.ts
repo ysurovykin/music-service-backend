@@ -79,6 +79,17 @@ class AlbumController {
         }
     }
 
+    async getListenerTopAlbumsThisMonth(req, res, next) {
+        try {
+            const { listenerId } = req.params;
+            const { offset, limit, search } = req.query;
+            const response = await albumService.getListenerTopAlbumsThisMonth(listenerId, offset, limit, search);
+            return res.json(response);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getAlbums(req, res, next) {
         try {
             const { offset, limit, search } = req.query;

@@ -75,7 +75,7 @@ export async function generateHomePageContent(listenerId: string): Promise<Array
       { $set: { homePageContent: homePageContent, homePageContentGeneratedAt: new Date() } }).lean();
     return homePageContent;
   } catch (error) {
-    console.log('Error while processing generateHomePageContent for listener with id ' + listenerId, error);
+    console.log('Error while processing generateHomePageContent job for listener with id ' + listenerId, error);
   }
 }
 

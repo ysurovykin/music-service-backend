@@ -1,6 +1,6 @@
 import { storage } from '../../firebase.config';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import AlbumModel, { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType, GetAlbumsInListenerLibraryResponseType, GetAlbumsResponseType } from '../models/album.model';
+import AlbumModel, { AlbumFullResponseDataType, AlbumInfoResponseDataType, CreateAlbumRequestDataType, GetAlbumsInListenerLibraryResponseType, GetAlbumsResponseType, GetListenerTopAlbumsThisMonthResponseType } from '../models/album.model';
 import ArtistModel, { ArtistShortDataType } from '../models/artist.model';
 import LikedAlbumstModel from '../models/likedAlbums.model';
 import { ForbiddenError, NotFoundError } from '../errors/api-errors';
@@ -9,6 +9,7 @@ import SongModel from '../models/song.model';
 import { getDominantColorWithShadow } from '../helpers/imageCoverColor.helper';
 import AlbumDto from '../dtos/album.dto';
 import listenerService from './listener.service';
+import ListenerModel from '../models/listener.model';
 
 class AlbumService {
 
@@ -158,11 +159,11 @@ class AlbumService {
 
     async getAlbumsInListenerLibrary(listenerId: string, offset: number = 0,
         limit: number = 10, search: string = ''): Promise<GetAlbumsInListenerLibraryResponseType> {
-        const likedAlbums = await LikedAlbumstModel.find({ listenerId: listenerId })
-            .sort({ date: -1 }).skip(+offset * +limit).limit(+limit).lean();
+        const likedAlbums = await LikedAlbumstModel.find({ listenerId: listenerId }).sort({ date: -1 }).lean();
         const albumIds = likedAlbums.map(likedAlbum => likedAlbum.albumId);
         search = search.replace('/', '');
-        const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' } }).lean();
+        const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' } })
+            .skip(+offset * +limit).limit(+limit).lean();
         const sortedAlbums = albums.sort((a, b) => albumIds.indexOf(a._id) - albumIds.indexOf(b._id));
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of sortedAlbums) {
@@ -181,6 +182,34 @@ class AlbumService {
         return {
             likedAlbums: albumDatas,
             isMoreLikedAlbumsForLoading: albumDatas.length === +limit
+        };
+    }
+
+    async getListenerTopAlbumsThisMonth(listenerId: string, offset: number = 0,
+        limit: number = 10, search: string = ''): Promise<GetListenerTopAlbumsThisMonthResponseType> {
+        const listener = await ListenerModel.findOne({ listenerId: listenerId }).lean();
+        search = search.replace('/', '');
+        const albumIds = listener.topAlbumsThisMonth || [];
+        const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' } })
+            .skip(+offset * +limit).limit(+limit).lean();
+        const sortedAlbums = albums.sort((a, b) => albumIds.indexOf(a._id) - albumIds.indexOf(b._id));
+        const albumDatas: Array<AlbumInfoResponseDataType> = [];
+        for (const album of sortedAlbums) {
+            const artist = await ArtistModel.findOne({ _id: album.artistId }, { _id: 1, name: 1 });
+            const artistData: ArtistShortDataType = {
+                name: artist.name,
+                id: artist._id
+            };
+            const albumDto = new AlbumDto(album);
+            albumDatas.push({
+                ...albumDto,
+                artist: artistData,
+                isAddedToLibrary: true
+            });
+        }
+        return {
+            topAlbumsThisMonth: albumDatas,
+            isMoreTopAlbumsThisMonthForLoading: albumDatas.length === +limit
         };
     }
 

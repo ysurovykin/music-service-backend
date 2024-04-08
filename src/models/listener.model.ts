@@ -85,6 +85,10 @@ const ListenerModel = model('Listener', new Schema({
    * Object structure: { [key: string]: number }
    */
   favoriteGenres: { type: Object, required: false },
+  topSongsThisMonth: [String],
+  topArtistsThisMonth: [String],
+  topAlbumsThisMonth: [String],
+  topContentThisMonthUpdatedAt: { type: Date, required: false },
 }));
 
 export default ListenerModel;

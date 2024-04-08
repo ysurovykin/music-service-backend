@@ -28,6 +28,6 @@ async function updateArtistFollowers(artistId: string) {
     );
     console.log('Successfully updated followers for artist with id ' + artistId);
   } catch (error) {
-    console.log('Error while processing updateArtistMonthlyListene for artist with id ' + artistId, error);
+    console.log('Error while processing updateArtistFollowers job for artist with id ' + artistId, error);
   }
 }

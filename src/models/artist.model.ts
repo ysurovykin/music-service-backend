@@ -54,7 +54,12 @@ export type GetArtistsResponseType = {
 
 export type GetArtistsInListenerLibraryResponseType = {
   followedArtists: Array<ArtistInfoResponseDataType>;
-  isMoreFollowedArtistsForLoading: boolean; 
+  isMoreFollowedArtistsForLoading: boolean;
+}
+
+export type GetListenerTopArtistsThisMonthResponseType = {
+  topArtistsThisMonth: Array<ArtistInfoResponseDataType>;
+  isMoreTopArtistsThisMonthForLoading: boolean;
 }
 
 const ArtistModel = model('Artist', new Schema({

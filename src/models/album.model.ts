@@ -41,6 +41,11 @@ export type GetAlbumsInListenerLibraryResponseType = {
   isMoreLikedAlbumsForLoading: boolean;
 }
 
+export type GetListenerTopAlbumsThisMonthResponseType = {
+  topAlbumsThisMonth: Array<AlbumInfoResponseDataType>;
+  isMoreTopAlbumsThisMonthForLoading: boolean;
+}
+
 const AlbumModel = model('Album', new Schema({
   _id: { type: String },
   name: { type: String, required: true },

@@ -3,6 +3,30 @@ import { HomePageContentTypesEnum } from "./src/models/listener.model";
 // Maximum number of playlists for one listener
 export const maxPlaylists = 20;
 
+// Top songs this month count for free subscription
+export const freeSubscriptionTopSongsThisMonthCount = 20;
+
+// Top artists this month count for free subscription
+export const freeSubscriptionTopArtistsThisMonthCount = 5;
+
+// Top albums this month count for free subscription
+export const freeSubscriptionTopAlbumsThisMonthCount = 5;
+
+// Top songs this month count for pain subscription
+export const paidSubscriptionTopSongsThisMonthCount = 50;
+
+// Top artists this month count for pain subscription
+export const paidSubscriptionTopArtistsThisMonthCount = 10;
+
+// Top albums this month count for pain subscription
+export const paidSubscriptionTopAlbumsThisMonthCount = 10;
+
+// Song radio content limit for free subscription
+export const freeSubscriptionSongRadioLimit = 20;
+
+// Song radio content limit for paid subscription
+export const paidSubscriptionSongRadioLimit = 50;
+
 // Match genres and the language of requested song
 export const mainSampleSizeMultiplier = 0.65;
 

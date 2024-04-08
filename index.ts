@@ -18,6 +18,7 @@ import { updateArtistMonthlyListenersJob } from './src/jobs/song/updateArtistMon
 import { updateArtistFollowersJob } from './src/jobs/song/updateArtistFollowers.job.ts';
 import errorMiddleware from './src/middlewares/error.middleware.ts';
 import { generateHomePageContentJob } from './src/jobs/listener/generateHomePageContent.job.ts';
+import { updateListenerTopContentThisMonthJob } from './src/jobs/listener/updateListenerTopContentThisMonth.job.ts';
 
 config();
 const PORT = process.env.PORT || 5000;
@@ -51,6 +52,7 @@ const start = async () => {
         registerJob(updateArtistMonthlyListenersJob, 60 * 24); //once a day
         registerJob(updateArtistFollowersJob, 60 * 24); //once a day
         registerJob(generateHomePageContentJob, 60 * 6); //every 6 hours
+        registerJob(updateListenerTopContentThisMonthJob, 60 * 6); //every 6 hours
         app.listen(PORT, () => console.log(`Server started on PORT = ${PORT}`));
     } catch (error) {
         console.log(error);

@@ -18,6 +18,7 @@ import PlaylistModel from '../models/playlist.model';
 import { ArtistShortDataType } from '../models/artist.model';
 import SongPlaysRawDataModel from '../models/songPlaysRawData.model';
 import SongRadioModel from '../models/songRadio.model';
+import ListenerModel from '../models/listener.model';
 
 class SongService {
 
@@ -117,6 +118,7 @@ class SongService {
             const playlistId = options.playlistId;
             const albumId = options.albumId;
             const artistId = options.artistId;
+            const optionsListenerId = options.listenerId;
             const songRadioBaseSongId = options.songRadioBaseSongId;
             if (playlistId) {
                 const songsAggregate = await PlaylistModel.aggregate([
@@ -165,6 +167,13 @@ class SongService {
                 const allSongs = await SongModel.find({ _id: { $in: songRadio.songIds } }).lean();
                 const sortedSongs = allSongs.sort((a, b) => songRadio.songIds.indexOf(a._id) - songRadio.songIds.indexOf(b._id));
                 songs = sortedSongs.slice(songsToSkip, +limit + songsToSkip);
+            } else if (optionsListenerId) {
+                const listenerData = await ListenerModel.findOne({ listenerId: optionsListenerId }, { topSongsThisMonth: 1 }).lean();
+                if (listenerData.topSongsThisMonth?.length) {
+                    const allSongs = await SongModel.find({ _id: { $in: listenerData.topSongsThisMonth } }).lean();
+                    const sortedSongs = allSongs.sort((a, b) =>  listenerData.topSongsThisMonth.indexOf(a._id) -  listenerData.topSongsThisMonth.indexOf(b._id));
+                    songs = sortedSongs.slice(songsToSkip, +limit + songsToSkip);
+                }
             }
         }
         const songsResponse: Array<SongInfoResponseDataType> = [];

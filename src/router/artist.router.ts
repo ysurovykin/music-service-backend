@@ -15,6 +15,7 @@ router.post('/unfollow', authMiddleware, artistController.unfollowArtist);
 router.get('/genres/:artistId', authMiddleware, artistController.getGenres);
 router.get('/most-recent-release/:artistId', authMiddleware, artistController.getMostRecentRelease);
 router.get('/artists-in-library/:listenerId', authMiddleware, artistController.getArtistsInListenerLibrary);
+router.get('/top-artists-this-month/:listenerId', authMiddleware, artistController.getListenerTopArtistsThisMonth);
 router.get('/fans-also-like/:artistId',  artistController.getFansAlsoLikeArtists);
 
 
