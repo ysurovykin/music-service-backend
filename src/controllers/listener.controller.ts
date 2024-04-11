@@ -26,7 +26,8 @@ class ListenerController {
     async getHomePageContent(req, res, next) {
         try {
             const { listenerId } = req.params;
-            const listener = await listenerService.getHomePageContent(listenerId);
+            const { forceUpdate } = req.query;
+            const listener = await listenerService.getHomePageContent(listenerId, forceUpdate);
             return res.json(listener);
         } catch (error) {
             next(error);
@@ -44,11 +45,44 @@ class ListenerController {
             next(error);
         }
     }
-    
+
     async getAccountContentCount(req, res, next) {
         try {
             const { listenerId } = req.params;
             const listener = await listenerService.getAccountContentCount(listenerId);
+            return res.json(listener);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getExistingGenres(req, res, next) {
+        try {
+            const { listenerId } = req.params;
+            const { choosenGenres, search } = req.query;
+            const listener = await listenerService.getExistingGenres(listenerId, choosenGenres, search);
+            return res.json(listener);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getRecommendedArtists(req, res, next) {
+        try {
+            const { listenerId } = req.params;
+            const { genres, offset, limit } = req.query;
+            const listener = await listenerService.getRecommendedArtists(listenerId, genres, offset, limit);
+            return res.json(listener);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async saveGetStartedResults(req, res, next) {
+        try {
+            const { listenerId } = req.query;
+            const { genres, artistIds } = req.body;
+            const listener = await listenerService.saveGetStartedResults(listenerId, genres, artistIds);
             return res.json(listener);
         } catch (error) {
             next(error);

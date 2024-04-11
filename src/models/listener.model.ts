@@ -12,6 +12,7 @@ export type ListenerInfoResponseDataType = {
   profileImageUrl: string;
   backgroundColor: string;
   subscription: string;
+  getStartedCompleted: boolean;
 }
 
 export type EditProfileRequestDataType = {
@@ -62,6 +63,27 @@ export type GetAccountContentCountResponseDataType = {
   likedAlbumsCount: number;
 }
 
+export type GetExistingGenresRequestDataType = {
+  choosenGenres: Array<string>;
+  search: string;
+}
+
+export type GetExistingGenresResponseDataType = {
+  recommendedGenres: Array<string>;
+  otherGenres: Array<string>;
+}
+
+export type GetRecommendedArtistsRequestDataType = {
+  genres: Array<string>;
+  offset: number;
+  limit: number;
+}
+
+export type GetRecommendedArtistsResponseDataType = {
+  recommendedArtists: Array<ArtistInfoResponseDataType>;
+  isMoreRecommendedArtistsForLoading: boolean;
+}
+
 const HomePageContentSchema = new Schema({
   contentSectionId: { type: String, required: true },
   contentType: { type: String, required: true },
@@ -89,6 +111,7 @@ const ListenerModel = model('Listener', new Schema({
   topArtistsThisMonth: [String],
   topAlbumsThisMonth: [String],
   topContentThisMonthUpdatedAt: { type: Date, required: false },
+  getStartedCompleted: { type: Boolean, required: false },
 }));
 
 export default ListenerModel;

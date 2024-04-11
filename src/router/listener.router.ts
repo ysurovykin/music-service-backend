@@ -12,5 +12,8 @@ router.get('/recent-most-visited-content/:listenerId', authMiddleware, listenerC
 router.get('/home-page-content/:listenerId', authMiddleware, listenerController.getHomePageContent);
 router.post('/edit-profile', authMiddleware, upload.single('image'), listenerController.editProfile);
 router.get('/account-content-count/:listenerId', authMiddleware, listenerController.getAccountContentCount);
+router.get('/existing-genres/:listenerId', listenerController.getExistingGenres);
+router.get('/recommended-artists/:listenerId', listenerController.getRecommendedArtists);
+router.post('/get-started', authMiddleware, listenerController.saveGetStartedResults);
 
 export default router;
