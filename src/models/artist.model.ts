@@ -85,7 +85,8 @@ const ArtistModel = model('Artist', new Schema({
   date: { type: Date, required: true },
   profileImageUrl: { type: String, required: false },
   backgroundColor: { type: String, required: false },
-  songsCount: { type: Number, required: true, default: 0 }
+  songsCount: { type: Number, required: true, default: 0 },
+  subscription: { type: String, required: true },
 }));
 
 export default ArtistModel;

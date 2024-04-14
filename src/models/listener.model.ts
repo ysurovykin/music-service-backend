@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose';
 import { ArtistInfoResponseDataType } from './artist.model';
 import { AlbumInfoResponseDataType } from './album.model';
 import { PlaylistInfoResponseDataType } from './playlist.model';
+import { CardDetailsType } from './creditCards.model';
 
 export type CreateListenerRequestDataType = {
   name: string;
@@ -13,6 +14,7 @@ export type ListenerInfoResponseDataType = {
   backgroundColor: string;
   subscription: string;
   getStartedCompleted: boolean;
+  subscriptionCanceledAtDate: string;
 }
 
 export type EditProfileRequestDataType = {
@@ -82,6 +84,12 @@ export type GetRecommendedArtistsRequestDataType = {
 export type GetRecommendedArtistsResponseDataType = {
   recommendedArtists: Array<ArtistInfoResponseDataType>;
   isMoreRecommendedArtistsForLoading: boolean;
+}
+
+export type ChangeSubscriptionRequestDataType = {
+  subscription: string;
+  cardId?: string; //if cardDetails is undefined
+  cardDetails?: CardDetailsType; //if cardId is undefined
 }
 
 const HomePageContentSchema = new Schema({

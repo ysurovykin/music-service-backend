@@ -21,8 +21,9 @@ class SongRadioService {
             throw new NotFoundError(`User with id ${listenerId} not found`);
         }
         const oneDayAgoDate = moment().subtract(1, 'day');
-        if (listener.lastSongRadioGeneratedAt && moment(listener.lastSongRadioGeneratedAt).isAfter(oneDayAgoDate)) {
-            throw new ForbiddenError('You can generate only one song radio per 24 hours');
+        if (listener.subscription === 'free' && listener.lastSongRadioGeneratedAt &&
+            moment(listener.lastSongRadioGeneratedAt).isAfter(oneDayAgoDate)) {
+            throw new ForbiddenError('You can generate only one song radio per 24 hours on free subscription');
         }
         const songRadioExists = await SongRadioModel.findOne({ listenerId: listenerId, baseSongId: songId }).lean();
         if (songRadioExists && !shouldRefresh) {
