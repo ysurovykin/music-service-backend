@@ -13,7 +13,7 @@ export type UserCreditCardInfoType = {
   active: boolean;
 }
 
-const CreditCardsModel = model('CreditCards', new Schema({
+const creditCardsSchema = new Schema({
   _id: { type: String },
   userId: { type: String, required: true },
   holderName: { type: String, required: true },
@@ -23,6 +23,12 @@ const CreditCardsModel = model('CreditCards', new Schema({
   deleted: { type: Boolean, required: false },
   activeForListener: { type: Boolean, required: false },
   activeForArtist: { type: Boolean, required: false },
-}));
+});
+
+creditCardsSchema.index({userId: 1, deleted: 1});
+creditCardsSchema.index({userId: 1, activeForListener: 1});
+creditCardsSchema.index({userId: 1, activeForArtist: 1});
+
+const CreditCardsModel = model('CreditCards', creditCardsSchema);
 
 export default CreditCardsModel;

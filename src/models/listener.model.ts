@@ -99,7 +99,7 @@ const HomePageContentSchema = new Schema({
   contentIds: [String]
 });
 
-const ListenerModel = model('Listener', new Schema({
+const listenerSchema = new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   date: { type: Date, required: true },
@@ -120,6 +120,14 @@ const ListenerModel = model('Listener', new Schema({
   topAlbumsThisMonth: [String],
   topContentThisMonthUpdatedAt: { type: Date, required: false },
   getStartedCompleted: { type: Boolean, required: false },
-}));
+});
+
+listenerSchema.index({ homePageContentGeneratedAt: 1 });
+listenerSchema.index({ topContentThisMonthUpdatedAt: 1 });
+listenerSchema.index({ lastProcessedSongPlayDataAt: 1 });
+listenerSchema.index({ _id: 1, country: 1, gender: 1 });
+
+
+const ListenerModel = model('Listener', listenerSchema);
 
 export default ListenerModel;

@@ -7,12 +7,16 @@ export type SongPlayRawDataType = {
   date: Date
 }
 
-const SongPlaysRawDataModel = model('SongPlaysRawData', new Schema({
+const songPlayRawDataSchema = new Schema({
   _id: { type: String },
   listenerId: { type: String, required: true },
   songId: { type: String, required: true },
   time: { type: Number, required: true },
   date: { type: Date, required: true }
-}));
+});
+
+songPlayRawDataSchema.index({ listenerId: 1 });
+
+const SongPlaysRawDataModel = model('SongPlaysRawData', songPlayRawDataSchema);
 
 export default SongPlaysRawDataModel;

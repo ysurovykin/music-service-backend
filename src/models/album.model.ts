@@ -28,7 +28,7 @@ export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
 
 export type AlbumFullResponseDataType = AlbumInfoResponseDataType & {
   songsCount: number;
-  songsTimeDuration: number; 
+  songsTimeDuration: number;
 }
 
 export type GetAlbumsResponseType = {
@@ -46,7 +46,7 @@ export type GetListenerTopAlbumsThisMonthResponseType = {
   isMoreTopAlbumsThisMonthForLoading: boolean;
 }
 
-const AlbumModel = model('Album', new Schema({
+const albumSchema = new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   artistId: { type: String, required: true },
@@ -65,6 +65,13 @@ const AlbumModel = model('Album', new Schema({
   lyricsBackgroundShadow: { type: String, required: true },
   songsCount: { type: Number, required: true, default: 0 },
   songIds: [String]
-}));
+});
+
+albumSchema.index({ artistId: 1 });
+albumSchema.index({ name: 1 });
+albumSchema.index({ artistId: 1, name: 1 });
+albumSchema.index({ _id: 1, name: 1 });
+
+const AlbumModel = model('Album', albumSchema);
 
 export default AlbumModel;

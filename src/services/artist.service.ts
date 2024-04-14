@@ -216,7 +216,7 @@ class ArtistService {
 
     async getListenerTopArtistsThisMonth(listenerId: string, offset: number = 0,
         limit: number = 10, search: string = ''): Promise<GetListenerTopArtistsThisMonthResponseType> {
-        const listener = await ListenerModel.findOne({ listenerId: listenerId }).lean();
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         const artistIds = listener.topArtistsThisMonth || [];
         search = search.replace('/', '');
         const artists = await ArtistModel.find({ _id: { $in: artistIds }, name: { $regex: search, $options: 'i' } })

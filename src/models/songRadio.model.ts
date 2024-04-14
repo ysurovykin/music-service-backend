@@ -34,7 +34,7 @@ export type SongRadioRecordType = {
   songIds: Array<string>,
 }
 
-const SongRadioModel = model('SongRadio', new Schema({
+const songRadioSchema = new Schema({
   _id: { type: String },
   listenerId: { type: String, required: true },
   name: { type: String, required: true },
@@ -42,6 +42,11 @@ const SongRadioModel = model('SongRadio', new Schema({
   baseSongId: { type: String, required: true },
   lastUpdatedAt: { type: Date, required: true },
   songIds: [String],
-}));
+});
+
+songRadioSchema.index({ listenerId: 1, baseSongId: 1 });
+songRadioSchema.index({ listenerId: 1, baseSongName: 1 });
+
+const SongRadioModel = model('SongRadio', songRadioSchema);
 
 export default SongRadioModel;

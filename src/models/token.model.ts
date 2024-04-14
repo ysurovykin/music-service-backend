@@ -5,9 +5,14 @@ export type TokenType = {
     refreshToken: string;
 };
 
-const TokenModel = model('Token', new Schema({
+const tokenSchema = new Schema({
     userId: { type: String, required: true },
     refreshToken: { type: String, required: true }
-}));
+});
+
+tokenSchema.index({ userId: 1 });
+tokenSchema.index({ refreshToken: 1 });
+
+const TokenModel = model('Token', tokenSchema);
 
 export default TokenModel;

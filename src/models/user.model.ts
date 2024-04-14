@@ -29,7 +29,7 @@ const BirthDateSchema = new Schema({
     year: { type: Number, required: true },
 });
 
-const UserModel = model('User', new Schema({
+const userSchema = new Schema({
     _id: { type: String },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
@@ -41,6 +41,10 @@ const UserModel = model('User', new Schema({
      * @type {ProfileTypeEnum} profile type
      */
     profileType: { type: String, required: true }
-}));
+})
+
+userSchema.index({ email: 1 });
+
+const UserModel = model('User', userSchema);
 
 export default UserModel;

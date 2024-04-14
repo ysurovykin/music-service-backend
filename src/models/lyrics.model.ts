@@ -17,10 +17,12 @@ const LyricsSchema = new Schema({
   end: { type: String, required: false },
 });
 
-const LyricsModel = model('Lyrics', new Schema({
+const lyricsSchema = new Schema({
   _id: { type: String },
   lyrics: [LyricsSchema],
   synchronized: { type: Boolean, required: true }
-}));
+});
+
+const LyricsModel = model('Lyrics', lyricsSchema);
 
 export default LyricsModel;

@@ -187,7 +187,7 @@ class AlbumService {
 
     async getListenerTopAlbumsThisMonth(listenerId: string, offset: number = 0,
         limit: number = 10, search: string = ''): Promise<GetListenerTopAlbumsThisMonthResponseType> {
-        const listener = await ListenerModel.findOne({ listenerId: listenerId }).lean();
+        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         search = search.replace('/', '');
         const albumIds = listener.topAlbumsThisMonth || [];
         const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' } })

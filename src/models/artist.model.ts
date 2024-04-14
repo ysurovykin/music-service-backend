@@ -62,7 +62,7 @@ export type GetListenerTopArtistsThisMonthResponseType = {
   isMoreTopArtistsThisMonthForLoading: boolean;
 }
 
-const ArtistModel = model('Artist', new Schema({
+const artistSchema = new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   description: { type: String, required: false },
@@ -87,6 +87,13 @@ const ArtistModel = model('Artist', new Schema({
   backgroundColor: { type: String, required: false },
   songsCount: { type: Number, required: true, default: 0 },
   subscription: { type: String, required: true },
-}));
+});
+
+artistSchema.index({ followersUpdatedAt: 1 });
+artistSchema.index({ monthlyListenersUpdatedAt: 1 });
+artistSchema.index({ name: 1 });
+artistSchema.index({ _id: 1, name: 1 });
+
+const ArtistModel = model('Artist', artistSchema);
 
 export default ArtistModel;

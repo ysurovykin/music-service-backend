@@ -43,13 +43,15 @@ const QueueSongSchema = new Schema({
     songQueueId: { type: String, required: true }
 });
 
-const QueueModel = model('Queue', new Schema({
+const queueSchema = new Schema({
     _id: { type: String },
     listenerId: { type: String, required: true },
     queue: [QueueSongSchema],
     lastUsedOptions: { type: Object, required: false },
     isMoreSongsForwardForLoading: { type: Boolean, required: false },
     isMoreSongsBehindForLoading: { type: Boolean, required: false }
-}));
+});
+
+const QueueModel = model('Queue', queueSchema);
 
 export default QueueModel;

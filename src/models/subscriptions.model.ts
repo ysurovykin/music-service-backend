@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-const subscriptionsModelSchema = new Schema({
+const subscriptionsSchema = new Schema({
   _id: { type: String },
   userId: { type: String, required: true },
   subscription: { type: String, required: true },
@@ -10,9 +10,9 @@ const subscriptionsModelSchema = new Schema({
   canceled: { type: Boolean, required: false }
 });
 
-subscriptionsModelSchema.index({ userId: 1, profileType: 1 });
-subscriptionsModelSchema.index({ nextPaymentDate: 1, canceled: 1 });
+subscriptionsSchema.index({ userId: 1, profileType: 1 });
+subscriptionsSchema.index({ nextPaymentDate: 1, canceled: 1 });
 
-const SubscriptionsModel = model('Subscriptions', subscriptionsModelSchema);
+const SubscriptionsModel = model('Subscriptions', subscriptionsSchema);
 
 export default SubscriptionsModel;

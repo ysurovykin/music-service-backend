@@ -129,7 +129,7 @@ class QueueService {
                     const songs = allSongRadioSongs.sort((a, b) => songRadio.songIds.indexOf(a._id) - songRadio.songIds.indexOf(b._id));
                     allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
                 } else if (listenerId) {
-                    const listenerData = await ListenerModel.findOne({ listenerId: listenerId }, { topSongsThisMonth: 1 }).lean();
+                    const listenerData = await ListenerModel.findOne({ _id: listenerId }, { topSongsThisMonth: 1 }).lean();
                     if (listenerData.topSongsThisMonth?.length) {
                         const listenerTopSongsThisMonth = await SongModel.find({ _id: { $in: listenerData.topSongsThisMonth } }).lean();
                         const songs = listenerTopSongsThisMonth.sort((a, b) =>  listenerData.topSongsThisMonth.indexOf(a._id) -  listenerData.topSongsThisMonth.indexOf(b._id));

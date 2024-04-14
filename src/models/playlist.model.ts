@@ -34,7 +34,7 @@ export type PlaylistInfoResponseDataType = {
 
 export type PlaylistFullResponseDataType = PlaylistInfoResponseDataType & {
   songsCount: number;
-  songsTimeDuration: number; 
+  songsTimeDuration: number;
 }
 
 export type EditedPlaylistType = {
@@ -52,7 +52,7 @@ const PlaylistSongIdSchema = new Schema({
   date: { type: Date, required: true }
 });
 
-const PlaylistModel = model('Playlist', new Schema({
+const playlistSchema = new Schema({
   _id: { type: String },
   name: { type: String, required: true },
   description: { type: String, required: false },
@@ -67,6 +67,12 @@ const PlaylistModel = model('Playlist', new Schema({
    */
   tag: { type: String, required: false },
   backgroundColor: { type: String, required: true }
-}));
+});
+
+playlistSchema.index({ listenerId: 1, tag: 1 });
+playlistSchema.index({ listenerId: 1, name: 1 });
+playlistSchema.index({ listenerId: 1, songIds: 1 });
+
+const PlaylistModel = model('Playlist', playlistSchema);
 
 export default PlaylistModel;

@@ -65,7 +65,7 @@ export type GetSongsSortingOptionsType = {
     date?: number
 }
 
-const SongModel = model('Song', new Schema({
+const songSchema = new Schema({
     _id: { type: String },
     name: { type: String, required: true },
     artistId: { type: String, required: true },
@@ -80,6 +80,15 @@ const SongModel = model('Song', new Schema({
     date: { type: Date, required: true },
     backgroundColor: { type: String, required: true },
     lyricsBackgroundShadow: { type: String, required: true }
-}));
+});
+
+songSchema.index({ albumId: 1 });
+songSchema.index({ artistId: 1 });
+songSchema.index({ name: 1 });
+songSchema.index({ artistId: 1, genres: 1 });
+songSchema.index({ _id: 1, genres: 1, language: 1 });
+songSchema.index({ _id: 1, artistId: 1, genres: 1 });
+
+const SongModel = model('Song', songSchema);
 
 export default SongModel;
