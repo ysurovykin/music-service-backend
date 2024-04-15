@@ -4,11 +4,12 @@ import { PlaylistInfoResponseDataType, CreatePlaylistRequestDataType, PlaylistTa
 import ListenerModel from '../models/listener.model';
 import PlaylistModel from '../models/playlist.model';
 import SongModel from '../models/song.model';
-import { NotFoundError } from '../errors/api-errors';
+import { ForbiddenError, NotFoundError } from '../errors/api-errors';
 import randomstring from 'randomstring';
 import { getCoverDominantColor } from '../helpers/imageCoverColor.helper';
 import listenerService from './listener.service';
 import PlaylistDto from '../dtos/playlist.dto';
+import { freeSubscriptionMaxPlaylists, paidSubscriptionMaxPlaylists } from '../../config';
 
 class PlaylistService {
 
@@ -16,6 +17,11 @@ class PlaylistService {
         const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         if (!listener) {
             throw new NotFoundError(`User with id ${listenerId} not found`);
+        }
+        const listenerPlaylistCount = await PlaylistModel.count({ listenerId: listenerId });
+        const maxPlaylistLimit = listener.subscription === 'free' ? freeSubscriptionMaxPlaylists : paidSubscriptionMaxPlaylists;
+        if (listenerPlaylistCount > maxPlaylistLimit) {
+            throw new ForbiddenError(`Your subscription does not allow to create more than ${maxPlaylistLimit} playlists`);
         }
         const playlistId = randomstring.generate(16);
         let songIds = [];

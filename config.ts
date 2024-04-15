@@ -1,7 +1,10 @@
 import { HomePageContentTypesEnum } from "./src/models/listener.model";
 
-// Maximum number of playlists for one listener
-export const maxPlaylists = 20;
+// Maximum number of playlists for free subscription
+export const freeSubscriptionMaxPlaylists = 5;
+
+// Maximum number of playlists for paid subscription
+export const paidSubscriptionMaxPlaylists = 10;
 
 // Top songs this month count for free subscription
 export const freeSubscriptionTopSongsThisMonthCount = 20;
