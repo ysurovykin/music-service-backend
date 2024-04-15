@@ -74,7 +74,7 @@ class ListenerService {
             const mostRecentVisited = visitedContent.filter(content => content.lastVisited > oneWeekAgo);
             if (mostRecentVisited.length >= 8) {
                 mostRecentVisited.sort((a, b) => b.visitsCounter - a.visitsCounter);
-                visitedContentToParse = visitedContentToParse.slice(0, 8);
+                visitedContentToParse = mostRecentVisited.slice(0, 8);
             } else {
                 const oldVisited = visitedContent.filter(content => content.lastVisited < oneWeekAgo);
                 const mostRecentVisitedSorted = mostRecentVisited

@@ -69,7 +69,8 @@ class SongRadioService {
             songName: song.name,
             baseSongId: songRadio.baseSongId,
             songsTimeDuration: songsInfo[0]?.totalDuration,
-            songsCount: songsInfo[0]?.totalCount
+            songsCount: songsInfo[0]?.totalCount,
+            brandNew: !songRadioExists
         };
     }
 

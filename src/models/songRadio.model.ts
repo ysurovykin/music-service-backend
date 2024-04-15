@@ -10,9 +10,10 @@ export type SongRadioInfoResponseDataType = {
 }
 
 export type SongRadioFullResponseDataType = SongRadioInfoResponseDataType & {
-  status: 204,
-  songsTimeDuration: number,
-  songsCount: number
+  status: 204;
+  songsTimeDuration: number;
+  songsCount: number;
+  brandNew?: boolean;
 }
 
 export type ApproveRequestResponseDataType = {
@@ -27,11 +28,11 @@ export type GetListenerSongRadiosResponseDataType = {
 
 export type SongRadioRecordType = {
   _id: string;
-  listenerId: string
-  name: string
-  baseSongId: string
-  lastUpdatedAt: Date
-  songIds: Array<string>,
+  listenerId: string;
+  name: string;
+  baseSongId: string;
+  lastUpdatedAt: Date;
+  songIds: Array<string>;
 }
 
 const songRadioSchema = new Schema({
