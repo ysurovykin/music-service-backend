@@ -18,7 +18,7 @@ export type CreateUserRequestDataType = {
     name: string;
     gender: string;
     country: string;
-    birthDate: Date;
+    birthDate: BirthDate;
     profileType: ProfileTypeEnum;
     profileImageLink: string;
 };

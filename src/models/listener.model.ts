@@ -119,14 +119,15 @@ const listenerSchema = new Schema({
   topArtistsThisMonth: [String],
   topAlbumsThisMonth: [String],
   topContentThisMonthUpdatedAt: { type: Date, required: false },
-  getStartedCompleted: { type: Boolean, required: false },
+  getStartedCompleted: { type: Boolean, required: true, default: false },
+  lastSongGuesserStatsUpdatedAt: { type: Date, required: false },
+  lastSongGuesserGuessesRecordsUpdatedAt: { type: Date, required: false }
 });
 
 listenerSchema.index({ homePageContentGeneratedAt: 1 });
 listenerSchema.index({ topContentThisMonthUpdatedAt: 1 });
 listenerSchema.index({ lastProcessedSongPlayDataAt: 1 });
 listenerSchema.index({ _id: 1, country: 1, gender: 1 });
-
 
 const ListenerModel = model('Listener', listenerSchema);
 

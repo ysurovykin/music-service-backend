@@ -25,7 +25,6 @@ class UserService {
         }
         const hashedPassword = await bcrypt.hash(userData.password, 3);
 
-        const birthDate = new Date(userData.birthDate);
         const userId = randomstring.generate(16);
         const newUser = await UserModel.create({
             _id: userId,
@@ -35,9 +34,9 @@ class UserService {
             name: userData.name,
             password: hashedPassword,
             birthDate: {
-                day: birthDate.getDate(),
-                month: birthDate.getMonth() + 1,
-                year: birthDate.getFullYear()
+                day: +userData.birthDate.day,
+                month: +userData.birthDate.month,
+                year: +userData.birthDate.year
             },
             profileType: userData.profileType
         });
@@ -46,6 +45,7 @@ class UserService {
             await ListenerModel.create({
                 _id: userId,
                 name: userData.name,
+                subscription: 'free',
                 date: new Date()
             });
             const playlistId = randomstring.generate(16);
@@ -62,6 +62,7 @@ class UserService {
             await ArtistModel.create({
                 _id: userId,
                 name: userData.name,
+                subscription: 'free',
                 date: new Date()
             });
         }

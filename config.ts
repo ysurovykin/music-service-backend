@@ -1,4 +1,5 @@
 import { HomePageContentTypesEnum } from "./src/models/listener.model";
+import { SongGuesserDifficultyEnum } from "./src/models/songGuesser.model";
 
 // Maximum number of playlists for free subscription
 export const freeSubscriptionMaxPlaylists = 5;
@@ -64,3 +65,9 @@ export const homePageContentSections = {
   'FAVORITE_ARTISTS': { title: 'Your favorite artists', type: HomePageContentTypesEnum.artist },
   'FAVORITE_ALBUMS': { title: 'Your favorite albums', type: HomePageContentTypesEnum.album },
 };
+
+export const songGuesserDifficultiesInSeconds: { [key in SongGuesserDifficultyEnum]: number } = {
+  [SongGuesserDifficultyEnum.NEW_TO_MUSIC]: 15,
+  [SongGuesserDifficultyEnum.FREQUENT_LISTENER]: 10,
+  [SongGuesserDifficultyEnum.TRUE_FAN]: 5,
+}

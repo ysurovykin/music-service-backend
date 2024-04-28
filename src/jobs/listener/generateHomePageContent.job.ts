@@ -99,7 +99,7 @@ const getMoreLikeArtistsContent = async (listenerId: string, homePageSectionCont
     { $limit: 1 },
   ]);
 
-  const artist = await ArtistModel.findOne({ _id: baseArtistId[0].artistId }).lean();
+  const artist = await ArtistModel.findOne({ _id: baseArtistId[0]?.artistId }).lean();
   if (artist) {
     const genresSorted = Object.keys(artist.genres).sort((a, b) => artist.genres[a] - artist.genres[b]);
     const languagesSorted = Object.keys(artist.languages).sort((a, b) => artist.languages[a] - artist.languages[b]);
