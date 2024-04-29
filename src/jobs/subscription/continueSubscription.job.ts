@@ -1,4 +1,4 @@
-import SubscriptionsModel from "../../models/subscriptions.model";
+import SubscriptionsModel from "../../user/subscription/subscriptions.model";
 import moment from "moment";
 
 export async function continueSubscriptionJob() {

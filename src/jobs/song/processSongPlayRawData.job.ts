@@ -1,10 +1,10 @@
 import moment from "moment";
-import ListenerModel from "../../models/listener.model";
-import SongPlaysRawDataModel from "../../models/songPlaysRawData.model";
-import SongPlaysModel from "../../models/songPlays.model";
-import SongModel from "../../models/song.model";
-import ArtistPlaysModel from "../../models/artistPlays.model";
-import AlbumPlaysModel from "../../models/albumPlays.model";
+import ListenerModel from "../../listener/listener/listener.model";
+import SongPlaysRawDataModel from "../../listener/song/songPlaysRawData.model";
+import SongPlaysModel from "../../listener/song/songPlays.model";
+import SongModel from "../../listener/song/song.model";
+import ArtistPlaysModel from "../../listener/artist/artistPlays.model";
+import AlbumPlaysModel from "../../listener/album/albumPlays.model";
 
 export async function processSongPlayRawDataJob() {
   try {

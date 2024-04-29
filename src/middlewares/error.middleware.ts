@@ -1,6 +1,6 @@
 
 import { ApiError } from '../errors/api-errors';
-import tokenService from '../services/token.service';
+import tokenService from '../user/token/token.service';
 
 export default function (error, req, res, next) {
     if (error instanceof ApiError) {

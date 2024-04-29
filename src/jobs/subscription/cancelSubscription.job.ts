@@ -1,6 +1,6 @@
-import ListenerModel from "../../models/listener.model";
-import SubscriptionsModel from "../../models/subscriptions.model";
-import ArtistModel from "../../models/artist.model";
+import ListenerModel from "../../listener/listener/listener.model";
+import SubscriptionsModel from "../../user/subscription/subscriptions.model";
+import ArtistModel from "../../listener/artist/artist.model";
 
 export async function cancelSubscriptionJob() {
   try {

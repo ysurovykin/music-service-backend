@@ -1,6 +1,6 @@
 
 import { UnauthorizedError } from '../errors/api-errors';
-import tokenService from '../services/token.service';
+import tokenService from '../user/token/token.service';
 
 export default function (req, res, next) {
     try {
