@@ -41,46 +41,6 @@ class ArtistService {
         }
     }
 
-    async changeArtistProfileImage(artistId: string, file: Express.Multer.File): Promise<void> {
-        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
-        if (!artist) {
-            throw new NotFoundError(`Artist with id ${artistId} not found`);
-        }
-
-        const downloadUrl = `artist-profile-images/${artist._id}`;
-        const storageRef = ref(storage, downloadUrl);
-        await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
-        let profileImageUrl = await getDownloadURL(storageRef);
-        const indexOfTokenQuery = profileImageUrl.indexOf('&token')
-        if (indexOfTokenQuery) {
-            profileImageUrl = profileImageUrl.slice(0, indexOfTokenQuery);
-        }
-        const backgroundColor = await getDominantColorWithShadow(profileImageUrl);
-
-        await ArtistModel.updateOne({ _id: artistId }, {
-            $set: { profileImageUrl: profileImageUrl, backgroundColor: backgroundColor.backgroundColor }
-        });
-    }
-
-    async removeArtistProfileImage(artistId: string): Promise<void> {
-        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
-        if (!artist) {
-            throw new NotFoundError(`Artist with id ${artistId} not found`);
-        }
-        if (artist.profileImageUrl) {
-            try {
-                const downloadUrl = `artist-profile-images/${artist._id}`;
-                const storageRef = ref(storage, downloadUrl);
-                await deleteObject(storageRef);
-            } catch (error) {
-                console.error('Error while deleting artist profile image', error);
-            }
-        }
-        await ArtistModel.updateOne({ _id: artistId }, {
-            $unset: { profileImageUrl: 1, backgroundColor: 1 }
-        });
-    }
-
     async getArtistById(listenerId: string, artistId: string): Promise<ArtistFullResponseDataType> {
         const artist = await ArtistModel.findOne({ _id: artistId }).lean();
         if (!artist) {

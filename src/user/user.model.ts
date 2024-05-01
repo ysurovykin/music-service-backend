@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import { CardDetailsType } from './creditCards/creditCards.model';
 
 export type BirthDate = {
     day: Number;
@@ -23,6 +24,12 @@ export type CreateUserRequestDataType = {
     profileImageLink: string;
 };
 
+export type ChangeSubscriptionRequestDataType = {
+    subscription: string;
+    cardId?: string; //if cardDetails is undefined
+    cardDetails?: CardDetailsType; //if cardId is undefined
+}
+
 const BirthDateSchema = new Schema({
     day: { type: Number, required: true },
     month: { type: Number, required: true },
@@ -40,7 +47,9 @@ const userSchema = new Schema({
     /**
      * @type {ProfileTypeEnum} profile type
      */
-    profileType: { type: String, required: true }
+    profileType: { type: String, required: true },
+    hasListenerProfile: { type: Boolean, required: false },
+    hasArtistProfile: { type: Boolean, required: false }
 })
 
 userSchema.index({ email: 1 });

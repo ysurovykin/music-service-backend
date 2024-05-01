@@ -4,15 +4,16 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose, { ConnectOptions } from 'mongoose';
 import userRouter from './src/user/user.router.ts';
-import songRouter from './src/listener/song/song.router.ts';
-import albumRouter from './src/listener/album/album.router.ts';
-import artistRouter from './src/listener/artist/artist.router.ts';
-import listenerRouter from './src/listener/listener/listener.router.ts';
-import playlistRouter from './src/listener/playlist/playlist.router.ts';
-import queueRouter from './src/listener/queue/queue.router.ts';
-import lyricsRouter from './src/listener/lyrics/lyrics.router.ts';
-import songRadioRouter from './src/listener/songRadio/songRadio.router.ts';
-import songGuesserRouter from './src/listener/songGuesser/songGuesser.router.ts';
+import songRouter from './src/api/song/song.router.ts';
+import albumRouter from './src/api/album/album.router.ts';
+import artistRouter from './src/api/artist/artist.router.ts';
+import listenerRouter from './src/api/listener/listener.router.ts';
+import playlistRouter from './src/api/playlist/playlist.router.ts';
+import queueRouter from './src/api/queue/queue.router.ts';
+import lyricsRouter from './src/api/lyrics/lyrics.router.ts';
+import songRadioRouter from './src/api/songRadio/songRadio.router.ts';
+import songGuesserRouter from './src/api/songGuesser/songGuesser.router.ts';
+import artistProfileRouter from './src/api/artistProfile/artistProfile.router.ts';
 import { registerJob } from './src/jobs/jobRegister.ts';
 import { processSongPlayRawDataJob } from './src/jobs/song/processSongPlayRawData.job.ts';
 import { updateArtistMonthlyListenersJob } from './src/jobs/song/updateArtistMonthlyListeners.job.ts';
@@ -46,6 +47,8 @@ app.use('/queue', queueRouter);
 app.use('/lyrics', lyricsRouter);
 app.use('/song-radio', songRadioRouter);
 app.use('/song-guesser', songGuesserRouter);
+
+app.use('/artist-profile', artistProfileRouter);
 app.use(errorMiddleware);
 
 const start = async () => {

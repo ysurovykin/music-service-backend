@@ -26,10 +26,8 @@ import FollowedArtistsModel from '../artist/followedArtists.model';
 import GenresModel from '../genres/genres.model';
 import UserModel from '../../user/user.model';
 import randomstring from 'randomstring';
-import CreditCardsModel, { CardDetailsType, UserCreditCardInfoType } from '../../user/creditCards/creditCards.model';
 import SubscriptionsModel from '../../user/subscription/subscriptions.model';
 import moment from 'moment';
-import subscriptionService from '../../user/subscription/subscription.service';
 
 class ListenerService {
 
@@ -387,37 +385,6 @@ class ListenerService {
             date: new Date()
         }));
         await FollowedArtistsModel.insertMany(artistsToFollow);
-    }
-
-    async getUserCreditCards(listenerId: string): Promise<Array<UserCreditCardInfoType>> {
-        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
-        if (!listener) {
-            throw new NotFoundError(`Listener with id ${listenerId} not found`);
-        }
-        const userCreditCards = await CreditCardsModel.find({ userId: listenerId, deleted: { $ne: true } }).lean();
-        const formatedCreditCards: Array<UserCreditCardInfoType> = userCreditCards.map(card => ({
-            cardId: card._id,
-            lastDigits: card.number.slice(-4),
-            active: card.activeForListener || card.activeForArtist
-        }));
-        return formatedCreditCards;
-    }
-
-    async changeSubscription(listenerId: string, subscription: string, cardId: string,
-        cardDetails: CardDetailsType): Promise<void> {
-        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
-        if (!listener) {
-            throw new NotFoundError(`Listener with id ${listenerId} not found`);
-        }
-        await subscriptionService.updateSubscription(listenerId, subscription, cardDetails, cardId, 'listener');
-    }
-
-    async deleteUserCreditCard(listenerId: string, cardId: string): Promise<void> {
-        const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
-        if (!listener) {
-            throw new NotFoundError(`Listener with id ${listenerId} not found`);
-        }
-        await CreditCardsModel.deleteOne({ _id: cardId });
     }
 
     async _updateVisitedContent(listenerId: string, contentType: 'artist' | 'album' | 'playlist', content: ContentDataType) {

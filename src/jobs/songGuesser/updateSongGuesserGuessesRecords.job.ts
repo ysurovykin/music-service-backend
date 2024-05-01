@@ -1,7 +1,7 @@
 import moment from "moment";
-import ListenerModel from "../../listener/listener/listener.model";
-import SongGuesserStatsModel from "../../listener/songGuesser/songGuesserStats/songGuesserStats.model";
-import SongGuesserGuessesRecordModel from "../../listener/songGuesser/songGuesserGuessesRecord/songGuesserGuessesRecord.model";
+import ListenerModel from "../../api/listener/listener.model";
+import SongGuesserStatsModel from "../../api/songGuesser/songGuesserStats/songGuesserStats.model";
+import SongGuesserGuessesRecordModel from "../../api/songGuesser/songGuesserGuessesRecord/songGuesserGuessesRecord.model";
 
 export async function updateSongGuesserGuessesRecordsJob() {
   try {

@@ -1,6 +1,6 @@
 import moment from "moment";
-import ArtistPlaysModel from "../../listener/artist/artistPlays.model";
-import ArtistModel from "../../listener/artist/artist.model";
+import ArtistPlaysModel from "../../api/artist/artistPlays.model";
+import ArtistModel from "../../api/artist/artist.model";
 
 export async function updateArtistMonthlyListenersJob() {
   try {

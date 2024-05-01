@@ -8,6 +8,8 @@ export default class UserDto {
     country: string;
     profileType: ProfileTypeEnum;
     birthDate: BirthDate;
+    hasArtistProfile: boolean;
+    hasListenerProfile: boolean;
 
     constructor(model: any) {
         this.userId = model._id || model.userId;
@@ -17,5 +19,7 @@ export default class UserDto {
         this.country = model.country;
         this.profileType = model.profileType;
         this.birthDate = model.birthDate;
+        this.hasArtistProfile = model.hasArtistProfile;
+        this.hasListenerProfile = model.hasListenerProfile;
     }
 }

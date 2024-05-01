@@ -11,27 +11,6 @@ class ArtistController {
         }
     }
 
-    async changeArtistProfileImage(req, res, next) {
-        try {
-            const image: Express.Multer.File = req.file;
-            const { artistId } = req.body;
-            await artistService.changeArtistProfileImage(artistId, image);
-            return res.sendStatus(204);
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async removeArtistProfileImage(req, res, next) {
-        try {
-            const { artistId } = req.body;
-            await artistService.removeArtistProfileImage(artistId);
-            return res.sendStatus(204);
-        } catch (error) {
-            next(error);
-        }
-    }
-
     async getArtistById(req, res, next) {
         try {
             const { artistId } = req.params;

@@ -1,5 +1,5 @@
-import { HomePageContentTypesEnum } from "./src/listener/listener/listener.model";
-import { SongGuesserDifficultyEnum } from "./src/listener/songGuesser/songGuesser.model";
+import { HomePageContentTypesEnum } from "./src/api/listener/listener.model";
+import { SongGuesserDifficultyEnum } from "./src/api/songGuesser/songGuesser.model";
 
 // Maximum number of playlists for free subscription
 export const freeSubscriptionMaxPlaylists = 5;

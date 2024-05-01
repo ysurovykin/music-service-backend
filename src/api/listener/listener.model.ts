@@ -2,7 +2,6 @@ import { Schema, model } from 'mongoose';
 import { ArtistInfoResponseDataType } from '../artist/artist.model';
 import { AlbumInfoResponseDataType } from '../album/album.model';
 import { PlaylistInfoResponseDataType } from '../playlist/playlist.model';
-import { CardDetailsType } from '../../user/creditCards/creditCards.model';
 
 export type CreateListenerRequestDataType = {
   name: string;
@@ -84,12 +83,6 @@ export type GetRecommendedArtistsRequestDataType = {
 export type GetRecommendedArtistsResponseDataType = {
   recommendedArtists: Array<ArtistInfoResponseDataType>;
   isMoreRecommendedArtistsForLoading: boolean;
-}
-
-export type ChangeSubscriptionRequestDataType = {
-  subscription: string;
-  cardId?: string; //if cardDetails is undefined
-  cardDetails?: CardDetailsType; //if cardId is undefined
 }
 
 const HomePageContentSchema = new Schema({

@@ -5,14 +5,6 @@ export type ArtistSocialLinks = {
   link: string;
 }
 
-export type CreateArtistRequestDataType = {
-  name: string;
-  country: string;
-  description?: string;
-  socialLinks?: Array<ArtistSocialLinks>;
-  genres: Array<string>;
-};
-
 export type ArtistShortDataType = {
   name: string;
   id: string;
@@ -85,7 +77,6 @@ const artistSchema = new Schema({
   profileImageUrl: { type: String, required: false },
   backgroundColor: { type: String, required: false },
   songsCount: { type: Number, required: true, default: 0 },
-  subscription: { type: String, required: true },
 });
 
 artistSchema.index({ followersUpdatedAt: 1 });

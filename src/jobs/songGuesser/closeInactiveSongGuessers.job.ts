@@ -1,5 +1,5 @@
 import moment from "moment";
-import SongGuesserModel, { SongGuesserDifficultyEnum, SongGuesserRecordType } from "../../listener/songGuesser/songGuesser.model";
+import SongGuesserModel, { SongGuesserDifficultyEnum, SongGuesserRecordType } from "../../api/songGuesser/songGuesser.model";
 
 export async function closeInactiveSongGuessersJob() {
   try {

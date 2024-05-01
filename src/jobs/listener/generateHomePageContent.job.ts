@@ -1,6 +1,6 @@
 import moment from "moment";
-import ArtistModel from "../../listener/artist/artist.model";
-import ListenerModel, { HomePageContentDataType } from "../../listener/listener/listener.model";
+import ArtistModel from "../../api/artist/artist.model";
+import ListenerModel, { HomePageContentDataType } from "../../api/listener/listener.model";
 import {
   freeSubscriptionHomePageContentSectionCount,
   freeSubscriptionHomePageSectionContentLimit,
@@ -8,11 +8,11 @@ import {
   paidSubscriptionHomePageContentSectionCount,
   paidSubscriptionHomePageSectionContentLimit
 } from "../../../config";
-import ArtistPlaysModel from "../../listener/artist/artistPlays.model";
-import AlbumPlaysModel from "../../listener/album/albumPlays.model";
-import AlbumModel from "../../listener/album/album.model";
-import LikedAlbumsModel from "../../listener/album/likedAlbums.model";
-import FollowedArtistsModel from "../../listener/artist/followedArtists.model";
+import ArtistPlaysModel from "../../api/artist/artistPlays.model";
+import AlbumPlaysModel from "../../api/album/albumPlays.model";
+import AlbumModel from "../../api/album/album.model";
+import LikedAlbumsModel from "../../api/album/likedAlbums.model";
+import FollowedArtistsModel from "../../api/artist/followedArtists.model";
 
 const GetHomePageContentMap = new Map([
   ['MORE_LIKE_ARTIST', async (listenerId: string, homePageSectionContentLimit: number) =>

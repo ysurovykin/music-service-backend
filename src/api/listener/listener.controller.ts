@@ -89,37 +89,6 @@ class ListenerController {
         }
     }
 
-    async getUserCreditCards(req, res, next) {
-        try {
-            const { listenerId } = req.params;
-            const creditCards = await listenerService.getUserCreditCards(listenerId);
-            return res.json(creditCards);
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async changeSubscription(req, res, next) {
-        try {
-            const { listenerId } = req.query;
-            const { subscription, cardId, cardDetails } = req.body;
-            await listenerService.changeSubscription(listenerId, subscription, cardId, cardDetails);
-            return res.sendStatus(204);
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async deleteUserCreditCard(req, res, next) {
-        try {
-            const { listenerId, cardId } = req.params;
-            await listenerService.deleteUserCreditCard(listenerId, cardId);
-            return res.sendStatus(200);
-        } catch (error) {
-            next(error);
-        }
-    }
-
 }
 
 const listenerController = new ListenerController();

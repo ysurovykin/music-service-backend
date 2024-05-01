@@ -1,9 +1,9 @@
 import moment from "moment";
-import ListenerModel from "../../listener/listener/listener.model";
-import SongGuesserModel from "../../listener/songGuesser/songGuesser.model";
-import SongGuesserStatsModel from "../../listener/songGuesser/songGuesserStats/songGuesserStats.model";
+import ListenerModel from "../../api/listener/listener.model";
+import SongGuesserModel from "../../api/songGuesser/songGuesser.model";
+import SongGuesserStatsModel from "../../api/songGuesser/songGuesserStats/songGuesserStats.model";
 import randomstring from "randomstring";
-import SongGuesserGuessesRecordModel from "../../listener/songGuesser/songGuesserGuessesRecord/songGuesserGuessesRecord.model";
+import SongGuesserGuessesRecordModel from "../../api/songGuesser/songGuesserGuessesRecord/songGuesserGuessesRecord.model";
 
 export async function updateSongGuesserStatsJob() {
   try {

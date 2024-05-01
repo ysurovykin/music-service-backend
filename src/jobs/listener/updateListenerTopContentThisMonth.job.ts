@@ -1,8 +1,8 @@
 import moment from "moment";
-import ListenerModel from "../../listener/listener/listener.model";
-import ArtistPlaysModel from "../../listener/artist/artistPlays.model";
-import AlbumPlaysModel from "../../listener/album/albumPlays.model";
-import SongPlaysModel from "../../listener/song/songPlays.model";
+import ListenerModel from "../../api/listener/listener.model";
+import ArtistPlaysModel from "../../api/artist/artistPlays.model";
+import AlbumPlaysModel from "../../api/album/albumPlays.model";
+import SongPlaysModel from "../../api/song/songPlays.model";
 import { freeSubscriptionTopAlbumsThisMonthCount, freeSubscriptionTopArtistsThisMonthCount, freeSubscriptionTopSongsThisMonthCount, paidSubscriptionTopAlbumsThisMonthCount, paidSubscriptionTopArtistsThisMonthCount, paidSubscriptionTopSongsThisMonthCount } from "../../../config";
 
 export async function updateListenerTopContentThisMonthJob() {
