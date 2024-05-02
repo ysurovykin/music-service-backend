@@ -267,6 +267,7 @@ const getPopularAlbumsContent = async (listenerId: string, homePageSectionConten
     {
       $match: {
         _id: { $nin: likedAlbumIds },
+        hidden: { $ne: true },
         'genresArray.k': favoriteGenres[0]
       }
     },

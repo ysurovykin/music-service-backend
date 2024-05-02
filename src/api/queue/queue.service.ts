@@ -28,6 +28,11 @@ class QueueService {
             const songs = allSongs.slice(startIndex, endIndex + 1);
             songsResponse = await this._formatSongs(listenerId, songs);
         }
+        const songQueueIdIndex = songsResponse.findIndex(song => song.songQueueId === songQueueId);
+        if (songQueueIdIndex === -1) {
+            songQueueId = songsResponse[0].songQueueId;
+        }
+
         return {
             queue: songsResponse,
             songQueueId: songQueueId,
@@ -101,6 +106,7 @@ class QueueService {
                             }
                         },
                         { $unwind: '$matchedSong' },
+                        { $match: { hidden: { $ne: true } } },
                         {
                             $project: {
                                 _id: 0,
@@ -119,12 +125,12 @@ class QueueService {
                     allSongs = playlistSongs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
                 } else if (albumId) {
                     const album = await AlbumModel.findOne({ _id: albumId }).lean();
-                    const allAlbumSongs = await SongModel.find({ _id: { $in: album.songIds } }, { _id: 1 }).lean();
+                    const allAlbumSongs = await SongModel.find({ _id: { $in: album.songIds }, hidden: { $ne: true } }, { _id: 1 }).lean();
                     const songs = allAlbumSongs.sort((a, b) => album.songIds.indexOf(a._id) - album.songIds.indexOf(b._id));
                     allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
                 } else if (artistId) {
                     const sortingRequest = songService.getSortingRequest(sortingOptions);
-                    const findRequest: any = { artistId: artistId };
+                    const findRequest: any = { artistId: artistId, hidden: { $ne: true } };
                     if (likedSongIds) {
                         findRequest._id = { $in: likedSongIds };
                     }
@@ -132,13 +138,13 @@ class QueueService {
                     allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
                 } else if (songRadioBaseSongId) {
                     const songRadio = await SongRadioModel.findOne({ listenerId: listenerId, baseSongId: songRadioBaseSongId }).lean();
-                    const allSongRadioSongs = await SongModel.find({ _id: { $in: songRadio.songIds } }, { _id: 1 }).lean();
+                    const allSongRadioSongs = await SongModel.find({ _id: { $in: songRadio.songIds }, hidden: { $ne: true } }, { _id: 1 }).lean();
                     const songs = allSongRadioSongs.sort((a, b) => songRadio.songIds.indexOf(a._id) - songRadio.songIds.indexOf(b._id));
                     allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
                 } else if (listenerId) {
                     const listenerData = await ListenerModel.findOne({ _id: listenerId }, { topSongsThisMonth: 1 }).lean();
                     if (listenerData.topSongsThisMonth?.length) {
-                        const listenerTopSongsThisMonth = await SongModel.find({ _id: { $in: listenerData.topSongsThisMonth } }).lean();
+                        const listenerTopSongsThisMonth = await SongModel.find({ _id: { $in: listenerData.topSongsThisMonth }, hidden: { $ne: true } }).lean();
                         const songs = listenerTopSongsThisMonth.sort((a, b) => listenerData.topSongsThisMonth.indexOf(a._id) - listenerData.topSongsThisMonth.indexOf(b._id));
                         allSongs = songs.map(song => ({ songId: song._id, songQueueId: randomstring.generate(16) }));
                     }
@@ -178,9 +184,12 @@ class QueueService {
         const songsResponse: Array<QueueSongInfoResponseDataType> = [];
         if (songsData?.length) {
             const songIds = songsData.map(song => song.songId);
-            const songs = await SongModel.find({ _id: { $in: songIds } }).lean();
+            const songs = await SongModel.find({ _id: { $in: songIds }, hidden: { $ne: true } }).lean();
             for (const songData of songsData) {
                 const songToBeFormated = songs.find(song => song._id === songData.songId);
+                if (!songToBeFormated) {
+                    continue;
+                }
                 const songFormated: SongInfoResponseDataType = await songService.formatSongData(listenerId, songToBeFormated);
                 songFormated.songUrl += `&token=${randomstring.generate(16)}`;
                 songsResponse.push({ ...songFormated, songQueueId: songData.songQueueId });

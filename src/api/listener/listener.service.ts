@@ -49,7 +49,7 @@ class ListenerService {
         };
     }
 
-    async getRecentMostVisitedContent(listenerId: string): Promise<Array<ContentDataType>> {
+    async getRecentMostVisitedContent(listenerId: string): Promise<Array<ContentDataType>> { //TODO rewrite as job
         const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         if (!listener) {
             throw new NotFoundError(`Listener with id ${listenerId} not found`);
@@ -66,6 +66,15 @@ class ListenerService {
                 type: content.type,
                 visitsCounter: content.visitsCounter
             }));
+            const visitedAlbums = visitedContentFormated.filter(content => content.type === 'album');
+            if (visitedAlbums) {
+                const albumIds = visitedAlbums.map(album => album.contentId);
+                const hiddenAlbums = await AlbumModel.find({ _id: { $in: albumIds }, hidden: true }, { _id: 1 }).lean();
+                if (hiddenAlbums.length) {
+                    const hiddenAlbumIds = hiddenAlbums.map(hiddenAlbum => hiddenAlbum._id);
+                    visitedContentFormated = visitedContentFormated.filter(content => !hiddenAlbumIds.includes(content.contentId));
+                }
+            }
         } else {
             let visitedContentToParse = [];
             const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -73,13 +82,55 @@ class ListenerService {
             if (mostRecentVisited.length >= 8) {
                 mostRecentVisited.sort((a, b) => b.visitsCounter - a.visitsCounter);
                 visitedContentToParse = mostRecentVisited.slice(0, 8);
+                let startIndex = 8;
+                let startIndexForOldContent = 0;
+                do {
+                    const visitedAlbums = visitedContentToParse.filter(content => content.type === 'album');
+                    if (visitedAlbums) {
+                        const albumIds = visitedAlbums.map(album => album.contentId);
+                        const hiddenAlbums = await AlbumModel.find({ _id: { $in: albumIds }, hidden: true }, { _id: 1 }).lean();
+                        if (hiddenAlbums.length) {
+                            const hiddenAlbumIds = hiddenAlbums.map(hiddenAlbum => hiddenAlbum._id);
+                            visitedContentToParse = visitedContentToParse.filter(content => !hiddenAlbumIds.includes(content.contentId));
+                            let additionalContent = mostRecentVisited.slice(startIndex, startIndex + hiddenAlbums.length);
+                            if (!additionalContent.length) {
+                                const oldVisited = visitedContent.filter(content => content.lastVisited < oneWeekAgo);
+                                oldVisited.sort((a, b) => b.visitsCounter - a.visitsCounter)
+                                additionalContent = oldVisited.slice(startIndexForOldContent, startIndexForOldContent + hiddenAlbums.length);
+                                startIndexForOldContent += hiddenAlbums.length;
+                                if (!additionalContent.length) {
+                                    break;
+                                }
+                            }
+                            visitedContentToParse = [...visitedContentToParse, ...additionalContent]
+                            startIndex += hiddenAlbums.length;
+                        }
+                    }
+                } while (visitedContentToParse.length < 8);
             } else {
                 const oldVisited = visitedContent.filter(content => content.lastVisited < oneWeekAgo);
-                const mostRecentVisitedSorted = mostRecentVisited
-                    .sort((a, b) => b.visitsCounter - a.visitsCounter);
-                const oldVisitedSorted = oldVisited.sort((a, b) => b.visitsCounter - a.visitsCounter)
-                    .slice(0, 8 - mostRecentVisitedSorted.length);
+                mostRecentVisited.sort((a, b) => b.visitsCounter - a.visitsCounter);
+                oldVisited.sort((a, b) => b.visitsCounter - a.visitsCounter)
+                const oldVisitedSorted = oldVisited.slice(0, 8 - mostRecentVisited.length);
                 visitedContentToParse = [...mostRecentVisited, ...oldVisitedSorted];
+                let startIndex = 8 - mostRecentVisited.length;
+                do {
+                    const visitedAlbums = visitedContentToParse.filter(content => content.type === 'album');
+                    if (visitedAlbums) {
+                        const albumIds = visitedAlbums.map(album => album.contentId);
+                        const hiddenAlbums = await AlbumModel.find({ _id: { $in: albumIds }, hidden: true }, { _id: 1 }).lean();
+                        if (hiddenAlbums.length) {
+                            const hiddenAlbumIds = hiddenAlbums.map(hiddenAlbum => hiddenAlbum._id);
+                            visitedContentToParse = visitedContentToParse.filter(content => !hiddenAlbumIds.includes(content.contentId));
+                            const additionalContent = oldVisited.slice(startIndex, startIndex + hiddenAlbums.length);
+                            if (!additionalContent.length) {
+                                break;
+                            }
+                            visitedContentToParse = [...visitedContentToParse, ...additionalContent]
+                            startIndex += hiddenAlbums.length;
+                        }
+                    }
+                } while (visitedContentToParse.length < 8);
             }
             visitedContentFormated = visitedContentToParse.map(content => ({
                 contentId: content.contentId,

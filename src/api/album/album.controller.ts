@@ -48,6 +48,28 @@ class AlbumController {
         }
     }
 
+    async hideAlbum(req, res, next) {
+        try {
+            const { albumId } = req.params;
+            const { artistId } = req.query;
+            await albumService.hideAlbum(artistId, albumId);
+            return res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async unhideAlbum(req, res, next) {
+        try {
+            const { albumId } = req.params;
+            const { artistId } = req.query;
+            await albumService.unhideAlbum(artistId, albumId);
+            return res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getAlbumsByArtistId(req, res, next) {
         try {
             const { artistId } = req.params;

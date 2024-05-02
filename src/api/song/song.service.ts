@@ -81,6 +81,7 @@ class SongService {
             genres: songGenres,
             language: songData.language,
             backgroundColor: album.backgroundColor,
+            explicit: !!songData.explicit,
             lyricsBackgroundShadow: album.lyricsBackgroundShadow,
             songUrl,
             duration,

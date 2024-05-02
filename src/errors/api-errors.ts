@@ -20,10 +20,12 @@ export class NotFoundError extends ApiError {
 
 export class ForbiddenError extends ApiError {
     status: number;
+    details: Object;
 
-    constructor(message: string) {
+    constructor(message: string, details?: Object) {
         super(message, 403);
         this.status = 403;
+        this.details = details;
     }
 }
 

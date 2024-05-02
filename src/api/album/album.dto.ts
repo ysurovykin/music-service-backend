@@ -8,7 +8,7 @@ export default class AlbumDto {
     backgroundColor: string;
     lyricsBackgroundShadow: string;
     songsCount: number;
-    hiden: boolean;
+    hidden: boolean;
 
     constructor(model: any) {
         this.albumId = model._id;
@@ -20,6 +20,6 @@ export default class AlbumDto {
         this.backgroundColor = model.backgroundColor;
         this.lyricsBackgroundShadow = model.lyricsBackgroundShadow;
         this.songsCount = model.songsCount;
-        this.hiden = model.hiden;
+        this.hidden = model.hidden;
     }
 }

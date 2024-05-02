@@ -78,7 +78,7 @@ class AlbumService {
         if (!album) {
             throw new NotFoundError(`Album with id ${albumData.albumId} not found`);
         }
-        const artistAlbumsCount = await AlbumModel.count({ artistId: artistId, hiden: { $ne: true } });
+        const artistAlbumsCount = await AlbumModel.count({ artistId: artistId, hidden: { $ne: true } });
         const maxAlbumsLimit = artistProfile.subscription === 'free' ? freeSubscriptionMaxArtistAlbums : paidSubscriptionMaxArtistAlbums;
         if (artistAlbumsCount > maxAlbumsLimit) {
             throw new ForbiddenError(`Your subscription does not allow to have more than ${maxAlbumsLimit} albums active`);
@@ -122,7 +122,7 @@ class AlbumService {
             id: artist._id
         };
 
-        const albums = await AlbumModel.find({ artistId }).lean();
+        const albums = await AlbumModel.find({ artistId, hidden: { $ne: true } }).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
             const albumDto = new AlbumDto(album);
@@ -143,7 +143,7 @@ class AlbumService {
         }
 
         const albumIds = await SongModel.distinct(('albumId'), { coArtistIds: artistId }).lean();
-        const albums = await AlbumModel.find({ _id: { $in: albumIds } }).lean();
+        const albums = await AlbumModel.find({ _id: { $in: albumIds }, hidden: { $ne: true } }).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
             const albumDto = new AlbumDto(album);
@@ -166,7 +166,9 @@ class AlbumService {
         if (!albumId) {
             throw new NotFoundError(`Album with id ${albumId} not found`);
         }
-
+        if (album.hidden) {
+            throw new ForbiddenError(`Album "${album.name}" is currently unavailable`, { hidden: true });
+        }
         const artist = await ArtistModel.findOne({ _id: album.artistId }, { _id: 1, name: 1 });
         if (!artist) {
             throw new NotFoundError(`Artist with id ${album.artistId} not found`);
@@ -227,7 +229,7 @@ class AlbumService {
         const likedAlbums = await LikedAlbumstModel.find({ listenerId: listenerId }).sort({ date: -1 }).lean();
         const albumIds = likedAlbums.map(likedAlbum => likedAlbum.albumId);
         search = search.replace('/', '');
-        const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' } })
+        const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' }, hidden: { $ne: true } })
             .skip(+offset * +limit).limit(+limit).lean();
         const sortedAlbums = albums.sort((a, b) => albumIds.indexOf(a._id) - albumIds.indexOf(b._id));
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
@@ -255,7 +257,7 @@ class AlbumService {
         const listener = await ListenerModel.findOne({ _id: listenerId }).lean();
         search = search.replace('/', '');
         const albumIds = listener.topAlbumsThisMonth || [];
-        const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' } })
+        const albums = await AlbumModel.find({ _id: { $in: albumIds }, name: { $regex: search, $options: 'i' }, hidden: { $ne: true } })
             .skip(+offset * +limit).limit(+limit).lean();
         const sortedAlbums = albums.sort((a, b) => albumIds.indexOf(a._id) - albumIds.indexOf(b._id));
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
@@ -280,7 +282,7 @@ class AlbumService {
 
     async getAlbums(offset: number = 0, limit: number = 10, search: string = ''): Promise<GetAlbumsResponseType> {
         search = search.replace('/', '');
-        const albums = await AlbumModel.find({ name: { $regex: search, $options: 'i' } }).sort({ likes: -1 })
+        const albums = await AlbumModel.find({ name: { $regex: search, $options: 'i' }, hidden: { $ne: true } }).sort({ likes: -1 })
             .skip(+offset * +limit).limit(+limit).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
@@ -332,6 +334,32 @@ class AlbumService {
             albums: albumDatas,
             isMoreAlbumsForLoading: albumDatas.length === +limit
         };
+    }
+
+    async hideAlbum(artistId: string, albumId: string): Promise<void> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const album = await AlbumModel.findOne({ _id: albumId, artistId: artistId }).lean();
+        if (!album) {
+            throw new NotFoundError(`Album with id ${albumId} not found for artist with id ${artistId}`);
+        }
+        await AlbumModel.updateOne({ _id: albumId, artistId: artistId }, { $set: { hidden: true } }).lean();
+    }
+
+    async unhideAlbum(artistId: string, albumId: string): Promise<void> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const album = await AlbumModel.findOne({ _id: albumId, artistId: artistId }).lean();
+        if (!album) {
+            throw new NotFoundError(`Album with id ${albumId} not found for artist with id ${artistId}`);
+        }
+        await AlbumModel.updateOne({ _id: albumId, artistId: artistId }, { $set: { hidden: false } }).lean();
     }
 
 }

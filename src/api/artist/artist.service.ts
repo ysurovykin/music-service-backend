@@ -70,7 +70,7 @@ class ArtistService {
                 }
             },
         ]);
-        const albumsCount = await AlbumModel.count({ artistId: artist });
+        const albumsCount = await AlbumModel.count({ artistId: artist, hidden: { $ne: true } });
         const albumsWhereAppearsCount = await SongModel.distinct(('albumId'), { coArtistIds: artistId }).count();
 
         const artistDto = new ArtistDto(artist);
@@ -133,7 +133,7 @@ class ArtistService {
         if (!artist) {
             throw new NotFoundError(`Artist with id ${artistId} not found`);
         }
-        const artistMostRecentRelease = await AlbumModel.findOne({ artistId: artistId }).sort({ date: -1 }).lean();
+        const artistMostRecentRelease = await AlbumModel.findOne({ artistId: artistId, hidden: { $ne: true } }).sort({ date: -1 }).lean();
         const artistData: ArtistShortDataType = {
             name: artist.name,
             id: artist._id

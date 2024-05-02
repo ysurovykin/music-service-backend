@@ -10,6 +10,7 @@ export type CreateSongRequestDataType = {
     language: string;
     genres: Array<string>;
     indexInAlbum: number;
+    explicit: boolean;
 };
 
 export type SongInfoResponseDataType = {
@@ -25,6 +26,8 @@ export type SongInfoResponseDataType = {
     duration: number;
     songUrl: string;
     playlistIds: Array<string>;
+    explicit: boolean;
+    hidden?: boolean;
 }
 
 export type SongRecordType = {
@@ -42,6 +45,8 @@ export type SongRecordType = {
     songUrl: string;
     duration: number;
     date: Date;
+    hidden?: boolean;
+    explicit: boolean;
 }
 
 export type GetSongsResponseDataType = {
@@ -79,15 +84,18 @@ const songSchema = new Schema({
     duration: { type: Number, required: true },
     date: { type: Date, required: true },
     backgroundColor: { type: String, required: true },
+    explicit: { type: Boolean, required: true },
+    hidden: { type: Boolean, required: false },
     lyricsBackgroundShadow: { type: String, required: true }
 });
 
-songSchema.index({ albumId: 1 });
-songSchema.index({ artistId: 1 });
-songSchema.index({ name: 1 });
-songSchema.index({ artistId: 1, genres: 1 });
-songSchema.index({ _id: 1, genres: 1, language: 1 });
-songSchema.index({ _id: 1, artistId: 1, genres: 1 });
+songSchema.index({ albumId: 1, hidden: 1 });
+songSchema.index({ artistId: 1, hidden: 1 });
+songSchema.index({ name: 1, hidden: 1 });
+songSchema.index({ hidden: 1, artistId: 1, genres: 1 });
+songSchema.index({ _id: 1, hidden: 1, genres: 1, language: 1 });
+songSchema.index({ _id: 1, hidden: 1, artistId: 1, genres: 1 });
+songSchema.index({ _id: 1, hidden: 1, language: 1, genres: 1, artistId: 1, albumId: 1, coArtistIds: 1 })
 
 const SongModel = model('Song', songSchema);
 

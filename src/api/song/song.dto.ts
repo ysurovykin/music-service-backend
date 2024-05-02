@@ -5,6 +5,8 @@ export default class SongDto {
     plays: number;
     date: Date;
     backgroundColor: string;
+    explicit: boolean;
+    hidden: boolean;
 
     constructor(model: any) {
         this.songId = model._id;
@@ -13,5 +15,7 @@ export default class SongDto {
         this.plays = Math.floor(model.plays);
         this.date = model.date;
         this.backgroundColor = model.backgroundColor;
+        this.explicit = model.explicit;
+        this.hidden = model.hidden;
     }
 }

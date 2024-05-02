@@ -18,7 +18,7 @@ export type AlbumShortDataType = {
 export type AlbumWithoutArtistType = {
   albumId: string;
   name: string;
-  hiden: boolean;
+  hidden: boolean;
   date: Date;
   coverImageUrl: string;
   backgroundColor: string;
@@ -31,7 +31,7 @@ export type ArtistAlbumInfoResponseDataType = {
   name?: string;
   date?: Date;
   coverImageUrl?: string;
-  hiden: boolean;
+  hidden: boolean;
   backgroundColor?: string;
   songsCount?: number;
   songsTimeDuration?: number;
@@ -93,15 +93,16 @@ const albumSchema = new Schema({
   backgroundColor: { type: String, required: true },
   lyricsBackgroundShadow: { type: String, required: true },
   songsCount: { type: Number, required: true, default: 0 },
-  hiden: { type: Boolean, required: false },
+  hidden: { type: Boolean, required: false },
   songIds: [String]
 });
 
 albumSchema.index({ artistId: 1 });
 albumSchema.index({ name: 1 });
-albumSchema.index({ artistId: 1, name: 1 });
-albumSchema.index({ artistId: 1, hiden: 1 });
-albumSchema.index({ _id: 1, name: 1 });
+albumSchema.index({ artistId: 1, name: 1, hidden: 1 });
+albumSchema.index({ artistId: 1, hidden: 1 });
+albumSchema.index({ _id: 1, name: 1, hidden: 1});
+albumSchema.index({ _id: 1, hidden: 1});
 
 const AlbumModel = model('Album', albumSchema);
 

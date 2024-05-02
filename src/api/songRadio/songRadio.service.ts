@@ -160,6 +160,7 @@ class SongRadioService {
                 const coArtistSongs = await SongModel.aggregate([
                     {
                         $match: {
+                            hidden: { $ne: true },
                             artistId: coArtistId,
                             genres: { $in: genres }
                         },
@@ -176,6 +177,7 @@ class SongRadioService {
             {
                 $match: {
                     _id: { $nin: [...songRadioSongIds, ...songIdsToExclude] },
+                    hidden: { $ne: true },
                     language: language,
                     genres: { $in: genres }
                 }
@@ -191,6 +193,7 @@ class SongRadioService {
                 {
                     $match: {
                         _id: { $nin: [...songRadioSongIds, ...songIdsToExclude] },
+                        hidden: { $ne: true },
                         genres: { $in: genres }
                     }
                 },
@@ -205,6 +208,7 @@ class SongRadioService {
             {
                 $match: {
                     _id: { $nin: [...songRadioSongIds, ...songIdsToExclude] },
+                    hidden: { $ne: true },
                     artistId: artistId,
                     genres: { $in: genres }
                 }
@@ -233,6 +237,7 @@ class SongRadioService {
             {
                 $match: {
                     _id: { $nin: [...songRadioSongIds, ...songIdsToExclude] },
+                    hidden: { $ne: true },
                     genres: { $in: [...similarGenresSet] }
                 }
             },
@@ -253,6 +258,7 @@ class SongRadioService {
                 {
                     $match: {
                         _id: { $nin: [...songRadioSongIds, ...songIdsToExclude] },
+                        hidden: { $ne: true },
                         genres: { $in: [...allSimilarGenresSet] }
                     }
                 },

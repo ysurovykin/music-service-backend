@@ -65,6 +65,7 @@ class SongGuesserService {
         const songCount = await SongModel.count({
             $and: [
                 songIds.length ? { _id: { $in: songIds } } : {},
+                { hidden: { $ne: true } },
                 filter.languages?.length ? { language: { $in: filter.languages } } : {},
                 filter.genres?.length ? { genres: { $in: filter.genres } } : {},
                 artistIds.length ? { artistId: { $in: artistIds } } : {},
@@ -719,6 +720,7 @@ class SongGuesserService {
         const song = await SongModel.aggregate([
             {
                 $match: {
+                    hidden: { $ne: true },
                     ...(songIds.length ? { _id: { $in: songIds, $nin: songIdsToExclude } } : { _id: { $nin: songIdsToExclude } }),
                     ...(filter.languages.length ? { language: { $in: filter.languages } } : {}),
                     ...(filter.genres.length ? { genres: { $in: filter.genres } } : {}),
