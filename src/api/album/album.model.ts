@@ -3,7 +3,11 @@ import { ArtistShortDataType } from '../artist/artist.model';
 
 export type CreateAlbumRequestDataType = {
   name: string;
-  artistId: string;
+};
+
+export type EditAlbumRequestDataType = {
+  name: string;
+  albumId: string;
 };
 
 export type AlbumShortDataType = {
@@ -14,11 +18,37 @@ export type AlbumShortDataType = {
 export type AlbumWithoutArtistType = {
   albumId: string;
   name: string;
+  hiden: boolean;
   date: Date;
   coverImageUrl: string;
   backgroundColor: string;
   lyricsBackgroundShadow: string;
   isAddedToLibrary?: boolean;
+}
+
+export type ArtistAlbumInfoResponseDataType = {
+  albumId?: string;
+  name?: string;
+  date?: Date;
+  coverImageUrl?: string;
+  hiden: boolean;
+  backgroundColor?: string;
+  songsCount?: number;
+  songsTimeDuration?: number;
+}
+
+export type ArtistAlbumFullResponseDataType = ArtistAlbumInfoResponseDataType & {
+}
+
+export type GetArtistAlbumsRequest = {
+  search?: string;
+  offset: number;
+  limit: number;
+}
+
+export type GetArtistAlbumsResponseType = {
+  albums: Array<ArtistAlbumInfoResponseDataType>;
+  isMoreAlbumsForLoading: boolean;
 }
 
 export type AlbumInfoResponseDataType = AlbumWithoutArtistType & {
@@ -63,12 +93,14 @@ const albumSchema = new Schema({
   backgroundColor: { type: String, required: true },
   lyricsBackgroundShadow: { type: String, required: true },
   songsCount: { type: Number, required: true, default: 0 },
+  hiden: { type: Boolean, required: false },
   songIds: [String]
 });
 
 albumSchema.index({ artistId: 1 });
 albumSchema.index({ name: 1 });
 albumSchema.index({ artistId: 1, name: 1 });
+albumSchema.index({ artistId: 1, hiden: 1 });
 albumSchema.index({ _id: 1, name: 1 });
 
 const AlbumModel = model('Album', albumSchema);

@@ -3,9 +3,12 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import AlbumModel, {
     AlbumFullResponseDataType,
     AlbumInfoResponseDataType,
+    ArtistAlbumFullResponseDataType,
     CreateAlbumRequestDataType,
+    EditAlbumRequestDataType,
     GetAlbumsInListenerLibraryResponseType,
     GetAlbumsResponseType,
+    GetArtistAlbumsResponseType,
     GetListenerTopAlbumsThisMonthResponseType
 } from './album.model';
 import ArtistModel, { ArtistShortDataType } from '../artist/artist.model';
@@ -13,21 +16,32 @@ import LikedAlbumstModel from './likedAlbums.model';
 import { ForbiddenError, NotFoundError } from '../../errors/api-errors';
 import randomstring from 'randomstring';
 import SongModel from '../song/song.model';
-import { getDominantColorWithShadow } from '../../helpers/imageCoverColor.helper';
+import { getCoverDominantColor, getDominantColorWithShadow } from '../../helpers/imageCoverColor.helper';
 import AlbumDto from './album.dto';
 import listenerService from '../listener/listener.service';
 import ListenerModel from '../listener/listener.model';
+import ArtistProfileModel from '../artistProfile/artistProfile.model';
+import { freeSubscriptionMaxArtistAlbums, paidSubscriptionMaxArtistAlbums } from '../../../config';
 
 class AlbumService {
 
-    async create(albumData: CreateAlbumRequestDataType, file: Express.Multer.File): Promise<any> {
-        const artist = await ArtistModel.findOne({ _id: albumData.artistId }).lean();
+    async create(artistId: string, albumData: CreateAlbumRequestDataType, file: Express.Multer.File): Promise<void> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
         if (!artist) {
-            throw new NotFoundError(`Artist with id ${albumData.artistId} not found`);
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
         }
         const album = await AlbumModel.findOne({ artistId: artist._id, name: albumData.name }).lean();
         if (album) {
-            throw new ForbiddenError(`Album ${albumData.name} already exists for artist with id ${albumData.artistId}`);
+            throw new ForbiddenError(`Album ${albumData.name} already exists for artist with id ${artistId}`);
+        }
+        const artistAlbumsCount = await AlbumModel.count({ artistId: artistId });
+        const maxAlbumsLimit = artistProfile.subscription === 'free' ? freeSubscriptionMaxArtistAlbums : paidSubscriptionMaxArtistAlbums;
+        if (artistAlbumsCount > maxAlbumsLimit) {
+            throw new ForbiddenError(`Your subscription does not allow to create more than ${maxAlbumsLimit} albums`);
         }
         const albumId = randomstring.generate(16);
 
@@ -52,6 +66,50 @@ class AlbumService {
             lyricsBackgroundShadow: backgroundColor.lyricsBackgroundShadow,
             date: new Date()
         });
+    }
+
+    async edit(artistId: string, albumData: EditAlbumRequestDataType, file: Express.Multer.File): Promise<void> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const album = await AlbumModel.findOne({ _id: albumData.albumId }).lean();
+        if (!album) {
+            throw new NotFoundError(`Album with id ${albumData.albumId} not found`);
+        }
+        const artistAlbumsCount = await AlbumModel.count({ artistId: artistId, hiden: { $ne: true } });
+        const maxAlbumsLimit = artistProfile.subscription === 'free' ? freeSubscriptionMaxArtistAlbums : paidSubscriptionMaxArtistAlbums;
+        if (artistAlbumsCount > maxAlbumsLimit) {
+            throw new ForbiddenError(`Your subscription does not allow to have more than ${maxAlbumsLimit} albums active`);
+        }
+        let fieldsToSet: {};
+
+        if (albumData.name !== album.name) {
+            fieldsToSet = {
+                ...fieldsToSet,
+                name: albumData.name
+            };
+        }
+
+        if (file) {
+            const downloadUrl = `album-covers/${artist._id}/${albumData.albumId}`;
+            const storageRef = ref(storage, downloadUrl);
+            await uploadBytes(storageRef, file.buffer, { contentType: 'image/jpeg' });
+            let coverImageUrl = await getDownloadURL(storageRef);
+            const indexOfTokenQuery = coverImageUrl.indexOf('&token')
+            if (indexOfTokenQuery) {
+                coverImageUrl = coverImageUrl.slice(0, indexOfTokenQuery);
+            }
+            const backgroundColor = await getCoverDominantColor(coverImageUrl);
+            fieldsToSet = {
+                ...fieldsToSet,
+                coverImageUrl: coverImageUrl,
+                backgroundColor: backgroundColor
+            };
+        }
+
+        await AlbumModel.updateOne({ _id: albumData.albumId }, { $set: fieldsToSet });
     }
 
     async getAlbumsByArtistId(listenerId: string, artistId: string): Promise<Array<AlbumInfoResponseDataType>> {
@@ -244,6 +302,37 @@ class AlbumService {
         };
     }
 
+    async getArtistAlbumById(artistId: string, albumId: string): Promise<ArtistAlbumFullResponseDataType> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const album = await AlbumModel.findOne({ _id: albumId, artistId: artistId }).lean();
+        if (!album) {
+            throw new NotFoundError(`Album with id ${albumId} not found for artist with id ${artistId}`);
+        }
+        const albumDto = new AlbumDto(album);
+        return {
+            ...albumDto
+        };
+    }
+
+    async getArtistAlbums(artistId: string, offset: number = 0, limit: number = 10, search: string = ''): Promise<GetArtistAlbumsResponseType> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        search = search.replace('/', '');
+        const albums = await AlbumModel.find({ artistId: artistId, name: { $regex: search, $options: 'i' } }).sort({ likes: -1 })
+            .skip(+offset * +limit).limit(+limit).lean();
+        const albumDatas = albums.map(album => new AlbumDto(album));
+        return {
+            albums: albumDatas,
+            isMoreAlbumsForLoading: albumDatas.length === +limit
+        };
+    }
 
 }
 

@@ -71,3 +71,9 @@ export const songGuesserDifficultiesInSeconds: { [key in SongGuesserDifficultyEn
   [SongGuesserDifficultyEnum.FREQUENT_LISTENER]: 10,
   [SongGuesserDifficultyEnum.TRUE_FAN]: 5,
 }
+
+// Maximum number of albums for free subscription
+export const freeSubscriptionMaxArtistAlbums = 1;
+
+// Maximum number of albums for paid subscription
+export const paidSubscriptionMaxArtistAlbums = 10;
