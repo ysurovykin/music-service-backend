@@ -20,5 +20,7 @@ router.post('/create', artistAuthMiddleware, upload.single('image'), albumContro
 router.post('/edit', artistAuthMiddleware, upload.single('image'), albumController.edit);
 router.get('/artist-albums/:artistId', artistAuthMiddleware, albumController.getArtistAlbums);
 router.get('/artist-album/:albumId', artistAuthMiddleware, albumController.getArtistAlbumById);
+router.post('/hide/:albumId', artistAuthMiddleware, albumController.hideAlbum);
+router.post('/unhide/:albumId', artistAuthMiddleware, albumController.unhideAlbum);
 
 export default router;

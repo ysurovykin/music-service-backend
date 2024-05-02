@@ -19,6 +19,7 @@ import { ArtistShortDataType } from '../artist/artist.model';
 import SongPlaysRawDataModel from './songPlaysRawData.model';
 import SongRadioModel from '../songRadio/songRadio.model';
 import ListenerModel from '../listener/listener.model';
+import ArtistProfileModel from '../artistProfile/artistProfile.model';
 
 class SongService {
 
@@ -172,7 +173,7 @@ class SongService {
                 const listenerData = await ListenerModel.findOne({ _id: optionsListenerId }, { topSongsThisMonth: 1 }).lean();
                 if (listenerData.topSongsThisMonth?.length) {
                     const allSongs = await SongModel.find({ _id: { $in: listenerData.topSongsThisMonth } }).lean();
-                    const sortedSongs = allSongs.sort((a, b) =>  listenerData.topSongsThisMonth.indexOf(a._id) -  listenerData.topSongsThisMonth.indexOf(b._id));
+                    const sortedSongs = allSongs.sort((a, b) => listenerData.topSongsThisMonth.indexOf(a._id) - listenerData.topSongsThisMonth.indexOf(b._id));
                     songs = sortedSongs.slice(songsToSkip, +limit + songsToSkip);
                 }
             }
@@ -258,6 +259,33 @@ class SongService {
         sortingRequest.date = -1;
         return sortingRequest;
     }
+
+    async hideSong(artistId: string, songId: string): Promise<void> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const song = await SongModel.findOne({ _id: songId, artistId: artistId }).lean();
+        if (!song) {
+            throw new NotFoundError(`Song with id ${songId} not found for artist with id ${artistId}`);
+        }
+        await SongModel.updateOne({ _id: songId }, { $set: { hidden: true } });
+    }
+
+    async unhideSong(artistId: string, songId: string): Promise<void> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const song = await SongModel.findOne({ _id: songId, artistId: artistId }).lean();
+        if (!song) {
+            throw new NotFoundError(`Song with id ${songId} not found for artist with id ${artistId}`);
+        }
+        await SongModel.updateOne({ _id: songId }, { $set: { hidden: false } });
+    }
+
 }
 
 const songService = new SongService();

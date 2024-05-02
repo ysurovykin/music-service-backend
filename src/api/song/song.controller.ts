@@ -45,6 +45,27 @@ class SongController {
         }
     }
 
+    async hideSong(req, res, next) {
+        try {
+            const { songId } = req.params;
+            const { artistId } = req.query;
+            await songService.hideSong(artistId, songId);
+            return res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async unhideSong(req, res, next) {
+        try {
+            const { songId } = req.params;
+            const { artistId } = req.query;
+            await songService.unhideSong(artistId, songId);
+            return res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
 
 }
 

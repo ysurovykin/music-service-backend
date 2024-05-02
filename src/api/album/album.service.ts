@@ -346,7 +346,10 @@ class AlbumService {
         if (!album) {
             throw new NotFoundError(`Album with id ${albumId} not found for artist with id ${artistId}`);
         }
-        await AlbumModel.updateOne({ _id: albumId, artistId: artistId }, { $set: { hidden: true } }).lean();
+        await AlbumModel.updateOne({ _id: albumId, artistId: artistId }, { $set: { hidden: true } });
+        if (album.songIds) {
+            await SongModel.updateMany({ _id: { $in: album.songIds } }, { $set: { hidden: true } });
+        }
     }
 
     async unhideAlbum(artistId: string, albumId: string): Promise<void> {
@@ -359,7 +362,10 @@ class AlbumService {
         if (!album) {
             throw new NotFoundError(`Album with id ${albumId} not found for artist with id ${artistId}`);
         }
-        await AlbumModel.updateOne({ _id: albumId, artistId: artistId }, { $set: { hidden: false } }).lean();
+        await AlbumModel.updateOne({ _id: albumId, artistId: artistId }, { $set: { hidden: false } });
+        if (album.songIds) {
+            await SongModel.updateMany({ _id: { $in: album.songIds } }, { $set: { hidden: false } });
+        }
     }
 
 }
