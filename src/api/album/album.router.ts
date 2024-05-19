@@ -22,5 +22,6 @@ router.get('/artist-albums/:artistId', artistAuthMiddleware, albumController.get
 router.get('/artist-album/:albumId', artistAuthMiddleware, albumController.getArtistAlbumById);
 router.post('/hide/:albumId', artistAuthMiddleware, albumController.hideAlbum);
 router.post('/unhide/:albumId', artistAuthMiddleware, albumController.unhideAlbum);
+router.get('/artist-albums/stats/:artistId', artistAuthMiddleware, albumController.getArtistAlbumsStats);
 
 export default router;

@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { AlbumShortDataType } from '../album/album.model';
 import { ArtistShortDataType } from '../artist/artist.model';
 
-export type CreateSongRequestDataType = {
+export type UploadSongRequestDataType = {
     name: string;
     artistId: string;
     coArtistIds?: Array<string>;
@@ -95,7 +95,7 @@ songSchema.index({ name: 1, hidden: 1 });
 songSchema.index({ hidden: 1, artistId: 1, genres: 1 });
 songSchema.index({ _id: 1, hidden: 1, genres: 1, language: 1 });
 songSchema.index({ _id: 1, hidden: 1, artistId: 1, genres: 1 });
-songSchema.index({ _id: 1, hidden: 1, language: 1, genres: 1, artistId: 1, albumId: 1, coArtistIds: 1 })
+songSchema.index({ _id: 1, hidden: 1, language: 1, genres: 1, artistId: 1, albumId: 1 })
 
 const SongModel = model('Song', songSchema);
 

@@ -23,6 +23,16 @@ class ArtistProfileController {
             next(error);
         }
     }
+
+    async getArtistStats(req, res, next) {
+        try {
+            const { artistId } = req.params;
+            const response = await artistProfileService.getArtistStats(artistId);
+            return res.json(response);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 const artistProfileController = new ArtistProfileController();

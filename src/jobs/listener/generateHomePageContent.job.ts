@@ -82,7 +82,7 @@ export async function generateHomePageContent(listenerId: string): Promise<Array
 const getMoreLikeArtistsContent = async (listenerId: string, homePageSectionContentLimit: number): Promise<HomePageContentDataType> => {
   const today = moment();
   const playDateThisMonth = `${today.year()}/${today.month() + 1}`;
-  const playDatePreviousMonth = `${today.year()}/${today.month() + 1}`;
+  const playDatePreviousMonth = `${today.year()}/${today.month()}`;
   const baseArtistId = await ArtistPlaysModel.aggregate([
     { $match: { listenerId } },
     { $sort: { lastPlayedDate: -1 } },
@@ -289,8 +289,8 @@ const getPopularAlbumsContent = async (listenerId: string, homePageSectionConten
 
 const getFavoriteArtistsContent = async (listenerId: string, homePageSectionContentLimit: number): Promise<HomePageContentDataType> => {
   const today = moment();
-  const playDateThisMonth = `${today.year}/${today.month}`;
-  const playDatePreviousMonth = `${today.year}/${today.month}`;
+  const playDateThisMonth = `${today.year()}/${today.month() + 1}`;
+  const playDatePreviousMonth = `${today.year()}/${today.month()}`;
   const artists = await ArtistPlaysModel.aggregate([
     { $match: { listenerId } },
     {
@@ -319,8 +319,8 @@ const getFavoriteArtistsContent = async (listenerId: string, homePageSectionCont
 
 const getFavoriteAlbumsContent = async (listenerId: string, homePageSectionContentLimit: number): Promise<HomePageContentDataType> => {
   const today = moment();
-  const playDateThisMonth = `${today.year}/${today.month}`;
-  const playDatePreviousMonth = `${today.year}/${today.month}`;
+  const playDateThisMonth = `${today.year()}/${today.month() + 1}`;
+  const playDatePreviousMonth = `${today.year()}/${today.month()}`;
   const albums = await AlbumPlaysModel.aggregate([
     { $match: { listenerId } },
     {

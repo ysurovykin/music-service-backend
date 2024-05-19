@@ -27,10 +27,10 @@ class QueueService {
             const endIndex = Math.min(currentSongIndex + 9, allSongs.length - 1);
             const songs = allSongs.slice(startIndex, endIndex + 1);
             songsResponse = await this._formatSongs(listenerId, songs);
-        }
-        const songQueueIdIndex = songsResponse.findIndex(song => song.songQueueId === songQueueId);
-        if (songQueueIdIndex === -1) {
-            songQueueId = songsResponse[0].songQueueId;
+            const songQueueIdIndex = songsResponse.findIndex(song => song.songQueueId === songQueueId);
+            if (songQueueIdIndex === -1) {
+                songQueueId = songsResponse[0].songQueueId;
+            }
         }
 
         return {

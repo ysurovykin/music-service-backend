@@ -13,7 +13,7 @@ export async function updateListenerTopContentThisMonthJob() {
         { topContentThisMonthUpdatedAt: { $lt: dayAgoDate } },
         { topContentThisMonthUpdatedAt: { $exists: false } },
       ],
-    }, { _id: 1 }).lean();
+    }, { _id: 1, subscription: 1 }).lean();
     for (const listener of listeners) {
       await updateListenerTopContentThisMonth(listener._id, listener.subscription);
     }

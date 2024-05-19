@@ -14,10 +14,7 @@ import SongModel from '../song/song.model';
 import LikedAlbumstModel from '../album/likedAlbums.model';
 import AlbumModel, { AlbumFullResponseDataType } from '../album/album.model';
 import PlaylistModel from '../playlist/playlist.model';
-import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { storage } from '../../../firebase.config';
 import randomstring from 'randomstring';
-import { getDominantColorWithShadow } from '../../helpers/imageCoverColor.helper';
 import AlbumDto from '../album/album.dto';
 import listenerService from '../listener/listener.service';
 import ListenerModel from '../listener/listener.model';
@@ -59,7 +56,7 @@ class ArtistService {
             },
         ]);
         const likedPlaylist = await PlaylistModel.findOne({ listenerId: listenerId, tag: 'liked' }, { songIds: 1 }).lean();
-        const likedSongIds = likedPlaylist.songIds.map(song => song.id);
+        const likedSongIds = likedPlaylist?.songIds?.map(song => song.id) || [];
         const likedSongsInfo = await SongModel.aggregate([
             { $match: { _id: { $in: likedSongIds }, artistId: artistId } },
             {

@@ -26,7 +26,7 @@ class PlaylistService {
         }
         const listenerPlaylistCount = await PlaylistModel.count({ listenerId: listenerId });
         const maxPlaylistLimit = listener.subscription === 'free' ? freeSubscriptionMaxPlaylists : paidSubscriptionMaxPlaylists;
-        if (listenerPlaylistCount > maxPlaylistLimit) {
+        if (listenerPlaylistCount >= maxPlaylistLimit) {
             throw new ForbiddenError(`Your subscription does not allow to create more than ${maxPlaylistLimit} playlists`);
         }
         const playlistId = randomstring.generate(16);
@@ -88,7 +88,7 @@ class PlaylistService {
                 coverImageUrl: coverImageUrl,
                 backgroundColor: backgroundColor
             };
-        } else if (playlistData.backgroundColor !== playlist.backgroundColor) {
+        } else if (playlistData.backgroundColor && (playlistData.backgroundColor !== playlist.backgroundColor)) {
             if (playlist.coverImageUrl) {
                 try {
                     const downloadUrl = `playlist-covers/${listener._id}/${playlistData.playlistId}`;

@@ -2,7 +2,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import mm from 'music-metadata';
 import { storage } from '../../../firebase.config';
 import SongModel, {
-    CreateSongRequestDataType,
+    UploadSongRequestDataType,
     GetSongsOptionsType,
     GetSongsResponseDataType,
     GetSongsSortingOptionsType,
@@ -23,7 +23,7 @@ import ArtistProfileModel from '../artistProfile/artistProfile.model';
 
 class SongService {
 
-    async upload(songData: CreateSongRequestDataType, file: Express.Multer.File): Promise<void> {
+    async upload(songData: UploadSongRequestDataType, file: Express.Multer.File): Promise<void> {
         const album = await AlbumModel.findOne({ _id: songData.albumId }).lean();
         if (!album) {
             throw new NotFoundError(`Album with id ${songData.albumId} not found`);
@@ -52,7 +52,8 @@ class SongService {
         songIds.length = Math.max(songIds.length, songData.indexInAlbum);
         songIds[songData.indexInAlbum - 1] = songId;
         await AlbumModel.updateOne({ _id: album._id }, {
-            $set: { genres: albumGenres, languages: albumLanguages, songIds }
+            $set: { genres: albumGenres, languages: albumLanguages, songIds },
+            $inc: { songsCount: 1 }
         });
         await ArtistModel.updateOne({ _id: artist._id }, {
             $set: { genres: artistGenres, languages: artistLanguages },

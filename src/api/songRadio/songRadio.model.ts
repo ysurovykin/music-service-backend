@@ -40,6 +40,8 @@ const songRadioSchema = new Schema({
   listenerId: { type: String, required: true },
   name: { type: String, required: true },
   baseSongName: { type: String, required: true },
+  albumId: { type: String, required: true },
+  artistId: { type: String, required: true },
   baseSongId: { type: String, required: true },
   lastUpdatedAt: { type: Date, required: true },
   songIds: [String],

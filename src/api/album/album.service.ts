@@ -3,6 +3,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import AlbumModel, {
     AlbumFullResponseDataType,
     AlbumInfoResponseDataType,
+    AlbumStatsResponseDataType,
     ArtistAlbumFullResponseDataType,
     CreateAlbumRequestDataType,
     EditAlbumRequestDataType,
@@ -40,7 +41,7 @@ class AlbumService {
         }
         const artistAlbumsCount = await AlbumModel.count({ artistId: artistId });
         const maxAlbumsLimit = artistProfile.subscription === 'free' ? freeSubscriptionMaxArtistAlbums : paidSubscriptionMaxArtistAlbums;
-        if (artistAlbumsCount > maxAlbumsLimit) {
+        if (artistAlbumsCount >= maxAlbumsLimit) {
             throw new ForbiddenError(`Your subscription does not allow to create more than ${maxAlbumsLimit} albums`);
         }
         const albumId = randomstring.generate(16);
@@ -366,6 +367,27 @@ class AlbumService {
         if (album.songIds) {
             await SongModel.updateMany({ _id: { $in: album.songIds } }, { $set: { hidden: false } });
         }
+    }
+
+    async getArtistAlbumsStats(artistId: string): Promise<Array<AlbumStatsResponseDataType>> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const albums = await AlbumModel.find({ artistId: artistId }).lean();
+        const isFreeSubscription = artistProfile?.subscription == 'free';
+        const parsedAlbums = albums.map(album => ({
+            albumId: album._id,
+            name: album.name,
+            date: album.date,
+            coverImageUrl: album.coverImageUrl,
+            hidden: album.hidden,
+            backgroundColor: album.backgroundColor,
+            generalStats: album.generalStats,
+            advancedStats: isFreeSubscription ? undefined : album.advancedStats
+        }));
+        return parsedAlbums;
     }
 
 }

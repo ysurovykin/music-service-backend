@@ -33,11 +33,11 @@ export type ArtistAlbumInfoResponseDataType = {
   coverImageUrl?: string;
   hidden: boolean;
   backgroundColor?: string;
-  songsCount?: number;
-  songsTimeDuration?: number;
 }
 
 export type ArtistAlbumFullResponseDataType = ArtistAlbumInfoResponseDataType & {
+  songsCount?: number;
+  songsTimeDuration?: number;
 }
 
 export type GetArtistAlbumsRequest = {
@@ -75,6 +75,24 @@ export type GetListenerTopAlbumsThisMonthResponseType = {
   isMoreTopAlbumsThisMonthForLoading: boolean;
 }
 
+export type AlbumGeneralStatsType = {
+  songsCount: number;
+  songsTimeDuration: number;
+  likes: number;
+}
+
+export type AlbumAdvancedStatsType = {
+  plays: number;
+  playsDynamics: string;
+  songRadios: number;
+  songGuessers: number;
+}
+
+export type AlbumStatsResponseDataType = ArtistAlbumInfoResponseDataType & {
+  generalStats: AlbumGeneralStatsType;
+  advancedStats: AlbumAdvancedStatsType;
+}
+
 const albumSchema = new Schema({
   _id: { type: String },
   name: { type: String, required: true },
@@ -94,15 +112,17 @@ const albumSchema = new Schema({
   lyricsBackgroundShadow: { type: String, required: true },
   songsCount: { type: Number, required: true, default: 0 },
   hidden: { type: Boolean, required: false },
-  songIds: [String]
+  songIds: [String],
+  generalStats: { type: Object, required: false },
+  advancedStats: { type: Object, required: false },
 });
 
 albumSchema.index({ artistId: 1 });
 albumSchema.index({ name: 1 });
 albumSchema.index({ artistId: 1, name: 1, hidden: 1 });
 albumSchema.index({ artistId: 1, hidden: 1 });
-albumSchema.index({ _id: 1, name: 1, hidden: 1});
-albumSchema.index({ _id: 1, hidden: 1});
+albumSchema.index({ _id: 1, name: 1, hidden: 1 });
+albumSchema.index({ _id: 1, hidden: 1 });
 
 const AlbumModel = model('Album', albumSchema);
 

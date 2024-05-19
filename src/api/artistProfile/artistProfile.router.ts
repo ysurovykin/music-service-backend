@@ -8,5 +8,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/:artistProfileId', artistAuthMiddleware, artistController.getArtistProfileById);
 router.post('/edit-profile', artistAuthMiddleware, upload.single('image'), artistController.editProfile);
+router.get('/stats/:artistId', artistAuthMiddleware, artistController.getArtistStats);
 
 export default router;

@@ -49,6 +49,8 @@ class SongRadioService {
             songRadio = await SongRadioModel.create({
                 _id: songRadioId,
                 baseSongId: songId,
+                albumId: song.albumId,
+                artistId: song.artistId,
                 listenerId: listenerId,
                 lastUpdatedAt: new Date(),
                 songIds: songIds,
@@ -199,7 +201,7 @@ class SongRadioService {
                 },
                 { $project: { weight: { $multiply: ['$plays', { $rand: {} }] }, songId: '$songId' } },
                 { $sort: { weight: -1 } },
-                { $limit: mainSampleSize }
+                { $limit: mainSampleSize - mainSampleSongs.length }
             ]);
             songRadioSongIds.push(...additionalMainSampleSongs.map(song => song._id));
         }
@@ -271,7 +273,7 @@ class SongRadioService {
 
         if (songRadioSongIds.length > totalSize) {
             const shuffledArray = [...songRadioSongIds].sort(() => Math.random() - 0.5);
-            songRadioSongIds = shuffledArray.slice(0, songRadioSongIds.length - totalSize);
+            songRadioSongIds = shuffledArray.slice(0, totalSize);
         }
         songRadioSongIds[0] = song._id;
 

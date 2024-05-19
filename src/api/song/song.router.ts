@@ -9,9 +9,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/songs', listenerAuthMiddleware, songController.getSongs);
 router.get('/:songId', listenerAuthMiddleware, songController.getSongById);
-router.post('/upload', listenerAuthMiddleware, upload.single('song'), songController.upload);
 router.post('/record-song-play-row-data', listenerAuthMiddleware, songController.recordSongPlayRowData);
 
+router.post('/upload', artistAuthMiddleware, upload.single('song'), songController.upload);
 router.post('/hide/:albumId', artistAuthMiddleware, songController.hideSong);
 router.post('/unhide/:albumId', artistAuthMiddleware, songController.unhideSong);
 

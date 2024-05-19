@@ -58,6 +58,7 @@ class UserService {
             await PlaylistModel.create({
                 _id: playlistId,
                 name: 'Liked Songs',
+                tag: 'liked',
                 editable: false,
                 pinned: true,
                 listenerId: userId,
@@ -143,6 +144,7 @@ class UserService {
                 await PlaylistModel.create({
                     _id: playlistId,
                     name: 'Liked Songs',
+                    tag: 'liked',
                     editable: false,
                     pinned: true,
                     listenerId: userId,

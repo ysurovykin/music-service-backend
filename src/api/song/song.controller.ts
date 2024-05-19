@@ -1,11 +1,11 @@
-import { CreateSongRequestDataType, GetSongsResponseDataType, SongInfoResponseDataType } from './song.model';
+import { UploadSongRequestDataType, GetSongsResponseDataType, SongInfoResponseDataType } from './song.model';
 import songService from './song.service'
 
 class SongController {
     async upload(req, res, next) {
         try {
             const file: Express.Multer.File = req.file;
-            const songData: CreateSongRequestDataType = req.body;
+            const songData: UploadSongRequestDataType = req.body;
             await songService.upload(songData, file);
             return res.sendStatus(204);
         } catch (error) {

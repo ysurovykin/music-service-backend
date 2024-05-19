@@ -70,6 +70,16 @@ class AlbumController {
         }
     }
 
+    async getArtistAlbumsStats(req, res, next) {
+        try {
+            const { artistId } = req.params;
+            const response = await albumService.getArtistAlbumsStats(artistId);
+            return res.json(response);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getAlbumsByArtistId(req, res, next) {
         try {
             const { artistId } = req.params;
