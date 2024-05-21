@@ -1,4 +1,4 @@
-import { UploadSongRequestDataType, GetSongsResponseDataType, SongInfoResponseDataType } from './song.model';
+import { UploadSongRequestDataType, GetSongsResponseDataType, SongInfoResponseDataType, ArtistSongInfoResponseDataType, GetArtistSongsResponseDataType } from './song.model';
 import songService from './song.service'
 
 class SongController {
@@ -40,6 +40,17 @@ class SongController {
             const { listenerId } = req.query;
             await songService.recordSongPlayRowData(listenerId, songId, time);
             return res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getArtistAlbumSongs(req, res, next) {
+        try {
+            const { albumId } = req.params;
+            const { artistId } = req.query;
+            const response: GetArtistSongsResponseDataType = await songService.getArtistAlbumSongs(artistId, albumId);
+            return res.json(response);
         } catch (error) {
             next(error);
         }

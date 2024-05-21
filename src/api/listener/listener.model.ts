@@ -114,7 +114,9 @@ const listenerSchema = new Schema({
   topContentThisMonthUpdatedAt: { type: Date, required: false },
   getStartedCompleted: { type: Boolean, required: true, default: false },
   lastSongGuesserStatsUpdatedAt: { type: Date, required: false },
-  lastSongGuesserGuessesRecordsUpdatedAt: { type: Date, required: false }
+  lastSongGuesserGuessesRecordsUpdatedAt: { type: Date, required: false },
+  recentMostVisitedContent: [VisitedContentSchema],
+  recentMostVisitedContentGeneratedAt: { type: Date, required: false },
 });
 
 listenerSchema.index({ homePageContentGeneratedAt: 1 });

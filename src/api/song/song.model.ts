@@ -70,6 +70,22 @@ export type GetSongsSortingOptionsType = {
     date?: number
 }
 
+export type ArtistSongInfoResponseDataType = {
+    songId: string;
+    name: string;
+    plays: number;
+    duration: number;
+    backgroundColor: string;
+    coverImageUrl: string;
+    hidden?: boolean;
+    explicit?: boolean;
+    coArtists?: Array<ArtistShortDataType>;
+}
+
+export type GetArtistSongsResponseDataType = {
+    songs?: Array<ArtistSongInfoResponseDataType>;
+}
+
 const songSchema = new Schema({
     _id: { type: String },
     name: { type: String, required: true },

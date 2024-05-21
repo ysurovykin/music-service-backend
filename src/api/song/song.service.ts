@@ -7,10 +7,12 @@ import SongModel, {
     GetSongsResponseDataType,
     GetSongsSortingOptionsType,
     SongInfoResponseDataType,
-    SongRecordType
+    SongRecordType,
+    ArtistSongInfoResponseDataType,
+    GetArtistSongsResponseDataType
 } from './song.model';
 import AlbumModel from '../album/album.model';
-import { NotFoundError } from '../../errors/api-errors';
+import { NotFoundError, ValidationError } from '../../errors/api-errors';
 import randomstring from 'randomstring';
 import SongDto from './song.dto';
 import ArtistModel from '../artist/artist.model';
@@ -33,6 +35,9 @@ class SongService {
         const songId = randomstring.generate(16);
 
         const artist = await ArtistModel.findOne({ _id: album.artistId }, { genres: 1, languages: 1 }).lean();
+        if (!artist) {
+            throw new NotFoundError(`Artist with id ${album.artistId} not found`);
+        }
         const songGenres = typeof songData.genres === 'string' ? JSON.parse(songData.genres) : songData.genres;
         const albumGenres = album.genres || {};
         const artistGenres = artist.genres || {};
@@ -49,8 +54,25 @@ class SongService {
             artistLanguages[songData.language] = ++artistLanguages[songData.language] || 1;
         }
         const songIds = album.songIds || [];
-        songIds.length = Math.max(songIds.length, songData.indexInAlbum);
-        songIds[songData.indexInAlbum - 1] = songId;
+        if (!isNaN(songData.indexInAlbum)) {
+            songIds.length = Math.max(songIds.length, songData.indexInAlbum);
+            songIds[songData.indexInAlbum - 1] = songId;
+        } else {
+            songIds.push(songId);
+        }
+        let coArtistIds = []
+        if (songData.coArtistIds) {
+            coArtistIds = typeof songData.coArtistIds === 'string' ? JSON.parse(songData.coArtistIds) : songData.coArtistIds;
+            for (let coArtistId of coArtistIds) {
+                if (coArtistId === artist._id) {
+                    throw new ValidationError('You cannot add yourself as coArtist to your song');
+                }
+                const coArtist = await ArtistModel.findOne({ _id: coArtistId }, { _id: 1 }).lean();
+                if (!coArtist) {
+                    throw new NotFoundError(`Artist with id ${coArtistId} not found`);
+                }
+            }
+        }
         await AlbumModel.updateOne({ _id: album._id }, {
             $set: { genres: albumGenres, languages: albumLanguages, songIds },
             $inc: { songsCount: 1 }
@@ -68,10 +90,7 @@ class SongService {
         if (indexOfTokenQuery) {
             songUrl = songUrl.slice(0, indexOfTokenQuery);
         }
-        let coArtistIds = []
-        if (songData.coArtistIds) {
-            coArtistIds = typeof songData.coArtistIds === 'string' ? JSON.parse(songData.coArtistIds) : songData.coArtistIds;
-        }
+
         await SongModel.create({
             ...songData,
             _id: songId,
@@ -259,6 +278,33 @@ class SongService {
         }
         sortingRequest.date = -1;
         return sortingRequest;
+    }
+
+    async getArtistAlbumSongs(artistId: string, albumId: string): Promise<GetArtistSongsResponseDataType> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        const artistProfile = await ArtistProfileModel.findOne({ _id: artistId }).lean();
+        if (!artist || !artistProfile) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const album = await AlbumModel.findOne({ _id: albumId }).lean();
+        if (!album) {
+            throw new NotFoundError(`Album with id ${albumId} not found`);
+        }
+        const allSongs = await SongModel.find({ _id: { $in: album.songIds } }).lean();
+        const sortedSongs = allSongs.sort((a, b) => album.songIds.indexOf(a._id) - album.songIds.indexOf(b._id));
+        const responseSongs: Array<ArtistSongInfoResponseDataType> = [];
+        for (let song of sortedSongs) {
+            let coArtists = [];
+            for (const songCoArtistId of song.coArtistIds) {
+                const coArtist = await ArtistModel.findOne({ _id: songCoArtistId }).lean();
+                coArtists.push({
+                    id: coArtist._id,
+                    name: coArtist.name
+                })
+            }
+            responseSongs.push({ ...song, songId: song._id, coArtists: coArtists });
+        };
+        return { songs: responseSongs };
     }
 
     async hideSong(artistId: string, songId: string): Promise<void> {

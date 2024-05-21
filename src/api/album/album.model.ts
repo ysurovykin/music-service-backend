@@ -3,11 +3,13 @@ import { ArtistShortDataType } from '../artist/artist.model';
 
 export type CreateAlbumRequestDataType = {
   name: string;
+  releaseDate: string;
 };
 
 export type EditAlbumRequestDataType = {
   name: string;
   albumId: string;
+  releaseDate: string;
 };
 
 export type AlbumShortDataType = {
@@ -33,9 +35,11 @@ export type ArtistAlbumInfoResponseDataType = {
   coverImageUrl?: string;
   hidden: boolean;
   backgroundColor?: string;
+  releaseDate?: Date,
 }
 
 export type ArtistAlbumFullResponseDataType = ArtistAlbumInfoResponseDataType & {
+  releaseDate?: Date;
   songsCount?: number;
   songsTimeDuration?: number;
 }
@@ -115,14 +119,15 @@ const albumSchema = new Schema({
   songIds: [String],
   generalStats: { type: Object, required: false },
   advancedStats: { type: Object, required: false },
+  releaseDate: { type: Date, required: true },
 });
 
 albumSchema.index({ artistId: 1 });
 albumSchema.index({ name: 1 });
 albumSchema.index({ artistId: 1, name: 1, hidden: 1 });
-albumSchema.index({ artistId: 1, hidden: 1 });
+albumSchema.index({ artistId: 1, releaseDate: 1, hidden: 1 });
 albumSchema.index({ _id: 1, name: 1, hidden: 1 });
-albumSchema.index({ _id: 1, hidden: 1 });
+albumSchema.index({ _id: 1, releaseDate: 1, hidden: 1 });
 
 const AlbumModel = model('Album', albumSchema);
 

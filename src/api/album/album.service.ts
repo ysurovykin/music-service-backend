@@ -23,6 +23,7 @@ import listenerService from '../listener/listener.service';
 import ListenerModel from '../listener/listener.model';
 import ArtistProfileModel from '../artistProfile/artistProfile.model';
 import { freeSubscriptionMaxArtistAlbums, paidSubscriptionMaxArtistAlbums } from '../../../config';
+import moment from 'moment';
 
 class AlbumService {
 
@@ -55,7 +56,11 @@ class AlbumService {
             coverImageUrl = coverImageUrl.slice(0, indexOfTokenQuery);
         }
         const backgroundColor = await getDominantColorWithShadow(coverImageUrl);
-
+        const releaseDate =
+            typeof albumData.releaseDate === 'string' ?
+                new Date(JSON.parse(albumData.releaseDate)) :
+                albumData.releaseDate ||
+                new Date();
         await AlbumModel.create({
             _id: albumId,
             name: albumData.name,
@@ -65,7 +70,8 @@ class AlbumService {
             genres: {},
             backgroundColor: backgroundColor.backgroundColor,
             lyricsBackgroundShadow: backgroundColor.lyricsBackgroundShadow,
-            date: new Date()
+            date: new Date(),
+            releaseDate: releaseDate.setHours(0, 0, 0, 0),
         });
     }
 
@@ -110,6 +116,18 @@ class AlbumService {
             };
         }
 
+        if (albumData.releaseDate && moment(album.releaseDate).isAfter(new Date())) {
+            const releaseDate =
+                typeof albumData.releaseDate === 'string' ?
+                    new Date(JSON.parse(albumData.releaseDate)) :
+                    albumData.releaseDate ||
+                    new Date();
+            fieldsToSet = {
+                ...fieldsToSet,
+                releaseDate: releaseDate.setHours(0, 0, 0, 0),
+            }
+        }
+
         await AlbumModel.updateOne({ _id: albumData.albumId }, { $set: fieldsToSet });
     }
 
@@ -123,7 +141,7 @@ class AlbumService {
             id: artist._id
         };
 
-        const albums = await AlbumModel.find({ artistId, hidden: { $ne: true } }).lean();
+        const albums = await AlbumModel.find({ artistId, releaseDate: { $lt: new Date() }, hidden: { $ne: true } }).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
             const albumDto = new AlbumDto(album);
@@ -144,7 +162,7 @@ class AlbumService {
         }
 
         const albumIds = await SongModel.distinct(('albumId'), { coArtistIds: artistId }).lean();
-        const albums = await AlbumModel.find({ _id: { $in: albumIds }, hidden: { $ne: true } }).lean();
+        const albums = await AlbumModel.find({ _id: { $in: albumIds }, releaseDate: { $lt: new Date() }, hidden: { $ne: true } }).lean();
         const albumDatas: Array<AlbumInfoResponseDataType> = [];
         for (const album of albums) {
             const albumDto = new AlbumDto(album);
@@ -316,8 +334,21 @@ class AlbumService {
             throw new NotFoundError(`Album with id ${albumId} not found for artist with id ${artistId}`);
         }
         const albumDto = new AlbumDto(album);
+        const songsInfo = await SongModel.aggregate([
+            { $match: { albumId: albumId } },
+            {
+                $group: {
+                    _id: null,
+                    totalDuration: { $sum: '$duration' },
+                    totalCount: { $count: {} }
+                }
+            },
+        ]);
         return {
-            ...albumDto
+            ...albumDto,
+            releaseDate: album.releaseDate,
+            songsTimeDuration: songsInfo[0]?.totalDuration,
+            songsCount: songsInfo[0]?.totalCount
         };
     }
 
@@ -330,7 +361,7 @@ class AlbumService {
         search = search.replace('/', '');
         const albums = await AlbumModel.find({ artistId: artistId, name: { $regex: search, $options: 'i' } }).sort({ likes: -1 })
             .skip(+offset * +limit).limit(+limit).lean();
-        const albumDatas = albums.map(album => new AlbumDto(album));
+        const albumDatas = albums.map(album => ({ ...new AlbumDto(album), releaseDate: album.releaseDate }));
         return {
             albums: albumDatas,
             isMoreAlbumsForLoading: albumDatas.length === +limit

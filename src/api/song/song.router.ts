@@ -12,7 +12,8 @@ router.get('/:songId', listenerAuthMiddleware, songController.getSongById);
 router.post('/record-song-play-row-data', listenerAuthMiddleware, songController.recordSongPlayRowData);
 
 router.post('/upload', artistAuthMiddleware, upload.single('song'), songController.upload);
-router.post('/hide/:albumId', artistAuthMiddleware, songController.hideSong);
-router.post('/unhide/:albumId', artistAuthMiddleware, songController.unhideSong);
+router.get('/artist-album-songs/:albumId', artistAuthMiddleware, songController.getArtistAlbumSongs);
+router.post('/hide/:songId', artistAuthMiddleware, songController.hideSong);
+router.post('/unhide/:songId', artistAuthMiddleware, songController.unhideSong);
 
 export default router;

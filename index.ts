@@ -28,6 +28,7 @@ import { updateSongGuesserGuessesRecordsJob } from './src/jobs/songGuesser/updat
 import { closeInactiveSongGuessersJob } from './src/jobs/songGuesser/closeInactiveSongGuessers.job.ts';
 import { updateArtistAlbumsStatsJob } from './src/jobs/artist/updateArtistAlbumsStats.job.ts';
 import { updateArtistProfileStatsJob } from './src/jobs/artist/updateArtistProfileStats.job.ts';
+import { updateRecentMostVisitedContentJob } from './src/jobs/listener/updateRecentMostVisitedContent.job.ts';
 
 config();
 const PORT = process.env.PORT || 5000;
@@ -71,6 +72,7 @@ const start = async () => {
         registerJob(closeInactiveSongGuessersJob, 60); //every hour
         registerJob(updateArtistAlbumsStatsJob, 60 * 6); //every 6 hours
         registerJob(updateArtistProfileStatsJob, 60 * 6); //every 6 hours
+        registerJob(updateRecentMostVisitedContentJob, 60); //every hour
         app.listen(PORT, () => console.log(`Server started on PORT = ${PORT}`));
     } catch (error) {
         console.log(error);
