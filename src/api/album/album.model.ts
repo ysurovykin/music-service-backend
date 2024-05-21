@@ -97,6 +97,13 @@ export type AlbumStatsResponseDataType = ArtistAlbumInfoResponseDataType & {
   advancedStats: AlbumAdvancedStatsType;
 }
 
+export type NextAlbumReleaseType = {
+  name: string;
+  releaseDate: Date;
+  coverImageUrl?: string;
+  backgroundColor?: string;
+}
+
 const albumSchema = new Schema({
   _id: { type: String },
   name: { type: String, required: true },

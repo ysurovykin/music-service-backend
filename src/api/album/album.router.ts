@@ -15,6 +15,7 @@ router.get('/albums/artist-appears/:artistId', listenerAuthMiddleware, albumCont
 router.get('/:albumId', listenerAuthMiddleware, albumController.getAlbumById);
 router.get('/albums-in-library/:listenerId', listenerAuthMiddleware, albumController.getAlbumsInListenerLibrary);
 router.get('/top-albums-this-month/:listenerId', listenerAuthMiddleware, albumController.getListenerTopAlbumsThisMonth);
+router.get('/next-artist-release/:artistId', listenerAuthMiddleware, albumController.getNextAlbumRelease);
 
 router.post('/create', artistAuthMiddleware, upload.single('image'), albumController.create);
 router.post('/edit', artistAuthMiddleware, upload.single('image'), albumController.edit);

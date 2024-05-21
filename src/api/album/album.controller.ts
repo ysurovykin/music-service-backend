@@ -167,6 +167,16 @@ class AlbumController {
         }
     }
 
+    async getNextAlbumRelease(req, res, next) {
+        try {
+            const { artistId } = req.params;
+            const album = await albumService.getNextAlbumRelease(artistId);
+            return res.json(album);
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }
 
 const albumController = new AlbumController();

@@ -10,7 +10,8 @@ import AlbumModel, {
     GetAlbumsInListenerLibraryResponseType,
     GetAlbumsResponseType,
     GetArtistAlbumsResponseType,
-    GetListenerTopAlbumsThisMonthResponseType
+    GetListenerTopAlbumsThisMonthResponseType,
+    NextAlbumReleaseType
 } from './album.model';
 import ArtistModel, { ArtistShortDataType } from '../artist/artist.model';
 import LikedAlbumstModel from './likedAlbums.model';
@@ -419,6 +420,26 @@ class AlbumService {
             advancedStats: isFreeSubscription ? undefined : album.advancedStats
         }));
         return parsedAlbums;
+    }
+
+    async getNextAlbumRelease(artistId: string): Promise<NextAlbumReleaseType> {
+        const artist = await ArtistModel.findOne({ _id: artistId }).lean();
+        if (!artist) {
+            throw new NotFoundError(`Artist with id ${artistId} not found`);
+        }
+        const albums = await AlbumModel.find({ artistId: artistId }).sort({ releaseDate: -1 }).lean();
+        const nextAlbumRelease = albums[0];
+        if (moment(nextAlbumRelease.releaseDate).isAfter(new Date()) &&
+            moment(nextAlbumRelease.releaseDate).isBefore(moment().add(1, 'month').toDate())) {
+            return {
+                name: nextAlbumRelease.name,
+                releaseDate: nextAlbumRelease.releaseDate,
+                backgroundColor: nextAlbumRelease.backgroundColor,
+                coverImageUrl: nextAlbumRelease.coverImageUrl,
+            };
+        } else {
+            return;
+        }
     }
 
 }
