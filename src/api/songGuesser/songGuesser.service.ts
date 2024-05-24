@@ -522,6 +522,7 @@ class SongGuesserService {
                         attempts: [],
                         isCloseAnswer: false,
                         mistakes: newMistakes,
+                        wasIncorrectAnswer: false,
                         currentGuesser: {
                             artistName: newSongGuesser.artistName,
                             artistId: newSongGuesser.artistId,

@@ -81,6 +81,8 @@ async function updateRecentMostVisitedContent(listenerId: string) {
               }
               visitedContentToParse = [...visitedContentToParse, ...additionalContent]
               startIndex += hiddenAlbums.length;
+            } else {
+              break;
             }
           }
         } while (visitedContentToParse.length < 8);
@@ -108,6 +110,8 @@ async function updateRecentMostVisitedContent(listenerId: string) {
               }
               visitedContentToParse = [...visitedContentToParse, ...additionalContent]
               startIndex += hiddenAlbums.length;
+            } else {
+              break;
             }
           }
         } while (visitedContentToParse.length < 8);
